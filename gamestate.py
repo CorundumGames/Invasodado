@@ -8,12 +8,11 @@ class GameState:
     
     GameState is meant to be derived from to represent different screens with
     different objects (e.g. the in-game state would have the player, the blocks,
-    etc. while the main menu would have the buttons.
-    
+    etc. while the main menu would have the buttons. 
     '''
     
-    #The list of all pygame.Groups; left-most groups are blitted first.
-    _group_list = []
+    #The pygame.Groups in this state; left-most groups are drawn first.
+    group_list = []
     
     next_state = None
     
