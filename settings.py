@@ -1,6 +1,6 @@
 import config
 '''This module provides access to the configurations made in the game's Options
-menu.  OBJECTS IN ALL CAPS are constants.  Do not change them!
+menu.  OBJECTS IN ALL CAPS are constants.
 '''
 
 #The current screen settings.
