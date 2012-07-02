@@ -10,7 +10,7 @@ class InGameState(GameState):
     def __init__(self):
         ship = player.Ship()
         self.group_list.append(pygame.sprite.RenderUpdates())
-        self.group_list[0].add(ship, ship.bullet)
+        self.group_list[0].add(ship)
     
     def events(self):
         pass

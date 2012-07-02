@@ -2,6 +2,7 @@ import config
 import pygame
 import enum
 import shipbullet
+import gsm
 
 '''The Ship is the player character.  There's only going to be one instance of
 it, but it has to inherit from pygame.sprite.Sprite, so I can't make it a true
@@ -22,6 +23,7 @@ class Ship(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = config.SPRITES.subsurface(SURFACE_CLIP) #@UndefinedVariable
+        self.image.set_colorkey(config.COLOR_KEY)
         self.rect = START_POS.copy()
         self.state = STATES.SPAWNING
         self.bullet = shipbullet.ShipBullet()
@@ -40,10 +42,9 @@ class Ship(pygame.sprite.Sprite):
         for e in pygame.event.get():
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
                 if self.bullet.state == shipbullet.STATES.IDLE:
-                    self.bullet.rect = self.rect
+                    self.bullet.add(gsm.current_state.group_list[0])
+                    self.bullet.rect = pygame.Rect(self.rect.copy().midtop, (0, 0))
                     self.bullet.state = shipbullet.STATES.FIRED
-                    
-                    print ("Bang!")
                 
             
         if self.rect.left < 0:

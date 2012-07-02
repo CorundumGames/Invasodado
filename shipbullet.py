@@ -1,10 +1,17 @@
-import pygame
 import enum
+import pygame
+
 import config
+import gsm
 import player
 
+
+'''This is the bullet the ship has available.  It is not meant to be created
+and deleted over and over, but to be reused by the ship (so we don't take as
+much time creating and destroying bullets.'''
+
 STATES       = enum.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
-SURFACE_CLIP = pygame.Rect(23, 5, 28, 10)
+SURFACE_CLIP = pygame.Rect(23, 5, 5, 5)
 START_POS    = pygame.Rect(0, config.screen.get_height()*2, 0, 0)
 SPEED        = 8
 
@@ -17,24 +24,34 @@ class ShipBullet(pygame.sprite.Sprite):
         self.state = STATES.IDLE
         
         self.actions = {
-                        STATES.IDLE   : lambda: None,
-                        STATES.FIRED  : self.fire(),
-                        STATES.MOVING : self.rect.move_ip(0, -SPEED),
-                        STATES.COLLIDE: lambda: None,
-                        STATES.RESET  : lambda: None,
+                        STATES.IDLE   : None             ,
+                        STATES.FIRED  : self.start_moving,
+                        STATES.MOVING : self.move        ,
+                        STATES.COLLIDE: None             ,
+                        STATES.RESET  : self.reset       ,
                         }
         
     def update(self):
+        '''Tells the bullet what to do this frame.'''
         try:
             self.actions[self.state]()
         except TypeError:
             pass
+            
+    def start_moving(self):
+        '''Plays a sound and begins moving.'''
+        #Play a sound here later
+        self.state = STATES.MOVING
+        
+    def move(self):
+        '''Moves up the screen, seeing if it's hit an enemy or exited.'''
+        self.rect.move_ip(0, -SPEED)
         
         if self.rect.bottom < 0:
-            self.rect = START_POS
-            self.state = STATES.IDLE  
-            
-    def fire(self):
-        #Play a sound here later
-        print("I'm going!")
-        self.state = STATES.MOVING
+            self.state = STATES.RESET
+        
+    def reset(self):
+        '''Resets the bullet back to its initial position.'''
+        self.kill()
+        self.rect = START_POS
+        self.state = STATES.IDLE  
