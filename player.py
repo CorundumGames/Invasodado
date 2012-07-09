@@ -9,15 +9,16 @@ it, but it has to inherit from pygame.sprite.Sprite, so I can't make it a true
 Python singleton.
 '''
 
-#Constants/magic numbers
+#Constants/magic numbers#
+
 STATES = enum.Enum('SPAWNING', 'NORMAL', 'ACTION')
 SURFACE_CLIP = pygame.Rect(0, 0, 16, 16)
 START_POS = pygame.Rect(config.screen.get_width()/2,
                         config.screen.get_height()*.8,
-                        0,
-                        0)
+                        16,  #The 16s are so we can use rect.right (but 0, 0
+                        16)  #would be fine, too).
 SPEED = 4
-########################
+#########################
 
 class Ship(pygame.sprite.Sprite):
     def __init__(self):
@@ -34,9 +35,9 @@ class Ship(pygame.sprite.Sprite):
         #Shorthand for which keys have been pressed
         keys = pygame.key.get_pressed()
         
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] and self.rect.left > 0:
             self.rect.move_ip(-SPEED, 0)
-        elif keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_RIGHT] and self.rect.right < config.screen.get_width():
             self.rect.move_ip(SPEED, 0)
         
         for e in pygame.event.get():
@@ -45,9 +46,5 @@ class Ship(pygame.sprite.Sprite):
                     self.bullet.add(gsm.current_state.group_list[0])
                     self.bullet.rect = pygame.Rect(self.rect.copy().midtop, (0, 0))
                     self.bullet.state = shipbullet.STATES.FIRED
-                
             
-        if self.rect.left < 0:
-            self.rect.left = 0
-        elif self.rect.right > config.screen.get_width():
-            self.rect.right = config.screen.get_width()   
+            

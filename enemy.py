@@ -19,22 +19,25 @@ Must check GameDevExchange to see how Space Invaders formations are handled!
 '''
 
 class Enemy(pygame.sprite.Sprite):
+    should_flip = False
     velocity = pygame.Rect(1, 0, 0, 0)
     
     def __init__(self, position):
         pygame.sprite.Sprite.__init__(self)
         self.rect = pygame.Rect(START_POS.x * (position[0]+1),
                                 START_POS.y * (position[1]+1)*.75,
-                                0,
-                                0)
+                                16,
+                                16)
         self.color = pygame.Color(0, 0, 255)
         self.image = config.SPRITES.subsurface(FRAMES[0]).copy() #@UndefinedVariable
-        self.state = STATES.APPEARING
+        self.state = STATES.ACTIVE
         
         self.image.set_colorkey(config.COLOR_KEY)
         pygame.PixelArray(self.image).replace((255, 255, 255), self.color)  #TODO: Draw a random element from a dictionary
         
     def update(self):
         self.rect.move_ip(Enemy.velocity.x, Enemy.velocity.y)
-        if self.rect.right > config.screen.get_width() or self.rect.left < 0:
-            Enemy.velocity.x *= -1
+        if (self.rect.right > config.screen.get_width() or \
+           self.rect.left < 0) and \
+           self.state == STATES.ACTIVE:
+            Enemy.should_flip = True

@@ -3,16 +3,20 @@ import pygame
 import player
 import gsm
 import enemysquadron
+import enemy
 
 from gamestate import GameState
+
+PLAYER = pygame.sprite.RenderUpdates()
+ENEMIES = pygame.sprite.RenderUpdates()
 
 class InGameState(GameState):    
     def __init__(self):
         ship = player.Ship()
-        self.group_list += [pygame.sprite.RenderUpdates(), pygame.sprite.RenderUpdates()]
+        self.group_list += [PLAYER, ENEMIES]
     
-        self.group_list[0].add(ship)
-        self.group_list[1].add(enemysquadron.enemies)
+        self.group_list[self.group_list.index(PLAYER)].add(ship)
+        self.group_list[self.group_list.index(ENEMIES)].add(enemysquadron.enemies)
     
     def events(self):
         pass
@@ -20,6 +24,10 @@ class InGameState(GameState):
     def logic(self):
         for g in self.group_list:
             g.update()
+            
+        if enemy.Enemy.should_flip == True:
+            enemy.Enemy.velocity.x *= -1
+            enemy.Enemy.should_flip = False
     
     def render(self):
         pygame.display.get_surface().fill((0, 0, 0))
