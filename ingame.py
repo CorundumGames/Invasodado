@@ -1,16 +1,18 @@
-
 import pygame
 
 import player
 import gsm
+import enemysquadron
 
 from gamestate import GameState
 
 class InGameState(GameState):    
     def __init__(self):
         ship = player.Ship()
-        self.group_list.append(pygame.sprite.RenderUpdates())
+        self.group_list += [pygame.sprite.RenderUpdates(), pygame.sprite.RenderUpdates()]
+    
         self.group_list[0].add(ship)
+        self.group_list[1].add(enemysquadron.enemies)
     
     def events(self):
         pass
