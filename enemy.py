@@ -3,6 +3,7 @@ import pygame
 
 import config
 import random
+import gameobject
 
 FRAMES = [pygame.Rect(0, 16, 16, 16), pygame.Rect(16, 16, 16, 16)]
 START_POS = pygame.Rect(32, 32, 0, 0)
@@ -14,16 +15,15 @@ Algorithm for storing one colored Enemy per color (with all animations)
 2: Paint them their respective colors
 3: Store them in a dict<pygame.Color, pygame.Surface>
 4: When an enemy's color is assigned, simply have it draw its Surface from the dict
-
-Must check GameDevExchange to see how Space Invaders formations are handled!
 '''
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(gameobject.GameObject):
     should_flip = False
-    velocity = pygame.Rect(1, 0, 0, 0)
+    velocity = [1, 0]
+    acceleration = [0, 0]
     
     def __init__(self, position):
-        pygame.sprite.Sprite.__init__(self)
+        gameobject.GameObject.__init__(self)
         self.rect = pygame.Rect(START_POS.x * (position[0]+1),
                                 START_POS.y * (position[1]+1)*.75,
                                 16,
@@ -36,7 +36,10 @@ class Enemy(pygame.sprite.Sprite):
         pygame.PixelArray(self.image).replace((255, 255, 255), self.color)  #TODO: Draw a random element from a dictionary
         
     def update(self):
-        self.rect.move_ip(Enemy.velocity.x, Enemy.velocity.y)
+        Enemy.acceleration[0] += Enemy.velocity[0]
+        Enemy.acceleration[1] += Enemy.velocity[1]
+        self.rect.move_ip(Enemy.velocity[0], Enemy.velocity[1])
+       
         if (self.rect.right > config.screen.get_width() or \
            self.rect.left < 0) and \
            self.state == STATES.ACTIVE:
