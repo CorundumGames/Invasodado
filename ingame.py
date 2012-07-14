@@ -4,6 +4,7 @@ import player
 import gsm
 import enemysquadron
 import enemy
+import collisiongrid
 
 from gamestate import GameState
 
@@ -17,16 +18,19 @@ class InGameState(GameState):
     
         self.group_list[self.group_list.index(PLAYER)].add(ship)
         self.group_list[self.group_list.index(ENEMIES)].add(enemysquadron.enemies)
+        self.collision_grid = collisiongrid.CollisionGrid(4, 4)
     
     def events(self):
         pass
     
     def logic(self):
+        self.collision_grid.update()
+        
         for g in self.group_list:
             g.update()
             
         if enemy.Enemy.should_flip == True:
-            enemy.Enemy.velocity.x *= -1
+            enemy.Enemy.velocity[0] *= -1
             enemy.Enemy.should_flip = False
     
     def render(self):
