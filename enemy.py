@@ -17,10 +17,10 @@ Algorithm for storing one colored Enemy per color (with all animations)
 4: When an enemy's color is assigned, simply have it draw its Surface from the dict
 '''
 
-class Enemy(gameobject.GameObject):
-    should_flip = False
-    velocity = [1, 0]
+class Enemy(gameobject.GameObject): 
     acceleration = [0, 0]
+    should_flip  = False
+    velocity     = [1, 0]
     
     def __init__(self, position):
         gameobject.GameObject.__init__(self)

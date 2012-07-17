@@ -13,7 +13,7 @@ much time creating and destroying bullets.'''
 
 STATES       = enum.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
 FRAME        = pygame.Rect(23, 5, 5, 5)
-START_POS    = pygame.Rect(0, config.screen.get_height()*2, 0, 0)
+START_POS    = pygame.Rect(0, config.screen.get_height()*2, 5, 5)
 SPEED        = 8
 
 
@@ -53,8 +53,6 @@ class ShipBullet(gameobject.GameObject):
         self.velocity[1] += self.acceleration[1]
         self.rect.move_ip(self.velocity[0], self.velocity[1])
         
-        
-        
         if self.rect.bottom < 0:
             self.state = STATES.RESET
         
@@ -62,5 +60,5 @@ class ShipBullet(gameobject.GameObject):
         '''Resets the bullet back to its initial position.'''
         self.velocity[1] = 0
         self.kill()
-        self.rect = START_POS
+        self.rect = START_POS.copy()
         self.state = STATES.IDLE  

@@ -4,7 +4,7 @@ import player
 import gsm
 import enemysquadron
 import enemy
-import collisiongrid
+import collisions
 
 from gamestate import GameState
 
@@ -18,7 +18,7 @@ class InGameState(GameState):
     
         self.group_list[self.group_list.index(PLAYER)].add(ship)
         self.group_list[self.group_list.index(ENEMIES)].add(enemysquadron.enemies)
-        self.collision_grid = collisiongrid.CollisionGrid(4, 4)
+        self.collision_grid = collisions.CollisionGrid(4, 4)
     
     def events(self):
         pass

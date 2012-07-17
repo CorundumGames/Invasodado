@@ -51,7 +51,7 @@ class Ship(gameobject.GameObject):
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
                 if self.bullet.state == shipbullet.STATES.IDLE:
                     self.bullet.add(gsm.current_state.group_list[0])
-                    self.bullet.rect = pygame.Rect(self.rect.copy().midtop, (0, 0))
+                    self.bullet.rect.midbottom = self.rect.copy().midtop
                     self.bullet.state = shipbullet.STATES.FIRED
             
             

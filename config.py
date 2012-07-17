@@ -13,6 +13,7 @@ SCREEN_DIMS = tuple(pygame.display.list_modes())
 #The main spritesheet for this game.
 SPRITES = pygame.image.load("./gfx/sprites.png").convert()
 
+#The color that will be transparent.
 COLOR_KEY = SPRITES.get_at((0, 0))
 
 COLORS = {

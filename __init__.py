@@ -7,5 +7,3 @@ while True:
     
     if pygame.event.peek(pygame.QUIT):
         quit()
-    
-    
