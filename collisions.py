@@ -38,7 +38,8 @@ class CollisionGrid:
         '''Handles all collisions, from first to last.'''
         self.collisions.sort()
         for i in self.collisions:
-            pass
+            i.obj1.on_collide(i.obj2)
+            i.obj2.on_collide(i.obj1)
             i.reset()
             
         self.spare_collisions += self.collisions

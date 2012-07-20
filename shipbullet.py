@@ -5,6 +5,7 @@ import config
 import gsm
 import player
 import gameobject
+import enemy
 
 
 '''This is the bullet the ship has available.  It is not meant to be created
@@ -21,26 +22,21 @@ class ShipBullet(gameobject.GameObject):
     def __init__(self):
         gameobject.GameObject.__init__(self)
 
-        self.image = config.SPRITES.subsurface(FRAME) #@UndefinedVariable
-        self.state = STATES.IDLE
-        self.rect = START_POS.copy()
-        
-        self.actions = {
-                        STATES.IDLE   : None             ,
-                        STATES.FIRED  : self.start_moving,
-                        STATES.MOVING : self.move        ,
-                        STATES.COLLIDE: None             ,
-                        STATES.RESET  : self.reset       ,
-                        }
-        
+        self.actions  = {
+                         STATES.IDLE   : None             ,
+                         STATES.FIRED  : self.start_moving,
+                         STATES.MOVING : self.move        ,
+                         STATES.COLLIDE: NotImplemented   ,
+                         STATES.RESET  : self.reset       ,
+                         }
+        self.image    = config.SPRITES.subsurface(FRAME) #@UndefinedVariable
+        self.rect     = START_POS.copy()
+        self.state    = STATES.IDLE
         self.velocity = [0, -SPEED]
-        
-    def update(self):
-        '''Tells the bullet what to do this frame.'''
-        try:
-            self.actions[self.state]()
-        except TypeError:
-            pass
+    
+    def on_collide(self, other):
+        if isinstance(other, enemy.Enemy):
+            self.reset()
             
     def start_moving(self):
         '''Plays a sound and begins moving.'''
