@@ -1,4 +1,3 @@
-import enum
 import pygame
 
 import config
@@ -12,11 +11,10 @@ import enemy
 and deleted over and over, but to be reused by the ship (so we don't take as
 much time creating and destroying bullets.'''
 
-STATES       = enum.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
+STATES       = config.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
 FRAME        = pygame.Rect(23, 5, 5, 5)
 START_POS    = pygame.Rect(0, config.screen.get_height()*2, 5, 5)
 SPEED        = 8
-
 
 class ShipBullet(gameobject.GameObject):
     def __init__(self):

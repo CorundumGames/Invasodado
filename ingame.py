@@ -19,6 +19,8 @@ class InGameState(GameState):
         self.group_list[self.group_list.index(PLAYER)].add(ship)
         self.group_list[self.group_list.index(ENEMIES)].add(enemysquadron.enemies)
         self.collision_grid = collisions.CollisionGrid(4, 4)
+        
+        enemysquadron.reset()
     
     def events(self):
         pass
@@ -29,9 +31,13 @@ class InGameState(GameState):
         for g in self.group_list:
             g.update()
             
+        
+            
         if enemy.Enemy.should_flip == True:
             enemy.Enemy.velocity[0] *= -1
             enemy.Enemy.should_flip = False
+            
+        
     
     def render(self):
         pygame.display.get_surface().fill((0, 0, 0))

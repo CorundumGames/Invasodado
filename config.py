@@ -1,6 +1,5 @@
 import pygame
 import settings
-import enum
 
 pygame.display.init()
 
@@ -25,3 +24,7 @@ COLORS = {
     'WHITE' : pygame.Color(255, 255, 255),
     'BLACK' : pygame.Color(  0,   0,   0)
     }
+
+class Enum(object):
+    def __init__(self, *keys):
+        self.__dict__.update(zip(keys, range(len(keys))))

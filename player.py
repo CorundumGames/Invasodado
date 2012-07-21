@@ -1,6 +1,5 @@
 import config
 import pygame
-import enum
 import shipbullet
 import gsm
 import gameobject
@@ -12,7 +11,7 @@ Python singleton.
 
 #Constants/magic numbers#
 
-STATES = enum.Enum('SPAWNING', 'NORMAL', 'ACTION')
+STATES = config.Enum('SPAWNING', 'NORMAL', 'ACTION')
 SURFACE_CLIP = pygame.Rect(0, 0, 16, 16)
 START_POS = pygame.Rect(config.screen.get_width()/2,
                         config.screen.get_height()*.8,

@@ -1,4 +1,3 @@
-import enum
 import pygame
 
 import config
@@ -7,20 +6,21 @@ import gameobject
 import shipbullet
 
 FRAMES = [pygame.Rect(0, 16, 16, 16), pygame.Rect(16, 16, 16, 16)]
-START_POS = pygame.Rect(32, 32, 0, 0)
-STATES = enum.Enum('APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'IDLE')
+START_POS = pygame.Rect(32, 32, 16, 16)
+STATES = config.Enum('APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'IDLE')
 SAFE_SPOT = (0, config.screen.get_height()*3)
 
 '''
 Algorithm for storing one colored Enemy per color (with all animations)
 1. Create as many copies of the Enemy frames (that is, properly animated) as there are colors for the desired difficulty
 2: Paint them their respective colors
-3: Store them in a dict<pygame.Color, pygame.Surface>
+3: Store them in a dict({pygame.Color : pygame.Surface})
 4: When an enemy's color is assigned, simply have it draw its Surface from the dict
 '''
 
 class Enemy(gameobject.GameObject): 
     acceleration = [0, 0]
+    count        = 0
     should_flip  = False
     velocity     = [1, 0]
     
@@ -28,7 +28,7 @@ class Enemy(gameobject.GameObject):
         gameobject.GameObject.__init__(self)
         
         self.actions = {
-                        STATES.APPEARING: NotImplemented,
+                        STATES.APPEARING: self.appear   ,
                         STATES.LOWERING : NotImplemented,
                         STATES.ACTIVE   : self.move     ,
                         STATES.DYING    : self.die      ,
@@ -41,10 +41,14 @@ class Enemy(gameobject.GameObject):
                                 START_POS.y * (position[1]+1)*.75,
                                 16,
                                 16)
-        self.state = STATES.ACTIVE
+        self.state = STATES.IDLE
         
         self.image.set_colorkey(config.COLOR_KEY)
         pygame.PixelArray(self.image).replace((255, 255, 255), self.color)  #TODO: Draw a random element from a dictionary
+        
+    def appear(self):
+        ++Enemy.count
+        self.state = STATES.ACTIVE
         
     def move(self):
         Enemy.acceleration[0] += Enemy.velocity[0]
@@ -62,4 +66,5 @@ class Enemy(gameobject.GameObject):
     def die(self):
         self.rect.topleft = SAFE_SPOT
         self.kill()
+        --Enemy.count
         self.state = STATES.IDLE
