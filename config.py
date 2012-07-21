@@ -1,8 +1,6 @@
 import pygame
 import settings
 
-pygame.display.init()
-
 #The window we blit graphics onto.
 screen = pygame.display.set_mode(settings.resolution)
 
