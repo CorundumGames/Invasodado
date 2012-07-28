@@ -91,7 +91,8 @@ class GridCell:
         grid = self.grid
         
         for i, j in itertools.combinations(self.objects, 2):
-            if pygame.sprite.collide_rect(i, j):
+            if pygame.sprite.collide_rect(i, j) or \
+            i.rect.move(i.velocity[0], i.velocity[1]).colliderect(j.rect.move(j.velocity[0], j.velocity[1])):
                 if grid.spare_collisions == []:
                     grid.spare_collisions.append(Collision())
                 grid.collisions.append(grid.spare_collisions.pop().update(i, j))
