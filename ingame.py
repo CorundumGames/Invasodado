@@ -23,7 +23,6 @@ class InGameState(GameState):
         enemysquadron.reset()
     
     def events(self):
-        #Note: Something is keeping the bullet in STATES.FIRED
         for e in pygame.event.get():
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
                 self.ship.on_fire_bullet()

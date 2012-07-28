@@ -33,15 +33,15 @@ class ShipBullet(gameobject.GameObject):
         self.add(ingame.PLAYER)
     
     def on_collide(self, other):
-        #Issue: ShipBullet is not changing states after it's fired
         if isinstance(other, enemy.Enemy):
             if other.state == enemy.STATES.ACTIVE:
                 self.state = STATES.RESET
+                other.state = enemy.STATES.DYING
             
     def start_moving(self):
         '''Plays a sound and begins moving.'''
         #Play a sound here later
-        self.add(ingame.PLAYER)
+        
         self.velocity[1] = -SPEED
         self.state       = STATES.MOVING
         

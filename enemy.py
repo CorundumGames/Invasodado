@@ -65,9 +65,7 @@ class Enemy(gameobject.GameObject):
             Enemy.should_flip = True
             
     def on_collide(self, other):
-        if self.state == STATES.ACTIVE:
-            if isinstance(other, shipbullet.ShipBullet):
-                self.state = STATES.DYING
+        pass
                 
     def die(self):
         self.kill()
