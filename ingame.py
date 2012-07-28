@@ -1,43 +1,45 @@
 import pygame
 
-import player
-import gsm
+import collisions
 import enemysquadron
 import enemy
-import collisions
+import gsm
+import player
+import shipbullet
 
 from gamestate import GameState
 
-PLAYER = pygame.sprite.RenderUpdates()
+PLAYER  = pygame.sprite.RenderUpdates()
 ENEMIES = pygame.sprite.RenderUpdates()
 
 class InGameState(GameState):    
     def __init__(self):
-        ship = player.Ship()
-        self.group_list += [PLAYER, ENEMIES]
+        self.collision_grid = collisions.CollisionGrid(4, 4, 1)
+        self.group_list     = [PLAYER, ENEMIES]
+        self.ship           = player.Ship()
     
-        self.group_list[self.group_list.index(PLAYER)].add(ship)
-        self.group_list[self.group_list.index(ENEMIES)].add(enemysquadron.enemies)
-        self.collision_grid = collisions.CollisionGrid(4, 4)
-        
+        PLAYER.add(self.ship             )
+        ENEMIES.add(enemysquadron.enemies)
         enemysquadron.reset()
     
     def events(self):
-        pass
+        #Note: Something is keeping the bullet in STATES.FIRED
+        for e in pygame.event.get():
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
+                self.ship.on_fire_bullet()
     
     def logic(self):
+        if ENEMIES.sprites() == []:
+            enemysquadron.reset()
+        
         self.collision_grid.update()
         
         for g in self.group_list:
             g.update()
             
-        
-            
         if enemy.Enemy.should_flip == True:
             enemy.Enemy.velocity[0] *= -1
             enemy.Enemy.should_flip = False
-            
-        
     
     def render(self):
         pygame.display.get_surface().fill((0, 0, 0))

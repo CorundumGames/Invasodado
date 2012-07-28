@@ -1,19 +1,19 @@
 import pygame
 
 import config
-import gsm
-import player
-import gameobject
 import enemy
-
+import gameobject
+import gsm
+import ingame
+import player
 
 '''This is the bullet the ship has available.  It is not meant to be created
 and deleted over and over, but to be reused by the ship (so we don't take as
-much time creating and destroying bullets.'''
+much time creating and destroying bullets).'''
 
 STATES       = config.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
 FRAME        = pygame.Rect(23, 5, 5, 5)
-START_POS    = pygame.Rect(0, config.screen.get_height()*2, 5, 5)
+START_POS    = pygame.Rect(30, config.screen.get_height()*2, 5, 5)
 SPEED        = 8
 
 class ShipBullet(gameobject.GameObject):
@@ -30,21 +30,23 @@ class ShipBullet(gameobject.GameObject):
         self.image    = config.SPRITES.subsurface(FRAME) #@UndefinedVariable
         self.rect     = START_POS.copy()
         self.state    = STATES.IDLE
-        self.velocity = [0, -SPEED]
+        self.add(ingame.PLAYER)
     
     def on_collide(self, other):
+        #Issue: ShipBullet is not changing states after it's fired
         if isinstance(other, enemy.Enemy):
-            self.reset()
+            if other.state == enemy.STATES.ACTIVE:
+                self.state = STATES.RESET
             
     def start_moving(self):
         '''Plays a sound and begins moving.'''
         #Play a sound here later
-        self.state = STATES.MOVING
+        self.add(ingame.PLAYER)
         self.velocity[1] = -SPEED
+        self.state       = STATES.MOVING
         
     def move(self):
         '''Moves up the screen, seeing if it's hit an enemy or exited.'''
-        self.velocity[1] += self.acceleration[1]
         self.rect.move_ip(self.velocity[0], self.velocity[1])
         
         if self.rect.bottom < 0:
@@ -52,7 +54,7 @@ class ShipBullet(gameobject.GameObject):
         
     def reset(self):
         '''Resets the bullet back to its initial position.'''
-        self.velocity[1] = 0
         self.kill()
-        self.rect = START_POS.copy()
-        self.state = STATES.IDLE  
+        self.velocity[1] = 0
+        self.rect        = START_POS.copy()
+        self.state       = STATES.IDLE  

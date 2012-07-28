@@ -1,6 +1,6 @@
 import pygame
 
-class GameObject(pygame.sprite.Sprite):
+class GameObject(pygame.sprite.Sprite): 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.acceleration = [0, 0]
@@ -13,7 +13,5 @@ class GameObject(pygame.sprite.Sprite):
         pass
     
     def update(self):
-        try:
+        if callable(self.actions[self.state]):
             self.actions[self.state]()
-        except TypeError:
-            pass

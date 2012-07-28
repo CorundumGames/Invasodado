@@ -1,14 +1,17 @@
+import random
+
 import pygame
 
 import config
-import random
 import gameobject
+import gsm
+import ingame
 import shipbullet
 
 FRAMES = [pygame.Rect(0, 16, 16, 16), pygame.Rect(16, 16, 16, 16)]
 START_POS = pygame.Rect(32, 32, 16, 16)
-STATES = config.Enum('APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'IDLE')
-SAFE_SPOT = (0, config.screen.get_height()*3)
+STATES = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING')
+SAFE_SPOT = pygame.Rect(0, config.screen.get_height()*3, 16, 16)
 
 '''
 Algorithm for storing one colored Enemy per color (with all animations)
@@ -32,22 +35,25 @@ class Enemy(gameobject.GameObject):
                         STATES.LOWERING : NotImplemented,
                         STATES.ACTIVE   : self.move     ,
                         STATES.DYING    : self.die      ,
-                        STATES.IDLE     : None
+                        STATES.IDLE     : self.move
                         }
         
-        self.color = pygame.Color(0, 0, 255)
-        self.image = config.SPRITES.subsurface(FRAMES[0]).copy() #@UndefinedVariable
-        self.rect = pygame.Rect(START_POS.x * (position[0]+1),
-                                START_POS.y * (position[1]+1)*.75,
+        self.color         = pygame.Color(0, 0, 255)
+        self.form_position = position
+        self.image         = config.SPRITES.subsurface(FRAMES[0]).copy() #@UndefinedVariable
+        self.rect          = pygame.Rect(START_POS.x * (self.form_position[0]+1),
+                                START_POS.y * (self.form_position[1]+1)*.75,
                                 16,
                                 16)
-        self.state = STATES.IDLE
+        self.state         = STATES.IDLE
         
         self.image.set_colorkey(config.COLOR_KEY)
         pygame.PixelArray(self.image).replace((255, 255, 255), self.color)  #TODO: Draw a random element from a dictionary
         
     def appear(self):
-        ++Enemy.count
+        self.rect.topleft = (START_POS.x * (self.form_position[0]+1),
+                             START_POS.y * (self.form_position[1]+1)*.75)
+        self.add(ingame.ENEMIES)
         self.state = STATES.ACTIVE
         
     def move(self):
@@ -64,7 +70,5 @@ class Enemy(gameobject.GameObject):
                 self.state = STATES.DYING
                 
     def die(self):
-        self.rect.topleft = SAFE_SPOT
         self.kill()
-        --Enemy.count
         self.state = STATES.IDLE
