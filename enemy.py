@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+import color
 import config
 import gameobject
 import gsm
@@ -47,7 +48,7 @@ class Enemy(gameobject.GameObject):
                                 16)
         self.state         = STATES.IDLE
         
-        self.image.set_colorkey(config.COLOR_KEY)
+        self.image.set_colorkey(color.COLOR_KEY)
         pygame.PixelArray(self.image).replace((255, 255, 255), self.color)  #TODO: Draw a random element from a dictionary
         
     def appear(self):

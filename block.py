@@ -1,8 +1,10 @@
 import math
+import random
 
 import pygame
 
 import config
+import color
 import ingame
 import gameobject
 
@@ -24,4 +26,4 @@ class Block(gameobject.GameObject):
         self.state = STATES.ACTIVE
         
         self.add(ingame.BLOCKS)
-        self.image = config.blend_color(self.image, pygame.Color(0, 0, 255))
+        self.image = color.blend_color(self.image, random.choice(color.Colors.LIST))
