@@ -1,5 +1,6 @@
-import config
 import pygame
+
+import config
 import gsm
 
 pygame.display.init()
@@ -9,4 +10,4 @@ while True:
     gsm.update()
     
     if pygame.event.peek(pygame.QUIT):
-        quit()
+        break

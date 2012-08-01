@@ -1,6 +1,5 @@
 import pygame
 
-import color
 import settings
 
 #The window we blit graphics onto.
