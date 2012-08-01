@@ -1,4 +1,6 @@
 import pygame
+
+import color
 import settings
 
 #The window we blit graphics onto.
@@ -9,19 +11,6 @@ SCREEN_DIMS = tuple(pygame.display.list_modes())
 
 #The main spritesheet for this game.
 SPRITES = pygame.image.load("./gfx/sprites.png").convert()
-
-#The color that will be transparent.
-COLOR_KEY = SPRITES.get_at((0, 0))
-
-COLORS = {
-    'RED'   : pygame.Color(255,   0,   0),
-    'BLUE'  : pygame.Color(  0, 255,   0),
-    'GREEN' : pygame.Color(  0,   0, 255),
-    'YELLOW': pygame.Color(255, 255,   0),
-    'PURPLE': pygame.Color(255,   0, 255),
-    'WHITE' : pygame.Color(255, 255, 255),
-    'BLACK' : pygame.Color(  0,   0,   0)
-    }
 
 class Enum(object):
     def __init__(self, *keys):
