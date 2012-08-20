@@ -23,10 +23,10 @@ Algorithm for storing one colored Enemy per color (with all animations)
 '''
 
 class Enemy(gameobject.GameObject): 
-    acceleration = [0, 0]
+    acceleration = [0.0, 0.0]
     count        = 0
     should_flip  = False
-    velocity     = [1, 0]
+    velocity     = [1.0, 0.0]
     
     def __init__(self, position):
         gameobject.GameObject.__init__(self)
@@ -49,18 +49,22 @@ class Enemy(gameobject.GameObject):
         self.state         = STATES.IDLE
         
         self.image.set_colorkey(color.COLOR_KEY)
-        pygame.PixelArray(self.image).replace((255, 255, 255), self.color)  #TODO: Draw a random element from a dictionary
+        
         
     def appear(self):
         self.rect.topleft = (START_POS.x * (self.form_position[0]+1),
                              START_POS.y * (self.form_position[1]+1)*.75)
         self.add(ingame.ENEMIES)
+        self.image = color.blend_color(self.image, random.choice(color.Colors.LIST))
+        self.image.set_colorkey(self.image.get_at((0, 0)))
         self.state = STATES.ACTIVE
         
     def move(self):
-        Enemy.acceleration[0] += Enemy.velocity[0]
-        Enemy.acceleration[1] += Enemy.velocity[1]
-        self.rect.move_ip(Enemy.velocity[0], Enemy.velocity[1])
+        Enemy.velocity[0] += Enemy.acceleration[0]
+        Enemy.velocity[1] += Enemy.acceleration[1]
+        self.position[0] += Enemy.velocity[0]
+        self.position[1] += Enemy.velocity[1]
+        self.rect.topleft = map(round, self.position)
        
         if self.rect.right > config.screen.get_width() or self.rect.left < 0:
             Enemy.should_flip = True

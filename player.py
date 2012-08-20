@@ -1,5 +1,6 @@
 import pygame
 
+import color
 import config
 import gameobject
 import gsm
@@ -34,9 +35,10 @@ class Ship(gameobject.GameObject):
         self.bullet = shipbullet.ShipBullet()
         self.image  = config.SPRITES.subsurface(SURFACE_CLIP) #@UndefinedVariable
         self.rect   = START_POS.copy()
+        self.position = list(self.rect.topleft)
         self.state  = STATES.ACTIVE
         
-        self.image.set_colorkey(config.COLOR_KEY)
+        self.image.set_colorkey(color.COLOR_KEY)
         
     def on_fire_bullet(self):
         if self.bullet.state == shipbullet.STATES.IDLE:
@@ -45,9 +47,6 @@ class Ship(gameobject.GameObject):
             self.bullet.state          = shipbullet.STATES.FIRED
         
     def move(self):
-        self.velocity[0] += self.acceleration[0]
-        self.rect.move_ip(self.velocity[0], self.velocity[1])
-
         #Shorthand for which keys have been pressed
         keys = pygame.key.get_pressed()
         
@@ -57,5 +56,9 @@ class Ship(gameobject.GameObject):
             self.velocity[0] = SPEED
         else:
             self.velocity[0] = 0
+            
+        self.velocity[0] += self.acceleration[0]
+        self.position[0] += self.velocity[0]
+        self.rect.topleft = map(round, self.position)
         
         
