@@ -6,6 +6,7 @@ class GameObject(pygame.sprite.Sprite):
         self.acceleration = [0.0, 0.0]
         self.actions      = dict()
         self.position     = [0.0, 0.0]
+        self.previous_pos = [0.0, 0.0]
         self.rect         = None
         self.state        = None
         self.velocity     = [0.0, 0.0]
@@ -14,5 +15,7 @@ class GameObject(pygame.sprite.Sprite):
         pass
     
     def update(self):
+        self.previous_pos = list(self.position)
+        
         if callable(self.actions[self.state]):
             self.actions[self.state]()

@@ -1,7 +1,9 @@
 import pygame
 
 import block
+import blockgrid
 import collisions
+import config
 import enemysquadron
 import enemy
 import gsm
@@ -22,7 +24,8 @@ class InGameState(GameState):
     def events(self):
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                BLOCKS.add(block.Block(e.pos))        
+                if blockgrid.RECT.collidepoint(pygame.mouse.get_pos()):
+                    BLOCKS.add(block.Block(e.pos))        
     
     def logic(self):
         self.collision_grid.update()
