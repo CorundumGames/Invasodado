@@ -1,9 +1,12 @@
 import pygame
 
+import itertools
+
 import block
 import blockgrid
 import collisions
 import config
+import color
 import enemysquadron
 import enemy
 import gsm
@@ -22,21 +25,59 @@ class InGameState(GameState):
         self.group_list.append(BLOCKS)
     
     def events(self):
-        for e in pygame.event.get():
+        for e in pygame.event.get(pygame.MOUSEBUTTONDOWN):
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 if blockgrid.RECT.collidepoint(pygame.mouse.get_pos()):
-                    BLOCKS.add(block.Block(e.pos))        
+                    BLOCKS.add(block.Block(e.pos))  
+                    
+        for e in pygame.event.get(pygame.KEYDOWN):
+            if e.key == pygame.K_g:
+                for i in blockgrid.blocks:
+                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.GREEN, i):
+                            j.state = block.STATES.DYING
+                        
+            elif e.key == pygame.K_p:
+                for i in blockgrid.blocks:
+                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.PURPLE, i):
+                        j.state = block.STATES.DYING
+                        
+            elif e.key == pygame.K_y:
+                for i in blockgrid.blocks:
+                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.YELLOW, i):
+                        j.state = block.STATES.DYING
+                        
+            elif e.key == pygame.K_b:
+                for i in blockgrid.blocks:
+                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.BLUE, i):
+                        j.state = block.STATES.DYING
+                        
+            elif e.key == pygame.K_r:
+                for i in blockgrid.blocks:
+                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.RED, i):
+                        j.state = block.STATES.DYING
+                        
+            elif e.key == pygame.K_c:
+                blockgrid.clear()
+                             
     
     def logic(self):
         self.collision_grid.update()
         
         for g in self.group_list:
             g.update()
+            
+        pygame.event.clear()  #This is only temporary!
+            
+        blockgrid.update()
+        
     
     def render(self):
+        
         pygame.display.get_surface().fill((0, 0, 0))
         
         for g in self.group_list:
             pygame.display.update(g.draw(pygame.display.get_surface()))
-            
+        
+        
         self.fpsTimer.tick(60)
+        
