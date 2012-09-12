@@ -19,43 +19,70 @@ class Block(gameobject.GameObject):
         self.actions = {
                         STATES.IDLE     : None,
                         STATES.APPEARING: NotImplemented,
-                        STATES.ACTIVE   : NotImplemented,
+                        STATES.ACTIVE   : self.wait,
                         STATES.FALLING  : self.fall     ,
                         STATES.IMPACT   : self.stop     ,
-                        STATES.DYING    : NotImplemented
+                        STATES.DYING    : self.vanish
                         }
         
         self.acceleration[1] = GRAVITY
+        self.color = random.choice(color.Colors.LIST)
         self.image = config.SPRITES.subsurface(FRAME).copy()  #@UndefinedVariable
         self.rect = pygame.Rect(math.floor(pos[0]/16.0)*16, math.floor(pos[1]/16.0)*16, 16, 16)
         self.gridcell = (self.rect.left/self.rect.width, self.rect.top/self.rect.height)
+        self.lastcell = tuple(self.gridcell)
         self.position = list(self.rect.topleft)
         self.state = STATES.FALLING
         
+        self.block_below = None  #The block below; if it vanishes, we can fall again
+        
         self.add(ingame.BLOCKS)
         
-        self.image = color.blend_color(self.image, random.choice(color.Colors.LIST))
+        self.image = color.blend_color(self.image, self.color)
+        
+    def __str__(self):
+        return "Block of color " + str(self.color) + " at grid position " + \
+            str(self.gridcell) + ", previously at grid cell " + str(self.lastcell)
         
     def on_collide(self, other):
-        if isinstance(other, Block) and self.state == STATES.FALLING and other.state == STATES.ACTIVE:
+        if isinstance(other, Block) and self.state == STATES.FALLING and other.state == STATES.ACTIVE \
+        and other.rect.top > self.rect.bottom and other.alive():
+            self.block_below = other
             self.rect.bottom = other.rect.top
             self.state = STATES.IMPACT
+            
+        
+            
+    def wait(self):
+        if isinstance(self.block_below, Block) and (self.block_below.state == STATES.FALLING and self.block_below.velocity[1] > 1.0):
+            self.block_below = None
+            self.acceleration[1] = GRAVITY
+            self.state = STATES.FALLING
         
     def fall(self):
         self.velocity[1] += self.acceleration[1]
         self.position[1] += self.velocity[1]
         self.rect.topleft = map(round, self.position)
+        #The top block doesn't seem to fall.
         
         if self.rect.bottom >= blockgrid.RECT.bottom:  #@UndefinedVariable
             self.snap()
             self.state = STATES.IMPACT
             
-            
     def stop(self):
         self.acceleration[1] = 0
         self.velocity[1] = 0
+        self.lastcell = tuple(self.gridcell)
         self.gridcell = (self.rect.left/self.rect.width, self.rect.top/self.rect.height)
         self.state = STATES.ACTIVE
-            
+        
+    def vanish(self):
+        self.kill()
+        self.position = [-300, -300]
+        self.rect.topleft = self.position
+        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
+        self.gridcell = None
+        self.state = STATES.IDLE
+           
     def snap(self):
         self.rect.topleft = (math.floor(self.position[0]/16)*16, math.floor(self.position[1]/16)*16)
