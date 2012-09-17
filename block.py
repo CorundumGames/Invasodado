@@ -12,6 +12,7 @@ import gameobject
 STATES = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'FALLING', 'IMPACT', 'DYING')
 FRAME  = pygame.Rect(0, 32, 16, 16)
 GRAVITY = .5
+MAX_SPEED = 12
 
 bump = pygame.mixer.Sound("./bump.wav")
 
@@ -56,13 +57,13 @@ class Block(gameobject.GameObject):
             self.state           = STATES.FALLING
         
     def fall(self):
-        self.velocity[1] += self.acceleration[1]
+        self.velocity[1] = min(MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
         self.rect.topleft = map(round, self.position)
         self.gridcell = (self.rect.left/self.rect.width, self.rect.top/self.rect.height)
         
         if self.rect.bottom >= blockgrid.RECT.bottom or blockgrid.blocks[self.gridcell[0]][self.gridcell[1]]:  #@UndefinedVariable
-            self.snap()
+            self.rect.bottom = blockgrid.RECT.bottom
             self.state = STATES.IMPACT
             
     def stop(self):
