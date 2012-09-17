@@ -1,9 +1,15 @@
+
+
 import pygame
+
+pygame.mixer.init()
 
 import config
 import gsm
 
+
 pygame.display.init()
+
 pygame.display.get_surface().fill((0, 0, 0))
 
 while True:
