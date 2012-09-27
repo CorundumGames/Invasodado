@@ -7,7 +7,7 @@ import block
 import ingame
 
 CELL_SIZE  = (16, 16)
-DIMENSIONS = (config.screen.get_width()/CELL_SIZE[0], 24)
+DIMENSIONS = (config.screen.get_width()/CELL_SIZE[0], 24) #(row, column)
 LOCATION   = (0, 0)
 RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[1]*CELL_SIZE[1]))
 
@@ -16,20 +16,13 @@ blockstocheck = []
 blockstoclear = []
         
 def clear():
-    for i in blocks:
-        for j in itertools.ifilter(lambda x: x != False, i):
-            j.kill()
-            j = False
+    for i in itertools.ifilter(lambda x: x.state != block.STATES.IDLE, ingame.BLOCKS.sprites()):
+        i.state = block.STATES.DYING
+    blocks        = [[False for i in range(DIMENSIONS[0])] for j in range(DIMENSIONS[1])]
             
     blockstocheck = []
             
 def update():
     blocks        = [[False for i in range(DIMENSIONS[0])] for j in range(DIMENSIONS[1])]
     for b in ingame.BLOCKS.sprites():
-        if b.gridcell != None:
-            blocks[b.gridcell[0]][b.gridcell[1]] = True
-            
-    '''for i in range(len(blockstocheck)):  #TODO: Check the eight cardinal directions for like-colored blocks.
-        for j in range(i):
-            temp_clear = []'''  #This block of code slows the game down because we're not
-                                #removing anything from blockstocheck
+        blocks[b.gridcell[0]][b.gridcell[1]] = True

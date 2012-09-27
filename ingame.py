@@ -32,29 +32,24 @@ class InGameState(GameState):
                     
         for e in pygame.event.get(pygame.KEYDOWN):
             if e.key == pygame.K_g:
-                for i in blockgrid.blocks:
-                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.GREEN, i):
-                            j.state = block.STATES.DYING
+                for i in itertools.ifilter(lambda x: isinstance(x, block.Block) and x.color == color.Colors.GREEN, BLOCKS):
+                        i.state = block.STATES.DYING
                         
             elif e.key == pygame.K_p:
-                for i in blockgrid.blocks:
-                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.PURPLE, i):
-                        j.state = block.STATES.DYING
+                for i in itertools.ifilter(lambda x: isinstance(x, block.Block) and x.color == color.Colors.PURPLE, BLOCKS):
+                        i.state = block.STATES.DYING
                         
             elif e.key == pygame.K_y:
-                for i in blockgrid.blocks:
-                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.YELLOW, i):
-                        j.state = block.STATES.DYING
+                for i in itertools.ifilter(lambda x: isinstance(x, block.Block) and x.color == color.Colors.YELLOW, BLOCKS):
+                        i.state = block.STATES.DYING
                         
             elif e.key == pygame.K_b:
-                for i in blockgrid.blocks:
-                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.BLUE, i):
-                        j.state = block.STATES.DYING
+                for i in itertools.ifilter(lambda x: isinstance(x, block.Block) and x.color == color.Colors.BLUE, BLOCKS):
+                        i.state = block.STATES.DYING
                         
             elif e.key == pygame.K_r:
-                for i in blockgrid.blocks:
-                    for j in itertools.ifilter(lambda x: x != None and x.color == color.Colors.RED, i):
-                        j.state = block.STATES.DYING
+                for i in itertools.ifilter(lambda x: isinstance(x, block.Block) and x.color == color.Colors.RED, BLOCKS):
+                        i.state = block.STATES.DYING
                         
             elif e.key == pygame.K_c:
                 blockgrid.clear()
