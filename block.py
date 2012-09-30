@@ -71,6 +71,7 @@ class Block(gameobject.GameObject):
             and self.rect.bottom != self.block_below.rect.top:
             #If we're not at the bottom and there's no block directly below...
                 self.acceleration[1] = GRAVITY
+                if self not in blockgrid.blockstocheck: blockgrid.blockstocheck.append(self)  #Might remove later?
                 self.state           = STATES.FALLING
         
     def fall(self):
@@ -97,10 +98,11 @@ class Block(gameobject.GameObject):
         
     def vanish(self):
         self.kill()
+        if self in blockgrid.blockstocheck: blockgrid.blockstocheck.remove(self)
         self.block_below                                     = None
         self.position                                        = [-300.0, -300.0]
         self.rect.topleft                                    = self.position
-        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = False
+        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
         self.gridcell                                        = None
         self.state                                           = STATES.IDLE
            
