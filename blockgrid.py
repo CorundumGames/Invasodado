@@ -7,19 +7,19 @@ import block
 import ingame
 
 CELL_SIZE  = (16, 16)
-DIMENSIONS = (config.screen.get_width()/CELL_SIZE[0], 24) #(row, column)
+DIMENSIONS = (24, config.screen.get_width()/CELL_SIZE[0]) #(row, column)
 LOCATION   = (0, 0)
-RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[1]*CELL_SIZE[1]))
+RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))
 
 blocks        = [[None for i in range(DIMENSIONS[0])] for j in range(DIMENSIONS[1])]
-blockstocheck = []
+blockstocheck = set()
 blockstoclear = set()
         
 def clear():
     for i in itertools.ifilter(lambda x: x.state != block.STATES.IDLE, ingame.BLOCKS.sprites()):
         i.state = block.STATES.DYING
     blocks        = [[None for i in range(DIMENSIONS[0])] for j in range(DIMENSIONS[1])]
-    blockstocheck = []
+    blockstocheck = set()
     blockstoclear = set()
             
 def update():
@@ -44,9 +44,7 @@ def update():
             
         if len(matchlist) >= 3:
         #If at least 3 blocks are aligned...
-            print matchlist
             blockstoclear.update(matchlist)
-    
 
     for b in blockstoclear:
         b.state = block.STATES.DYING

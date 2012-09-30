@@ -92,7 +92,7 @@ class Block(gameobject.GameObject):
         self.velocity[1]     = 0.0
         self.gridcell        = (self.rect.left/self.rect.width,
                                 self.rect.top/self.rect.height)
-        if self not in blockgrid.blockstocheck: blockgrid.blockstocheck.append(self)  #Might remove later?
+        blockgrid.blockstocheck.add(self)  #Might remove later?
         bump.play()
         
         self.state           = STATES.ACTIVE
