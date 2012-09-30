@@ -71,7 +71,7 @@ class Block(gameobject.GameObject):
             and self.rect.bottom != self.block_below.rect.top:
             #If we're not at the bottom and there's no block directly below...
                 self.acceleration[1] = GRAVITY
-                if self not in blockgrid.blockstocheck: blockgrid.blockstocheck.append(self)  #Might remove later?
+                if self in blockgrid.blockstocheck: blockgrid.blockstocheck.remove(self)
                 self.state           = STATES.FALLING
         
     def fall(self):
@@ -92,6 +92,7 @@ class Block(gameobject.GameObject):
         self.velocity[1]     = 0.0
         self.gridcell        = (self.rect.left/self.rect.width,
                                 self.rect.top/self.rect.height)
+        if self not in blockgrid.blockstocheck: blockgrid.blockstocheck.append(self)  #Might remove later?
         bump.play()
         
         self.state           = STATES.ACTIVE

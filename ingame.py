@@ -57,15 +57,14 @@ class InGameState(GameState):
     
     def logic(self):
         self.collision_grid.update()
-        blockgrid.update()
         
         for g in self.group_list:
             g.update()
             
+        blockgrid.update()
+            
         pygame.event.clear()  #This is only temporary!
             
-        
-        
     
     def render(self):
         
