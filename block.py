@@ -40,8 +40,8 @@ class Block(gameobject.GameObject):
                                            math.floor(pos[1]/16.0)*16, 16, 16)
         self.state           = STATES.FALLING
         
-        self.gridcell        = (self.rect.left/self.rect.width,
-                                self.rect.top/self.rect.height)
+        self.gridcell        = (self.rect.top/self.rect.height, #(row, column)
+                                self.rect.left/self.rect.width)
         self.position        = list(self.rect.topleft)
         
         
@@ -55,7 +55,7 @@ class Block(gameobject.GameObject):
         
     def on_collide(self, other):
         if isinstance(other, Block) and self.state == STATES.FALLING\
-        and other.gridcell == (self.gridcell[0], self.gridcell[1]+1):
+        and other.gridcell == (self.gridcell[0]+1, self.gridcell[1]):
         #If we hit a block, we're falling, and the block we hit is a cell below us...
             self.block_below = other
             self.rect.bottom = other.rect.top
@@ -66,20 +66,20 @@ class Block(gameobject.GameObject):
         if so.
         '''
         if isinstance(self.block_below, Block):
-        #If there exists a block underneath us and we're not at the bottom...
+        #If there exists a block underneath us...
             if self.rect.bottom < blockgrid.RECT.bottom\
             and self.rect.bottom != self.block_below.rect.top:
             #If we're not at the bottom and there's no block directly below...
+                blockgrid.blockstocheck.discard(self)
                 self.acceleration[1] = GRAVITY
-                if self in blockgrid.blockstocheck: blockgrid.blockstocheck.remove(self)
                 self.state           = STATES.FALLING
         
     def fall(self):
         self.velocity[1]  = min(MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
         self.rect.topleft = map(round, self.position)
-        self.gridcell     = (self.rect.left/self.rect.width,
-                             self.rect.top/self.rect.height)
+        self.gridcell     = (self.rect.top/self.rect.height, #(row, column)
+                             self.rect.left/self.rect.width)
         
         if self.rect.bottom > blockgrid.RECT.bottom:  #@UndefinedVariable
         #If we've hit the grid's bottom...
@@ -90,8 +90,8 @@ class Block(gameobject.GameObject):
         #Stop all motion
         self.acceleration[1] = 0.0
         self.velocity[1]     = 0.0
-        self.gridcell        = (self.rect.left/self.rect.width,
-                                self.rect.top/self.rect.height)
+        self.gridcell        = (self.rect.top/self.rect.height, #(row, column)
+                                self.rect.left/self.rect.width)
         blockgrid.blockstocheck.add(self)  #Might remove later?
         bump.play()
         
@@ -99,13 +99,12 @@ class Block(gameobject.GameObject):
         
     def vanish(self):
         self.kill()
-        if self in blockgrid.blockstocheck: blockgrid.blockstocheck.remove(self)
-        self.block_below                                     = None
-        self.position                                        = [-300.0, -300.0]
-        self.rect.topleft                                    = self.position
-        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
-        self.gridcell                                        = None
-        self.state                                           = STATES.IDLE
+        blockgrid.blockstocheck.discard(self)
+        self.block_below  = None
+        self.position     = [-300.0, -300.0]
+        self.rect.topleft = self.position
+        self.gridcell     = None
+        self.state        = STATES.IDLE
            
     def snap(self):
         self.rect.topleft = (math.floor(self.position[0]/16)*16,
