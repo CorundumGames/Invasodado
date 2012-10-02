@@ -28,7 +28,7 @@ def clear():
             
 def update():
     blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
-    for b in ingame.BLOCKS.sprites():
+    for b in itertools.ifilter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites()):
         blocks[b.gridcell[0]][b.gridcell[1]] = b
 
     for b in blockstocheck:  #Iterate over all blocks to check
@@ -38,12 +38,16 @@ def update():
         matchlist = {b}  #Start with a match of one
         
         nextblock = (
-                    {blocks[max(0, b.gridcell[0]-j)][                     b.gridcell[1]   ] for j in temp}, #Left
                     {blocks[       b.gridcell[0]   ][max(0              , b.gridcell[1]-j)] for j in temp}, #Up
                     {blocks[max(0, b.gridcell[0]-j)][max(0              , b.gridcell[1]-j)] for j in temp}, #Up-left
-                    {blocks[max(0, b.gridcell[0]-j)][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp} #Down-left
+                    {blocks[max(0, b.gridcell[0]-j)][                     b.gridcell[1]   ] for j in temp}, #Left
+                    {blocks[max(0, b.gridcell[0]-j)][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp}, #Down-left
+                    {blocks[       b.gridcell[0]   ][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp}, #Down
+                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp}, #Down-right
+                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][                     b.gridcell[1]   ] for j in temp}, #Right
+                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][max(0              , b.gridcell[1]-j)] for j in temp}  #Up-right
                     )
-        #TODO: Check for all 8 directions for blocks that move, rather than 4 directions for ALL blocks that are still
+        #TODO: Optimize this so the cells are pre-calculated
         for i in itertools.ifilter(lambda x: x != None, nextblock):
             if len(filter(lambda x: isinstance(x, block.Block) and b.color == x.color, i)) > 1:
             #If there are two blocks and they're both the same color as the first...
