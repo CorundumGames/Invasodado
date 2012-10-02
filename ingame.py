@@ -45,8 +45,7 @@ class InGameState(GameState):
             
         if ENEMIES.sprites() == []:
             enemysquadron.reset()
-            
-        blockgrid.update()
+
     
     def render(self):
         pygame.display.get_surface().fill((0, 0, 0))

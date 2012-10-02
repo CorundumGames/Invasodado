@@ -41,13 +41,15 @@ class ShipBullet(gameobject.GameObject):
     def start_moving(self):
         '''Plays a sound and begins moving.'''
         #Play a sound here later
-        
+        self.position = list(self.rect.topleft)
         self.velocity[1] = -SPEED
         self.state       = STATES.MOVING
         
     def move(self):
         '''Moves up the screen, seeing if it's hit an enemy or exited.'''
-        self.rect.move_ip(self.velocity[0], self.velocity[1])
+        self.velocity[1] += self.acceleration[1]
+        self.position[1] += self.velocity[1]
+        self.rect.topleft = map(round, self.position)
         
         if self.rect.bottom < 0:
             self.state = STATES.RESET
