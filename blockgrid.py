@@ -29,11 +29,15 @@ def clear():
 def update():
     blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
     for b in itertools.ifilter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites()):
+    #For all blocks that are on the grid and still...
         blocks[b.gridcell[0]][b.gridcell[1]] = b
 
-    for b in blockstocheck:  #Iterate over all blocks to check
+    for b in blockstocheck:
+    #For all blocks to check for matches...
+    
         if b in blockstoclear:
-            continue
+        #If it's already slated for removal...
+            continue  #Skip this loop
         
         matchlist = {b}  #Start with a match of one
         
@@ -49,9 +53,10 @@ def update():
                     )
         #TODO: Optimize this so the cells are pre-calculated
         for i in itertools.ifilter(lambda x: x != None, nextblock):
+            #For all the matching blocks above...
             if len(filter(lambda x: isinstance(x, block.Block) and b.color == x.color, i)) > 1:
             #If there are two blocks and they're both the same color as the first...
-                matchlist |= i
+                matchlist |= i  #Mark these blocks as matching
                     
             
         if len(matchlist) >= 3:

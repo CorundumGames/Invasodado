@@ -34,14 +34,16 @@ class ShipBullet(gameobject.GameObject):
     
     def on_collide(self, other):
         if isinstance(other, enemy.Enemy):
+        #If we hit an enemy...
             if other.state == enemy.STATES.ACTIVE:
-                self.state = STATES.RESET
+            #And that other enemy is alive...
+                self.state  = STATES.RESET
                 other.state = enemy.STATES.DYING
             
     def start_moving(self):
         '''Plays a sound and begins moving.'''
         #Play a sound here later
-        self.position = list(self.rect.topleft)
+        self.position    = list(self.rect.topleft)
         self.velocity[1] = -SPEED
         self.state       = STATES.MOVING
         
@@ -52,6 +54,7 @@ class ShipBullet(gameobject.GameObject):
         self.rect.topleft = map(round, self.position)
         
         if self.rect.bottom < 0:
+        #If above the top of the screen...
             self.state = STATES.RESET
         
     def reset(self):

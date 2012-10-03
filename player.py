@@ -27,23 +27,23 @@ class Ship(gameobject.GameObject):
         gameobject.GameObject.__init__(self)
         
         self.actions = {
-                        STATES.IDLE      : None,
+                        STATES.IDLE      : None          ,
                         STATES.SPAWNING  : NotImplemented,
                         STATES.INVINCIBLE: NotImplemented,
                         STATES.ACTIVE    : self.move
                         }
-        self.bullet = shipbullet.ShipBullet()
-        self.image  = config.SPRITES.subsurface(SURFACE_CLIP) #@UndefinedVariable
-        self.rect   = START_POS.copy()
+        self.bullet   = shipbullet.ShipBullet()
+        self.image    = config.SPRITES.subsurface(SURFACE_CLIP) #@UndefinedVariable
+        self.rect     = START_POS.copy()
         self.position = list(self.rect.topleft)
-        self.state  = STATES.ACTIVE
+        self.state    = STATES.ACTIVE
         
         self.image.set_colorkey(color.COLOR_KEY)
         
     def on_fire_bullet(self):
         if self.bullet.state == shipbullet.STATES.IDLE:
             self.bullet.add(ingame.PLAYER)
-            self.bullet.rect.midbottom = self.rect.copy().midtop
+            self.bullet.rect.midbottom = self.rect.midtop
             self.bullet.state          = shipbullet.STATES.FIRED
         
     def move(self):

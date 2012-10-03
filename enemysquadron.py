@@ -6,26 +6,21 @@ import pygame
 import enemy
 import ingame
 
-
 ROW_SIZE = 10
 COL_SIZE = 8
 
-enemies = [[enemy.Enemy((i, j)) for i in range(ROW_SIZE)] for j in range(COL_SIZE)]
+enemies = None
 
 def reset():
-    for i in enemies:
-        for j in i:
-            j.add(ingame.ENEMIES)
+    ingame.ENEMIES.empty()
+    enemies = [[enemy.Enemy((i, j)) for i in range(ROW_SIZE)] for j in range(COL_SIZE)]
     
     for i in enemies:
-        for j in i[:len(i)/2]:
-            if random.randint(0, 1) == 1:
-                j.state = enemy.STATES.APPEARING       
-            
-    for i in enemies:
+    #For all rows of enemies...
         for j in range(ROW_SIZE/2):
-            i[ROW_SIZE-1-j].state = i[j].state
-            
-    for i in enemies:
-        for j in itertools.ifilter(lambda x: x.state == enemy.STATES.IDLE, i):
-            j.kill()
+        #For the first half of each row...
+            if random.randint(0, 1) == 1:
+            #With 50% odds...
+                ingame.ENEMIES.add(i[j], i[ROW_SIZE-1-j])
+                i[j].state            = enemy.STATES.APPEARING
+                i[ROW_SIZE-1-j].state = enemy.STATES.APPEARING   

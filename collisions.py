@@ -17,10 +17,15 @@ class CollisionGrid:
         cell_height           = config.screen.get_height()/height
         
         self.collisions       = []
-        self.grid             = [[GridCell(pygame.Rect(i*cell_width, j*cell_height,
-                                             cell_width, cell_height
-                                             ), self) 
-                      for i in range(width)] for j in range(height)]
+        self.grid             = [[GridCell(pygame.Rect(i*cell_width ,
+                                                       j*cell_height,
+                                                       cell_width   , 
+                                                       cell_height
+                                                       ),
+                                           self) 
+                                  for i in range(width)]
+                                  for j in range(height)
+                                  ]
         self.layer            = layer
         self.spare_collisions = []
     
@@ -28,7 +33,9 @@ class CollisionGrid:
         '''Removes objects no longer in this cell, and adds ones that just
         entered.  Called every frame.'''
         for row in self.grid:
+        #For all rows in this grid...
             for cell in row:
+            #For all cells in this row...
                 cell.remove_exiting()
                 cell.add_entering()
                 cell.check_collisions()
@@ -39,6 +46,7 @@ class CollisionGrid:
         '''Handles all collisions, from first to last.'''
         self.collisions.sort()
         for i in self.collisions:
+        #For all collisions
             i.obj1.on_collide(i.obj2)
             i.obj2.on_collide(i.obj1)
             i.reset()
@@ -70,7 +78,9 @@ class GridCell:
     def remove_exiting(self):
         '''Removes objects that are no longer within this cell.'''
         for o in self.objects:
+        #For all objects in this cell...
             if not self.rect.colliderect(o.rect):
+            #If this object is no longer in this cell...
                 self.objects_to_remove.add(o)
                 
         self.objects -= self.objects_to_remove
@@ -79,8 +89,11 @@ class GridCell:
     def add_entering(self):
         '''Adds objects that are held within this cell.'''
         for g in gsm.current_state.group_list:
+        #For all groups on-screen...
             for s in g:
+            #For all sprites in this group...
                 if s not in self.objects and self.rect.colliderect(s.rect):
+                #If the sprite is not already in this cell...
                     self.objects_to_add.add(s)
                     
         self.objects |= self.objects_to_add
@@ -91,9 +104,12 @@ class GridCell:
         grid = self.grid
         
         for i, j in itertools.combinations(self.objects, 2):
+        #For all possible combinations of objects that can touch...
             if pygame.sprite.collide_rect(i, j) or \
             i.rect.move(i.velocity[0], i.velocity[1]).colliderect(j.rect.move(j.velocity[0], j.velocity[1])):
-                if grid.spare_collisions == []:
+            #If these two objects touch or if they're about to touch...
+                if len(grid.spare_collisions) == 0:
+                #If we don't have any spare Collision objects...
                     grid.spare_collisions.append(Collision())
                 grid.collisions.append(grid.spare_collisions.pop().update(i, j))
                  

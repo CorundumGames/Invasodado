@@ -18,18 +18,22 @@ BLOCKS  = pygame.sprite.RenderUpdates()
 class InGameState(GameState):    
     def __init__(self):
         self.collision_grid = collisions.CollisionGrid(4, 4, 1)
-        self.group_list += [BLOCKS, ENEMIES, PLAYER]
+        self.group_list    += [BLOCKS, ENEMIES, PLAYER]
+        self.ship           = player.Ship()
         
-        self.ship = player.Ship()
+
+        
         PLAYER.add(self.ship, shipbullet.ShipBullet())
-        ENEMIES.add(enemysquadron.enemies)
         enemysquadron.reset()
+        
     
     def events(self):
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+            #If the mouse button is clicked...
                 BLOCKS.add(block.Block(e.pos))   
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
+            #If the space bar is pressed...
                 self.ship.on_fire_bullet()
                      
     
@@ -37,20 +41,28 @@ class InGameState(GameState):
         self.collision_grid.update()
         
         for g in self.group_list:
+        #For all Sprite groups...
             g.update()
             
+        if len(ENEMIES.sprites()) == 0:
+        #If all enemies have been killed...
+            enemysquadron.reset()
+            
         if enemy.Enemy.should_flip:
+        #If at least one enemy has touched the side of the screen...
             enemy.Enemy.should_flip = False
             enemy.Enemy.velocity[0] *= -1
             
-        if ENEMIES.sprites() == []:
-            enemysquadron.reset()
+        
+            
+        blockgrid.update()
 
     
     def render(self):
         pygame.display.get_surface().fill((0, 0, 0))
         
         for g in self.group_list:
+        #For all Sprite groups...
             pygame.display.update(g.draw(pygame.display.get_surface()))
             
         self.fpsTimer.tick(60)

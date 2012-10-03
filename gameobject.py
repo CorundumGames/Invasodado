@@ -17,4 +17,5 @@ class GameObject(pygame.sprite.Sprite):
         self.previous_pos = list(self.position)
         
         if callable(self.actions[self.state]):
+        #If this key has a function for its element...
             self.actions[self.state]()
