@@ -3,6 +3,7 @@ import pygame
 import block
 import blockgrid
 import collisions
+import config
 import enemysquadron
 import enemy
 import gsm
@@ -59,10 +60,12 @@ class InGameState(GameState):
 
     
     def render(self):
-        pygame.display.get_surface().fill((0, 0, 0))
+        pygame.display.get_surface().blit(config.BG, (0, 0))
         
         for g in self.group_list:
         #For all Sprite groups...
             pygame.display.update(g.draw(pygame.display.get_surface()))
+            
+        pygame.display.flip()
             
         self.fpsTimer.tick(60)

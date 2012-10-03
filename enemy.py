@@ -1,7 +1,9 @@
+import math
 import random
 
 import pygame
 
+import block
 import color
 import config
 import gameobject
@@ -77,7 +79,10 @@ class Enemy(gameobject.GameObject):
             pass
                 
     def die(self):
+        ingame.BLOCKS.add(block.Block((math.floor(self.position[0]/16)*16, 0), self.color))
+        hurt.play()
         self.kill()
+        
         self.position     = [-300.0, -300.0]
         self.velocity     = [0, 0]
         self.rect.topleft = self.position

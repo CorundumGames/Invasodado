@@ -14,7 +14,7 @@ class Colors:
     GREEN  = pygame.Color(  0, 255,   0)
     BLUE   = pygame.Color(  0,   0, 255)
     YELLOW = pygame.Color(255, 255,   0)
-    PURPLE = pygame.Color(255,   0, 255)
+    PURPLE = pygame.Color(153,   0, 153)
     
     LIST = [RED, BLUE, GREEN, YELLOW, PURPLE]
 

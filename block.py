@@ -21,7 +21,7 @@ class Block(gameobject.GameObject):
     '''Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
-    def __init__(self, pos):
+    def __init__(self, pos, newcolor):
         gameobject.GameObject.__init__(self)
         self.actions = {
                         STATES.IDLE     : None          ,
@@ -34,7 +34,7 @@ class Block(gameobject.GameObject):
         
         self.acceleration[1] = GRAVITY
         self.block_below     = None
-        self.color           = random.choice(color.Colors.LIST)
+        self.color           = newcolor
         self.image           = config.SPRITES.subsurface(FRAME).copy()  #@UndefinedVariable
         self.rect            = pygame.Rect(math.floor(pos[0]/16.0)*16,
                                            math.floor(pos[1]/16.0)*16, 16, 16)
