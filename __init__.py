@@ -1,11 +1,16 @@
+'''Invasodado alpha 1
 
+Invasodado is a mix between Space Invaders and Columns.
+
+Copyright 2012 Corundum Games
+'''
 
 import pygame
 
 pygame.mixer.init()
 
-import config
-import gsm
+from core import config
+from core import gsm
 
 
 pygame.display.init()

@@ -4,10 +4,9 @@ import random
 import pygame
 
 import block
-import color
-import config
+from core import color
+from core import config
 import gameobject
-import gsm
 import ingame
 import shipbullet
 
@@ -24,7 +23,7 @@ Algorithm for storing one colored Enemy per color (with all animations)
 4: When an enemy's color is assigned, simply have it draw its Surface from the dict
 '''
 
-hurt = pygame.mixer.Sound("./enemyhurt.wav")
+hurt = pygame.mixer.Sound("./sfx/enemyhurt.wav")
 
 class Enemy(gameobject.GameObject): 
     acceleration = [0.0, 0.0]

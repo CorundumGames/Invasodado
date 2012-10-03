@@ -1,7 +1,7 @@
 import config
-from ingame import InGameState
+from game import ingame
 
-current_state = InGameState()
+current_state = ingame.InGameState()
 
 def update():
     '''Moves us forward a bit.

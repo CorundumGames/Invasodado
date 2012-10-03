@@ -2,7 +2,7 @@ import itertools
 
 import pygame
 
-import config
+from core import config
 import block
 import ingame
 
@@ -16,7 +16,7 @@ blocks        = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[
 blockstocheck = set()
 blockstoclear = set()
 
-blockclear = pygame.mixer.Sound("./clear.wav")
+blockclear = pygame.mixer.Sound("./sfx/clear.wav")
         
 def clear():
     for i in itertools.ifilter(lambda x: x.state != block.STATES.IDLE, ingame.BLOCKS.sprites()):
@@ -28,6 +28,7 @@ def clear():
             
 def update():
     blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
+    
     for b in itertools.ifilter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites()):
     #For all blocks that are on the grid and still...
         blocks[b.gridcell[0]][b.gridcell[1]] = b

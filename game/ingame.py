@@ -1,22 +1,24 @@
+import random
+
 import pygame
 
 import block
 import blockgrid
-import collisions
-import config
+from core import collisions
+from core import color
+from core import config
 import enemysquadron
 import enemy
-import gsm
 import player
 import shipbullet
 
-from gamestate import GameState
+from core import gamestate
 
 PLAYER  = pygame.sprite.RenderUpdates()
 ENEMIES = pygame.sprite.RenderUpdates()
 BLOCKS  = pygame.sprite.RenderUpdates()
 
-class InGameState(GameState):    
+class InGameState(gamestate.GameState):    
     def __init__(self):
         self.collision_grid = collisions.CollisionGrid(4, 4, 1)
         self.group_list    += [BLOCKS, ENEMIES, PLAYER]
@@ -32,7 +34,7 @@ class InGameState(GameState):
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
             #If the mouse button is clicked...
-                BLOCKS.add(block.Block(e.pos))   
+                BLOCKS.add(block.Block(e.pos, random.choice(color.Colors.LIST)))   
             if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
             #If the space bar is pressed...
                 self.ship.on_fire_bullet()

@@ -4,8 +4,8 @@ import random
 import pygame
 
 import blockgrid
-import config
-import color
+from core import config
+from core import color
 import ingame
 import gameobject
 
@@ -14,7 +14,7 @@ FRAME     = pygame.Rect(0, 32, 16, 16)
 GRAVITY   = .5
 MAX_SPEED = 12.0
 
-bump = pygame.mixer.Sound("./bump.wav")
+bump = pygame.mixer.Sound("./sfx/bump.wav")
 
 
 class Block(gameobject.GameObject):

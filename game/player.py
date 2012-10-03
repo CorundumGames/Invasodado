@@ -1,9 +1,8 @@
 import pygame
 
-import color
-import config
+from core import color
+from core import config
 import gameobject
-import gsm
 import ingame
 import shipbullet
 

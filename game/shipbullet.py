@@ -1,9 +1,8 @@
 import pygame
 
-import config
+from core import config
 import enemy
 import gameobject
-import gsm
 import ingame
 import player
 
