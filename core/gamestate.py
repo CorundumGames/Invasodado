@@ -1,4 +1,4 @@
-import pygame
+import pygame.time
 import gsm
 
 #Every abstract method must raise an exception with this statement.

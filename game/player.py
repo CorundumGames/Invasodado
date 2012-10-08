@@ -1,4 +1,6 @@
-import pygame
+import pygame.key
+import pygame.rect
+import pygame.mouse
 
 from core import color
 from core import config
@@ -13,11 +15,11 @@ Python singleton.
 
 #Constants/magic numbers#
 STATES       = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE')
-SURFACE_CLIP = pygame.Rect(0, 0, 16, 16)
-START_POS    = pygame.Rect(config.screen.get_width()/2,
-                           config.screen.get_height()*.8,
-                           16,
-                           16)
+SURFACE_CLIP = pygame.Rect(0, 0, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)
+START_POS    = pygame.Rect(config.screen.get_width() /  2,
+                           config.screen.get_height()* .8,
+                           16*config.SCALE_FACTOR        ,
+                           16*config.SCALE_FACTOR)
 SPEED        = 4
 #########################
 
@@ -58,6 +60,4 @@ class Ship(gameobject.GameObject):
             
         self.velocity[0] += self.acceleration[0]
         self.position[0] += self.velocity[0]
-        self.rect.topleft = map(round, self.position)
-        
-        
+        self.rect.x = round(self.position[0])

@@ -1,13 +1,10 @@
-import itertools
 import random
-
-import pygame
 
 import enemy
 import ingame
 
-ROW_SIZE = 10
-COL_SIZE = 8
+ROW_SIZE = 7
+COL_SIZE = 4
 
 enemies = None
 

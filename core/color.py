@@ -1,10 +1,11 @@
 import Image
-import pygame
+import pygame.color
+import pygame.image
 
 import config
 
 #The color that will be transparent.
-COLOR_KEY = config.SPRITES.get_at((0, 0))  #@UndefinedVariable
+COLOR_KEY  = config.SPRITES.get_at((0, 0))  #@UndefinedVariable
 
 #The desired color mode for our graphics.
 COLOR_MODE = "RGBA"
@@ -20,7 +21,8 @@ class Colors:
 
 def blend_color(surface, color):
     '''Returns a new Surface blended with the given color.'''
-    colorsurface = Image.new(COLOR_MODE, surface.get_size(), (color.r, color.g, color.b, color.a))
+    colorsurface = Image.new(COLOR_MODE, surface.get_size(),
+                            (color.r, color.g, color.b, color.a))
     temp = Image.fromstring(COLOR_MODE, surface.get_size(),
                             pygame.image.tostring(surface, COLOR_MODE))
     temp = Image.blend(temp, colorsurface, 0.5)

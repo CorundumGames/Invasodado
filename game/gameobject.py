@@ -1,4 +1,4 @@
-import pygame
+import pygame.sprite
 
 class GameObject(pygame.sprite.Sprite): 
     def __init__(self):
@@ -14,8 +14,6 @@ class GameObject(pygame.sprite.Sprite):
         pass
     
     def update(self):
-        self.previous_pos = list(self.position)
-        
         if callable(self.actions[self.state]):
         #If this key has a function for its element...
             self.actions[self.state]()

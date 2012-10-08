@@ -1,4 +1,4 @@
-import pygame
+import pygame.rect
 
 from core import config
 import enemy
@@ -11,7 +11,7 @@ and deleted over and over, but to be reused by the ship (so we don't take as
 much time creating and destroying bullets).'''
 
 STATES       = config.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
-FRAME        = pygame.Rect(23, 5, 5, 5)
+FRAME        = pygame.Rect(23*config.SCALE_FACTOR, 5*config.SCALE_FACTOR, 5*config.SCALE_FACTOR, 5*config.SCALE_FACTOR)
 START_POS    = pygame.Rect(30, config.screen.get_height()*2, 5, 5)
 SPEED        = 8
 

@@ -1,9 +1,21 @@
 import itertools
 
-import pygame
+import pygame.sprite
+import pygame.time
 
+from game import block
+from game import shipbullet
+from game import enemy
 import config
 import gsm
+
+do_not_compare = {(block.Block          , shipbullet.ShipBullet),
+                  (shipbullet.ShipBullet, block.Block          ),
+                  (block.Block          , enemy.Enemy          ),
+                  (enemy.Enemy          , block.Block          )
+                  }
+
+do_not_check = {block.Block}
 
 class CollisionGrid:
     '''CollisionGrid is a grid meant to be used to easily determine whether or
@@ -90,7 +102,7 @@ class GridCell:
         '''Adds objects that are held within this cell.'''
         for g in gsm.current_state.group_list:
         #For all groups on-screen...
-            for s in g:
+            for s in itertools.ifilter(lambda x: type(x) not in do_not_check, g):
             #For all sprites in this group...
                 if s not in self.objects and self.rect.colliderect(s.rect):
                 #If the sprite is not already in this cell...

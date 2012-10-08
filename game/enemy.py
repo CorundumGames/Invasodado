@@ -1,7 +1,8 @@
 import math
 import random
 
-import pygame
+import pygame.mixer
+import pygame.rect
 
 import block
 from core import color
@@ -10,10 +11,13 @@ import gameobject
 import ingame
 import shipbullet
 
-FRAMES    = [pygame.Rect(0, 16, 16, 16), pygame.Rect(16, 16, 16, 16)]
-START_POS = (32.0, 32.0)
+FRAMES    = [pygame.Rect( 0*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR),
+             pygame.Rect(16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)]
+START_POS = (32, 32)
 STATES    = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING')
 SAFE_SPOT = (0, config.screen.get_height()*3)
+
+enemy_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAMES[0]).copy(), c)) for c in color.Colors.LIST])
 
 '''
 Algorithm for storing one colored Enemy per color (with all animations)
@@ -44,33 +48,32 @@ class Enemy(gameobject.GameObject):
         
         self.color         = random.choice(color.Colors.LIST)
         self.form_position = form_position
-        self.image         = config.SPRITES.subsurface(FRAMES[0]).copy() #@UndefinedVariable
+        self.image         = enemy_frames[id(self.color)]
         self.position      = list(START_POS)
-        self.rect          = pygame.Rect(START_POS, (16, 16))
+        self.rect          = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
         self.state         = STATES.IDLE
         
-        self.image.set_colorkey(color.COLOR_KEY)
-        
+        self.image.set_colorkey(color.COLOR_KEY)   
         
     def appear(self):
         self.add(ingame.ENEMIES)
-        self.position     = [START_POS[0] * (self.form_position[0]+1),
-                             START_POS[1] * (self.form_position[1]+1)*.75]
-        self.rect.topleft = self.position
+        self.position     = [START_POS[0] * (self.form_position[0]+1)*config.SCALE_FACTOR,
+                             START_POS[1] * (self.form_position[1]+1)*.75*config.SCALE_FACTOR]
+        self.rect.topleft = map(round, self.position)
         self.color        = random.choice(color.Colors.LIST)
-        self.image        = color.blend_color(self.image, self.color)  #Quick fix; store all colors later
+        self.image        = enemy_frames[id(self.color)]
         self.image.set_colorkey(self.image.get_at((0, 0)))
         
         self.state = STATES.ACTIVE
         
     def move(self):
         self.position[0] += Enemy.velocity[0]
-        self.position[1] += Enemy.velocity[1]
         self.rect.topleft = map(round, self.position)
        
-        if self.rect.right > config.screen.get_width() or self.rect.left < 0:
-        #If this enemy touches either end of the screen...
-            Enemy.should_flip = True
+        if not Enemy.should_flip:
+            if self.rect.right > config.screen.get_width() or self.rect.left < 0:
+            #If this enemy touches either end of the screen...
+                Enemy.should_flip = True
             
     def on_collide(self, other):
         if isinstance(other, shipbullet.ShipBullet) and self.state == STATES.ACTIVE:
@@ -78,7 +81,7 @@ class Enemy(gameobject.GameObject):
             pass
                 
     def die(self):
-        ingame.BLOCKS.add(block.Block((math.floor(self.position[0]/16)*16, 0), self.color))
+        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], self.color))
         hurt.play()
         self.kill()
         
