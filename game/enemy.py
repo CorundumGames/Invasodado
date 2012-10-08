@@ -46,7 +46,7 @@ class Enemy(gameobject.GameObject):
                         STATES.IDLE     : None
                         }
         
-        self.color         = random.choice(color.Colors.LIST)
+        self.color         = random.choice(color.Colors.LIST[0:config.NUM_COLORS])
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)]
         self.position      = list(START_POS)
@@ -60,7 +60,7 @@ class Enemy(gameobject.GameObject):
         self.position     = [START_POS[0] * (self.form_position[0]+1)*config.SCALE_FACTOR,
                              START_POS[1] * (self.form_position[1]+1)*.75*config.SCALE_FACTOR]
         self.rect.topleft = map(round, self.position)
-        self.color        = random.choice(color.Colors.LIST)
+        self.color        = random.choice(color.Colors.LIST[0:config.NUM_COLORS])
         self.image        = enemy_frames[id(self.color)]
         self.image.set_colorkey(self.image.get_at((0, 0)))
         

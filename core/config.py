@@ -9,7 +9,11 @@ screen = pygame.display.set_mode(settings.resolution)
 #A tuple of all available screen resolutions.
 SCREEN_DIMS = tuple(pygame.display.list_modes())
 
+#How much to scale all the graphics by; only for playtesting purposes
 SCALE_FACTOR = 2
+
+#How many colors we'll use
+NUM_COLORS = 5
 
 #The main spritesheet for this game.
 SPRITES = pygame.image.load("./gfx/sprites.png").convert()
