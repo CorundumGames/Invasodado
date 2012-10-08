@@ -6,7 +6,7 @@ from core import color
 import ingame
 import gameobject
 
-STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'FALLING', 'IMPACT', 'DYING')
+STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
 FRAME     = pygame.Rect( 0*config.SCALE_FACTOR,
                         32*config.SCALE_FACTOR,
                         16*config.SCALE_FACTOR,
@@ -26,12 +26,13 @@ class Block(gameobject.GameObject):
     def __init__(self, pos, newcolor):
         gameobject.GameObject.__init__(self)
         self.actions = {
-                        STATES.IDLE     : None          ,
-                        STATES.APPEARING: NotImplemented,
-                        STATES.ACTIVE   : self.wait     ,
-                        STATES.FALLING  : self.fall     ,
-                        STATES.IMPACT   : self.stop     ,
-                        STATES.DYING    : self.vanish
+                        STATES.IDLE         : None              ,
+                        STATES.APPEARING    : self.appear       ,
+                        STATES.ACTIVE       : self.wait         ,
+                        STATES.FALLING      : self.fall         ,
+                        STATES.START_FALLING: self.start_falling,
+                        STATES.IMPACT       : self.stop         ,
+                        STATES.DYING        : self.vanish
                         }
         
         self.acceleration[1] = GRAVITY
@@ -43,24 +44,29 @@ class Block(gameobject.GameObject):
                                            self.image.get_height())
         
         
-        self.gridcell        = [self.rect.y/self.rect.height, #(row, column)
-                                self.rect.x/self.rect.width]
+        self.gridcell        = [self.rect.centery/self.rect.height, #(row, column)
+                                self.rect.centerx/self.rect.width]
         self.position        = list(self.rect.topleft)
+        self.target          = None
         
-        self.state           = STATES.FALLING
+        self.state           = STATES.APPEARING
         self.add(ingame.BLOCKS)
         
     def __str__(self):
         return "Block of color " + str(self.color) + " at grid cell" + str(self.gridcell)
         
     def on_collide(self, other):
-        if isinstance(other, Block) and self.state == STATES.FALLING\
+        '''if isinstance(other, Block) and self.state == STATES.FALLING\
         and other.gridcell == [self.gridcell[0]+1, self.gridcell[1]]:
         #If we hit a block, we're falling, and the block we hit is a cell below us...
             self.block_below = other
             self.rect.bottom = other.rect.top
-            self.state       = STATES.IMPACT
+            self.state       = STATES.IMPACT'''
         pass      
+    
+    def appear(self):
+        
+        self.state = STATES.START_FALLING
             
     def wait(self):
         '''Constantly checks to see if this block can fall.  Gets it moving
@@ -71,22 +77,38 @@ class Block(gameobject.GameObject):
         #If we're not at the bottom and there's no block directly below...
             blockgrid.blockstocheck.discard(self)
             self.acceleration[1] = GRAVITY
-            self.state           = STATES.FALLING
+            self.state           = STATES.START_FALLING
+            
+    def start_falling(self):
+        for i in xrange(self.gridcell[0], blockgrid.DIMENSIONS[0]):
+                if isinstance(blockgrid.blocks[i][self.gridcell[1]], Block):
+                    self.target = [i-1, self.gridcell[1]]
+                    break
+                
+        self.state = STATES.FALLING
         
     def fall(self):
         self.velocity[1]  = min(MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
-        self.rect.top     = round(self.position[1])
-        self.gridcell[0]  = self.rect.centery/self.rect.height #(row, column)
-        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self
+        self.rect.top     = self.position[1] + .5  #Round to the nearest integer
+        self.gridcell[0]  = self.rect.centery/self.rect.height
+        '''blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self'''
+
+            
+        if self.gridcell == self.target:
+            self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
+            self.state = STATES.IMPACT
         
-        if self.gridcell[0] < blockgrid.DIMENSIONS[0]-1:
+        '''if self.gridcell[0] < blockgrid.DIMENSIONS[0]-1:
         #If we're not at the bottom of the grid...
-            if isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):  #This is always returning false.  It always registers as None
+            if isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
             #If there is a block below us...
-                print "france"
-                self.rect.bottom = blockgrid.blocks[self.gridcell[0]-1][self.gridcell[1]].rect.top
+                print self.rect.centery
+                self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
                 self.state       = STATES.IMPACT
+                #Then stop'''
+                
+        
         
         if self.rect.bottom > blockgrid.RECT.bottom:  #@UndefinedVariable
         #If we've hit the grid's bottom...
@@ -98,6 +120,8 @@ class Block(gameobject.GameObject):
         self.acceleration[1] = 0.0
         self.velocity[1]     = 0.0
         self.gridcell[0]     = self.rect.centery/self.rect.height #(row, column)
+        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self
+        self.target = None
         blockgrid.blockstocheck.add(self)  #Might remove later?
         bump.play()
         self.state           = STATES.ACTIVE
