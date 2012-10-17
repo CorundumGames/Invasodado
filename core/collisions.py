@@ -15,7 +15,7 @@ do_not_compare = {(block.Block          , shipbullet.ShipBullet),
                   (enemy.Enemy          , block.Block          )
                   }
 
-do_not_check = {block.Block}
+do_not_check = {block.Block, pygame.sprite.Sprite}
 
 class CollisionGrid:
     '''CollisionGrid is a grid meant to be used to easily determine whether or

@@ -22,6 +22,8 @@ SPRITES = pygame.transform.scale(SPRITES, (SPRITES.get_width()*SCALE_FACTOR, SPR
 #The background
 BG = pygame.image.load("./gfx/bg.png").convert()
 
+FONT = pygame.font.Font("./gfx/font.ttf", 18)
+
 class Enum(object):
     def __init__(self, *keys):
         self.__dict__.update(zip(keys, range(len(keys))))

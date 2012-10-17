@@ -11,6 +11,7 @@ import pygame.mixer
 
 pygame.mixer.init()
 pygame.display.init()
+pygame.font.init()
 
 from core import config
 from core import gsm
