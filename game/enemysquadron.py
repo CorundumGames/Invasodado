@@ -6,10 +6,14 @@ import ingame
 ROW_SIZE = 7
 COL_SIZE = 4
 
+global enemies
 enemies = None
+
+
 
 def reset():
     ingame.ENEMIES.empty()
+    global enemies
     enemies = [[enemy.Enemy((i, j)) for i in range(ROW_SIZE)] for j in range(COL_SIZE)]
     
     for i in enemies:
@@ -21,3 +25,9 @@ def reset():
                 ingame.ENEMIES.add(i[j], i[ROW_SIZE-1-j])
                 i[j].state            = enemy.STATES.APPEARING
                 i[ROW_SIZE-1-j].state = enemy.STATES.APPEARING   
+                
+def move_down():
+    global enemies
+    for i in enemies:
+        for e in i:
+            e.position[1] += 8

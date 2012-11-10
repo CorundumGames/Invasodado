@@ -32,8 +32,8 @@ def clear():
 def update():
     blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
     
-    for b in itertools.ifilter(lambda x: x.state == block.STATES.ACTIVE or x.state == block.STATES.FALLING, ingame.BLOCKS.sprites()):
-    #For all blocks that are on the grid and still...
+    for b in itertools.ifilter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites()):
+    #For all blocks that are on the grid and not moving...
         blocks[b.gridcell[0]][b.gridcell[1]] = b
 
     for b in blockstocheck:
@@ -55,10 +55,15 @@ def update():
                     {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][                     b.gridcell[1]   ] for j in temp}, #Right
                     {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][max(0              , b.gridcell[1]-j)] for j in temp}  #Up-right
                     )
+        
         #TODO: Optimize this so the cells are pre-calculated
-        for i in itertools.ifilter(lambda x: x != None, nextblock):
+        for i in nextblock:
         #For all the matching blocks above...
-            if len(filter(lambda x: isinstance(x, block.Block) and id(b.color) == id(x.color), i)) > 1:
+            if len(filter(lambda x: id(x) != id(b)   and \
+                          isinstance(x, block.Block) and \
+                          id(b.color) == id(x.color),
+                          i
+                          )) >= 2:
             #If there are two blocks and they're both the same color as the first...
                 matchlist.update(i)  #Mark these blocks as matching
                     
@@ -66,10 +71,11 @@ def update():
         if len(matchlist) >= 3:
         #If at least 3 blocks are aligned...
             blockstoclear.update(matchlist)  #Mark the blocks in question for removal
+            ingame.score += (len(matchlist)**2)*ingame.multiplier
             
         matchlist.clear()
             
-    if len(blockstoclear) > 0:
+    if len(blockstoclear) > 0 and len(filter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites())) == len(ingame.BLOCKS.sprites()):
         blockclear.play()
         for b in blockstoclear: b.state = block.STATES.DYING
         blockstoclear.clear()

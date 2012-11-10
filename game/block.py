@@ -14,6 +14,7 @@ FRAME     = pygame.Rect( 0*config.SCALE_FACTOR,
 GRAVITY   = .5
 MAX_SPEED = 12.0
 
+
 bump = pygame.mixer.Sound("./sfx/bump.wav")
 
 block_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.Colors.LIST])
@@ -47,73 +48,68 @@ class Block(gameobject.GameObject):
         self.gridcell        = [self.rect.centery/self.rect.height, #(row, column)
                                 self.rect.centerx/self.rect.width]
         self.position        = list(self.rect.topleft)
-        self.target          = None
+        self.target          = blockgrid.DIMENSIONS[0]-1
         
         self.state           = STATES.APPEARING
         self.add(ingame.BLOCKS)
         
     def __str__(self):
-        return "Block of color " + str(self.color) + " at grid cell" + str(self.gridcell)
+        return "Block of color " + str(self.color) + " at grid cell " + str(self.gridcell) + " with target " + str(self.target)
         
     def on_collide(self, other):
-        '''if isinstance(other, Block) and self.state == STATES.FALLING\
-        and other.gridcell == [self.gridcell[0]+1, self.gridcell[1]]:
-        #If we hit a block, we're falling, and the block we hit is a cell below us...
-            self.block_below = other
-            self.rect.bottom = other.rect.top
-            self.state       = STATES.IMPACT'''
         pass      
     
     def appear(self):
-        
         self.state = STATES.START_FALLING
             
-    def wait(self):
-        '''Constantly checks to see if this block can fall.  Gets it moving
-        if so.
-        '''
-        if self.rect.bottom < blockgrid.RECT.bottom\
-        and self.rect.bottom != blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top:
-        #If we're not at the bottom and there's no block directly below...
-            blockgrid.blockstocheck.discard(self)
-            self.acceleration[1] = GRAVITY
-            self.state           = STATES.START_FALLING
-            
     def start_falling(self):
-        for i in xrange(self.gridcell[0], blockgrid.DIMENSIONS[0]):
+        for i in xrange(self.gridcell[0]+1, blockgrid.DIMENSIONS[0]):
+        #For all grid cells below this one...
                 if isinstance(blockgrid.blocks[i][self.gridcell[1]], Block):
-                    self.target = [i-1, self.gridcell[1]]
+                #If this grid cell is occupied...
+                    self.target = i-1
                     break
                 
         self.state = STATES.FALLING
         
+    def wait(self):
+        '''Constantly checks to see if this block can fall.  Gets it moving
+        if so.
+        '''
+            
+        if self.rect.bottom < blockgrid.RECT.bottom \
+        and blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]] == None:
+        #If we're not at the bottom and there's no block directly below...
+            blockgrid.blockstocheck.discard(self)
+            self.acceleration[1] = GRAVITY
+            self.target          = blockgrid.DIMENSIONS[0]-1
+            self.state           = STATES.START_FALLING
+        
     def fall(self):
+        '''Falls down.  For the sake of efficiency, blocks work independently
+        of the collision detection system, since they're only going to move
+        vertically, and only depend on other blocks for collisions.
+        '''
         self.velocity[1]  = min(MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
         self.rect.top     = self.position[1] + .5  #Round to the nearest integer
         self.gridcell[0]  = self.rect.centery/self.rect.height
-        '''blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self'''
+        
 
+        while isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
+        #While the target is equal to a space a block currently occupies...
+            self.target -= 1
             
-        if self.gridcell == self.target:
-            self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
-            self.state = STATES.IMPACT
-        
-        '''if self.gridcell[0] < blockgrid.DIMENSIONS[0]-1:
-        #If we're not at the bottom of the grid...
-            if isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
-            #If there is a block below us...
-                print self.rect.centery
-                self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
-                self.state       = STATES.IMPACT
-                #Then stop'''
-                
-        
-        
-        if self.rect.bottom > blockgrid.RECT.bottom:  #@UndefinedVariable
+        if self.gridcell[0] == blockgrid.DIMENSIONS[0] - 1:
         #If we've hit the grid's bottom...
             self.rect.bottom = blockgrid.RECT.bottom
+            self.position    = list(self.rect.topleft)
             self.state       = STATES.IMPACT
+        elif isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
+        #Else if there is a block below us...
+            self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
+            self.position    = list(self.rect.topleft) 
+            self.state       = STATES.IMPACT 
             
     def stop(self):
         #Stop all motion
@@ -121,9 +117,20 @@ class Block(gameobject.GameObject):
         self.velocity[1]     = 0.0
         self.gridcell[0]     = self.rect.centery/self.rect.height #(row, column)
         blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self
+        
+        ''' if self.gridcell[0] < blockgrid.DIMENSIONS[0]-1:
+            if isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
+                self.velocity[1] = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].velocity[1]
+                self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
+                self.position = list(self.rect.topleft)
+                self.state = STATES.FALLING
+                return'''
+        
+        
         self.target = None
         blockgrid.blockstocheck.add(self)  #Might remove later?
         bump.play()
+        self.snap()
         self.state           = STATES.ACTIVE
         
         blockgrid.update()
@@ -133,6 +140,7 @@ class Block(gameobject.GameObject):
         blockgrid.blockstocheck.discard(self)
         self.position     = [-300.0, -300.0]
         self.rect.topleft = self.position
+        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
         self.gridcell     = None
         self.state        = STATES.IDLE
            
