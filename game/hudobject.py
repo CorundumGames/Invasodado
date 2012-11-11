@@ -11,7 +11,7 @@ class HudObject(gameobject.GameObject):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.acceleration = None
-        self.actions      = None
+        self.actions      = {None: None}
         self.position     = None
         self.rect         = None
         self.state        = None

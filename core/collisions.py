@@ -4,18 +4,16 @@ import pygame.sprite
 import pygame.time
 
 from game import block
+from game import hudobject
 from game import shipbullet
 from game import enemy
 import config
 import gsm
 
-do_not_compare = {(block.Block          , shipbullet.ShipBullet),
-                  (shipbullet.ShipBullet, block.Block          ),
-                  (block.Block          , enemy.Enemy          ),
-                  (enemy.Enemy          , block.Block          )
+do_not_compare = {
                   }
 
-do_not_check = {block.Block, pygame.sprite.Sprite}
+do_not_check = {block.Block, hudobject.HudObject}
 
 class CollisionGrid:
     '''CollisionGrid is a grid meant to be used to easily determine whether or
@@ -103,8 +101,8 @@ class GridCell:
         for g in gsm.current_state.group_list:
         #For all groups on-screen...
             for s in itertools.ifilter(lambda x: type(x) not in do_not_check, g):
-            #For all sprites in this group...
-                if s not in self.objects and self.rect.colliderect(s.rect):
+            #For all sprites in this group that aren't excluded from collisions...
+                if self.rect.colliderect(s.rect):
                 #If the sprite is not already in this cell...
                     self.objects_to_add.add(s)
                     
@@ -120,7 +118,7 @@ class GridCell:
             if pygame.sprite.collide_rect(i, j) or \
             i.rect.move(i.velocity[0], i.velocity[1]).colliderect(j.rect.move(j.velocity[0], j.velocity[1])):
             #If these two objects touch or if they're about to touch...
-                if len(grid.spare_collisions) == 0:
+                if grid.spare_collisions == []:
                 #If we don't have any spare Collision objects...
                     grid.spare_collisions.append(Collision())
                 grid.collisions.append(grid.spare_collisions.pop().update(i, j))

@@ -11,6 +11,7 @@ from core import color
 from core import config
 import enemysquadron
 import enemy
+import hudobject
 import player
 import shipbullet
 
@@ -33,7 +34,7 @@ class InGameState(gamestate.GameState):
         self.group_list    += [BLOCKS, ENEMIES, PLAYER, HUD]
         self.ship           = player.Ship()
         
-        self.hud_score       = pygame.sprite.Sprite()
+        self.hud_score       = hudobject.HudObject()
         self.hud_score.rect  = pygame.Rect(16, 16, 0, 0)
         
         
@@ -69,7 +70,7 @@ class InGameState(gamestate.GameState):
         #For all Sprite groups...
             g.update()
             
-        if len(ENEMIES.sprites()) == 0:
+        if ENEMIES.sprites() == []:
         #If all enemies have been killed...
             enemysquadron.reset()
             
