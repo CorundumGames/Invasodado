@@ -13,23 +13,27 @@ LOCATION   = (0, 0)
 RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))
 temp       = range(1, 3)
 
+global blocks
 blocks        = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
 blockstocheck = set()
 blockstoclear = set()
 
-matchlist = set()
+matchset = set()
 
 blockclear = pygame.mixer.Sound("./sfx/clear.wav")
         
 def clear():
+    global blocks
     for i in itertools.ifilter(lambda x: x.state != block.STATES.IDLE, ingame.BLOCKS.sprites()):
+    #For all blocks that are on-screen...
         i.state = block.STATES.DYING
         
     blocks        = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
-    blockstocheck = set()
-    blockstoclear = set()
+    blockstocheck.clear()
+    blockstoclear.clear()
             
 def update():
+    global blocks
     blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
     
     for b in itertools.ifilter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites()):
@@ -43,7 +47,7 @@ def update():
         #If it's already slated for removal...
             continue  #Skip this loop
         
-        matchlist.add(b)  #Start with a match of one
+        matchset.add(b)  #Start with a match of one
         
         nextblock = (
                     {blocks[       b.gridcell[0]   ][max(0              , b.gridcell[1]-j)] for j in temp}, #Up
@@ -58,26 +62,28 @@ def update():
         
         #TODO: Optimize this so the cells are pre-calculated
         for i in nextblock:
-        #For all the matching blocks above...
-            if len(filter(lambda x: id(x) != id(b)   and \
-                          isinstance(x, block.Block) and \
-                          id(b.color) == id(x.color),
-                          i
-                          )) >= 2:
+        #For all the sets of blocks above...
+            if len([id(b) for x in i if            \
+                    id(i) != id(x) and             \
+                    isinstance(x, block.Block) and \
+                    id(b.color) == id(x.color)]) >= 2:
             #If there are two blocks and they're both the same color as the first...
-                matchlist.update(i)  #Mark these blocks as matching
+                matchset.update(i)  #Mark these blocks as matching
                     
             
-        if len(matchlist) >= 3:
+        if len(matchset) >= 3:
         #If at least 3 blocks are aligned...
-            blockstoclear.update(matchlist)  #Mark the blocks in question for removal
-            ingame.score += (len(matchlist)**2)*ingame.multiplier
+            blockstoclear.update(matchset)  #Mark the blocks in question for removal
+            ingame.score += (len(matchset)**2)*ingame.multiplier
             
-        matchlist.clear()
+        matchset.clear()
             
-    if len(blockstoclear) > 0 and len(filter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites())) == len(ingame.BLOCKS.sprites()):
+    if len(blockstoclear) > 0:
+    #If we're clearing any blocks...
         blockclear.play()
-        for b in blockstoclear: b.state = block.STATES.DYING
+        for b in blockstoclear: 
+        #For every block marked for clearing...
+            b.state = block.STATES.DYING
         blockstoclear.clear()
         
     

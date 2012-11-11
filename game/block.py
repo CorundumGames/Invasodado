@@ -48,7 +48,7 @@ class Block(gameobject.GameObject):
         self.gridcell        = [self.rect.centery/self.rect.height, #(row, column)
                                 self.rect.centerx/self.rect.width]
         self.position        = list(self.rect.topleft)
-        self.target          = blockgrid.DIMENSIONS[0]-1
+        self.target          = blockgrid.DIMENSIONS[0] - 1
         
         self.state           = STATES.APPEARING
         self.add(ingame.BLOCKS)
@@ -63,13 +63,22 @@ class Block(gameobject.GameObject):
         self.state = STATES.START_FALLING
             
     def start_falling(self):
-        for i in xrange(self.gridcell[0]+1, blockgrid.DIMENSIONS[0]):
+        blockgrid.blockstocheck.discard(self)
+        for i in xrange(self.gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
         #For all grid cells below this one...
                 if isinstance(blockgrid.blocks[i][self.gridcell[1]], Block):
                 #If this grid cell is occupied...
-                    self.target = i-1
+                    self.target = i - 1
                     break
-                
+        
+        if self.gridcell[0] > 0 and isinstance(blockgrid.blocks[self.gridcell[0] - 1][self.gridcell[1]], Block):
+        #If there is a block above us...
+            for i in xrange(self.gridcell[0], 0, -1):
+                if isinstance(blockgrid.blocks[i][self.gridcell[1]], Block):
+                    blockgrid.blocks[i][self.gridcell[1]].state = STATES.START_FALLING
+                else:
+                    break
+            
         self.state = STATES.FALLING
         
     def wait(self):
@@ -82,7 +91,7 @@ class Block(gameobject.GameObject):
         #If we're not at the bottom and there's no block directly below...
             blockgrid.blockstocheck.discard(self)
             self.acceleration[1] = GRAVITY
-            self.target          = blockgrid.DIMENSIONS[0]-1
+            self.target          = blockgrid.DIMENSIONS[0] - 1
             self.state           = STATES.START_FALLING
         
     def fall(self):
@@ -108,8 +117,9 @@ class Block(gameobject.GameObject):
         elif isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
         #Else if there is a block below us...
             self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
-            self.position    = list(self.rect.topleft) 
-            self.state       = STATES.IMPACT 
+            self.position = list(self.rect.topleft)
+            self.state       = STATES.IMPACT
+        
             
     def stop(self):
         #Stop all motion
@@ -118,30 +128,36 @@ class Block(gameobject.GameObject):
         self.gridcell[0]     = self.rect.centery/self.rect.height #(row, column)
         blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self
         
-        ''' if self.gridcell[0] < blockgrid.DIMENSIONS[0]-1:
-            if isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
-                self.velocity[1] = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].velocity[1]
-                self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
-                self.position = list(self.rect.topleft)
-                self.state = STATES.FALLING
-                return'''
-        
-        
         self.target = None
         blockgrid.blockstocheck.add(self)  #Might remove later?
         bump.play()
         self.snap()
         self.state           = STATES.ACTIVE
         
-        blockgrid.update()
+        if len([id(b) for b in ingame.BLOCKS.sprites() if b.state == STATES.ACTIVE]) == len(ingame.BLOCKS.sprites()):
+        #If no blocks are moving...
+            blockgrid.update()
         
     def vanish(self):
+        #Maybe if there are any blocks above, they should all start falling.
         self.kill()
         blockgrid.blockstocheck.discard(self)
-        self.position     = [-300.0, -300.0]
-        self.rect.topleft = self.position
+        
+        
+                
+        self.position     = None
+        self.rect = None
+        
+        
+        
+        
         blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
+        
+        
         self.gridcell     = None
+        self.target       = None
+        
+        
         self.state        = STATES.IDLE
            
     def snap(self):
