@@ -8,7 +8,7 @@ import block
 import ingame
 
 CELL_SIZE  = (16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)
-DIMENSIONS = (12, config.screen.get_width()/CELL_SIZE[1]) #(row, column)
+DIMENSIONS = (12, 20) #(row, column)
 LOCATION   = (0, 0)
 RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))
 temp       = range(1, 3)
@@ -42,19 +42,26 @@ def update():
 
     for b in blockstocheck:
     #For all blocks to check for matches...
-        
         matchset.add(b)  #Start with a match of one
-        
-        nextblock = (
-                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][                     b.gridcell[1]   ] for j in temp}, #Down
-                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp}, #Down-right
-                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][                     b.gridcell[1]   ] for j in temp}, #Right
-                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][max(0              , b.gridcell[1]-j)] for j in temp}  #Up-right
-                    )
+        listDown = list() #List of blocks below
+        listDownRight = list() #List of blocks down and to the right
+        listRight = list() #List of blocks to the right
+        listUpRight = list() #List of blocks up and to the right
+        for j in temp:
+            if(b.gridcell[0] + j < len(blocks)): #check if index goes out of bounds
+                listDown.append(blocks[b.gridcell[0]+j][ b.gridcell[1]])#add the block below if index isn't out of bounds
+            if(b.gridcell[0] + j < len(blocks) and b.gridcell[1] + j < len(blocks[0])):#check if index goes out of bounds
+                listDownRight.append(blocks[b.gridcell[0]+j][b.gridcell[1]+j])#add the block down and to the right if index isn't out of bounds
+            if(b.gridcell[1] + j < len(blocks[0])):#check if index goes out of bounds
+                listRight.append(blocks[b.gridcell[0]][b.gridcell[1]+j])#add the block to the right  if index isn't out of bounds
+            if(b.gridcell[0] - j >= 0 and b.gridcell[1] + j < len(blocks[0])):#check if index goes out of bounds
+                listUpRight.append(blocks[b.gridcell[0]-j][b.gridcell[1]+j])#add the block up and to the right if index isn't out of bounds
+        nextblock = (listDown,listDownRight,listRight,listUpRight)#put the lists into a tuple to make iterating easier
         
         #TODO: Optimize this so the cells are pre-calculated
+        
         for i in nextblock:
-        #For all the sets of blocks above...
+        #For all the lists of blocks above...
             if len([id(b) for x in i if            \
                     id(i) != id(x) and             \
                     isinstance(x, block.Block) and \
