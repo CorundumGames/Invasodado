@@ -78,7 +78,7 @@ class Block(gameobject.GameObject):
                     blockgrid.blocks[i][self.gridcell[1]].state = STATES.START_FALLING
                 else:
                     break
-            
+        
         self.state = STATES.FALLING
         
     def wait(self):
@@ -117,7 +117,7 @@ class Block(gameobject.GameObject):
         elif isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
         #Else if there is a block below us...
             self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
-            self.position = list(self.rect.topleft)
+            self.position    = list(self.rect.topleft)
             self.state       = STATES.IMPACT
         
             
@@ -128,7 +128,7 @@ class Block(gameobject.GameObject):
         self.gridcell[0]     = self.rect.centery/self.rect.height #(row, column)
         blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self
         
-        self.target = None
+        self.target          = None
         blockgrid.blockstocheck.add(self)  #Might remove later?
         bump.play()
         self.snap()
@@ -141,23 +141,12 @@ class Block(gameobject.GameObject):
     def vanish(self):
         #Maybe if there are any blocks above, they should all start falling.
         self.kill()
-        blockgrid.blockstocheck.discard(self)
-        
-        
-                
+        blockgrid.blockstocheck.discard(self)      
         self.position     = None
-        self.rect = None
-        
-        
-        
-        
+        self.rect         = None
         blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
-        
-        
         self.gridcell     = None
         self.target       = None
-        
-        
         self.state        = STATES.IDLE
            
     def snap(self):

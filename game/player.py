@@ -43,6 +43,7 @@ class Ship(gameobject.GameObject):
         
     def on_fire_bullet(self):
         if self.bullet.state == shipbullet.STATES.IDLE:
+        #If our bullet is not on-screen...
             self.bullet.add(ingame.PLAYER)
             self.bullet.rect.midbottom = self.rect.midtop
             self.bullet.state          = shipbullet.STATES.FIRED
@@ -52,8 +53,10 @@ class Ship(gameobject.GameObject):
         keys = pygame.key.get_pressed()
         
         if keys[pygame.K_LEFT] and self.rect.left > 0:
+        #If we're pressing left and not at the left edge of the screen...
             self.velocity[0] = -SPEED
         elif keys[pygame.K_RIGHT] and self.rect.right < config.screen.get_width():
+        #If we're pressing right and not at the right edge of the screen...
             self.velocity[0] = SPEED
         else:
             self.velocity[0] = 0
