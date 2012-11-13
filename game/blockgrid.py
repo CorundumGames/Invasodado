@@ -42,19 +42,11 @@ def update():
 
     for b in blockstocheck:
     #For all blocks to check for matches...
-
-        if b in blockstoclear:
-        #If it's already slated for removal...
-            continue  #Skip this loop
         
         matchset.add(b)  #Start with a match of one
         
         nextblock = (
-                    {blocks[       b.gridcell[0]   ][max(0              , b.gridcell[1]-j)] for j in temp}, #Up
-                    {blocks[max(0, b.gridcell[0]-j)][max(0              , b.gridcell[1]-j)] for j in temp}, #Up-left
-                    {blocks[max(0, b.gridcell[0]-j)][                     b.gridcell[1]   ] for j in temp}, #Left
-                    {blocks[max(0, b.gridcell[0]-j)][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp}, #Down-left
-                    {blocks[       b.gridcell[0]   ][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp}, #Down
+                    {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][                     b.gridcell[1]   ] for j in temp}, #Down
                     {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][min(DIMENSIONS[1]-1, b.gridcell[1]+j)] for j in temp}, #Down-right
                     {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][                     b.gridcell[1]   ] for j in temp}, #Right
                     {blocks[min(DIMENSIONS[0]-1, b.gridcell[0]+j)][max(0              , b.gridcell[1]-j)] for j in temp}  #Up-right
@@ -78,7 +70,7 @@ def update():
             
         matchset.clear()
             
-    if len(blockstoclear) > 0:
+    if blockstoclear != set():
     #If we're clearing any blocks...
         blockclear.play()
         for b in blockstoclear: 
