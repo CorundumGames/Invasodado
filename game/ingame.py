@@ -48,12 +48,18 @@ class InGameState(gamestate.GameState):
     
     def events(self):
         for e in pygame.event.get():
-            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-            #If the mouse button is clicked...
-                BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.RED))
-            elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 3:
-                BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.BLUE))
-            if e.type == pygame.KEYDOWN:
+            if e.type == pygame.MOUSEBUTTONDOWN:
+            #If a mouse button is clicked...
+                if e.button == 1:
+                #If it was the left button...
+                    BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.RED))
+                elif e.button == 2:
+                #If it was the middle button...
+                    BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.YELLOW))
+                elif e.button == 3:
+                #If it was the right button...
+                    BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.BLUE))
+            elif e.type == pygame.KEYDOWN:
             #If a key is pressed...
                 if e.key == pygame.K_SPACE:
                 #If the space bar is pressed...
