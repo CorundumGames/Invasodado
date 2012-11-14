@@ -15,6 +15,10 @@ SCALE_FACTOR = 2
 #How many colors we'll use
 NUM_COLORS = 5
 
+#Screen Width and Height
+SCREEN_WIDTH = screen.get_width()
+SCREEN_HEIGHT = screen.get_height()
+
 #The main spritesheet for this game.
 SPRITES = pygame.image.load("./gfx/sprites.png").convert()
 SPRITES = pygame.transform.scale(SPRITES, (SPRITES.get_width()*SCALE_FACTOR, SPRITES.get_height()*SCALE_FACTOR))

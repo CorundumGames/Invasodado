@@ -89,7 +89,7 @@ class Block(gameobject.GameObject):
         '''
             
         if self.rect.bottom < blockgrid.RECT.bottom \
-        and blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]] == None:
+        and (blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]] == None or blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].state == STATES.FALLING):
         #If we're not at the bottom and there's no block directly below...
             blockgrid.blockstocheck.discard(self)
             self.acceleration[1] = GRAVITY
