@@ -1,6 +1,7 @@
 import pygame.rect
 
 from core import config
+import ufo
 import enemy
 import gameobject
 import ingame
@@ -38,6 +39,12 @@ class ShipBullet(gameobject.GameObject):
             #And that other enemy is alive...
                 self.state  = STATES.RESET
                 other.state = enemy.STATES.DYING
+        elif isinstance(other, ufo.UFO):
+        #If we hit a UFO...
+            if other.state == ufo.STATES.MOVING:
+            #And that UFO is alive...
+                self.state  = STATES.RESET
+                other.state = ufo.STATES.DYING
             
     def start_moving(self):
         '''Plays a sound and begins moving.'''

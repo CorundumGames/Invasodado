@@ -1,3 +1,5 @@
+import random
+
 import pygame.mixer
 
 import blockgrid
@@ -19,12 +21,11 @@ bump = pygame.mixer.Sound("./sfx/bump.wav")
 
 block_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.Colors.LIST])
 
-
 class Block(gameobject.GameObject):
     '''Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
-    def __init__(self, pos, newcolor):
+    def __init__(self, pos, newcolor, special=False):
         gameobject.GameObject.__init__(self)
         self.actions = {
                         STATES.IDLE         : None              ,
@@ -51,6 +52,7 @@ class Block(gameobject.GameObject):
         self.target          = blockgrid.DIMENSIONS[0] - 1
         
         self.state           = STATES.APPEARING
+        self.special         = special
         self.add(ingame.BLOCKS)
         
     def __str__(self):
@@ -104,20 +106,28 @@ class Block(gameobject.GameObject):
         self.rect.top     = self.position[1] + .5  #Round to the nearest integer
         self.gridcell[0]  = self.rect.centery/self.rect.height
         
+        if self.special:
+            self.image = random.choice(block_frames)
+            
+        
 
         while isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
         #While the target is equal to a space a block currently occupies...
             self.target -= 1
-            
+          
         if self.gridcell[0] == blockgrid.DIMENSIONS[0] - 1:
         #If we've hit the grid's bottom...
             self.rect.bottom = blockgrid.RECT.bottom
             self.position    = list(self.rect.topleft)
             self.state       = STATES.IMPACT
+            
         elif isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
         #Else if there is a block below us...
             self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
             self.position    = list(self.rect.topleft)
+            if self.special:
+                self.color = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].color
+                blockgrid.clear_color(self.color)
             self.state       = STATES.IMPACT
         
             

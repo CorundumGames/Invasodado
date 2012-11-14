@@ -14,6 +14,7 @@ import enemy
 import hudobject
 import player
 import shipbullet
+import ufo
 
 from core import gamestate
 
@@ -33,6 +34,7 @@ class InGameState(gamestate.GameState):
         self.collision_grid = collisions.CollisionGrid(4, 4, 1)
         self.group_list    += [BLOCKS, ENEMIES, PLAYER, HUD]
         self.ship           = player.Ship()
+        self.ufo            = ufo.UFO()
         
         self.hud_score       = hudobject.HudObject()
         self.hud_score.rect  = pygame.Rect(16, 16, 0, 0)
@@ -50,7 +52,7 @@ class InGameState(gamestate.GameState):
         for e in pygame.event.get():
             if e.type == pygame.MOUSEBUTTONDOWN:
             #If a mouse button is clicked...
-                if e.button == 1:
+                if   e.button == 1:
                 #If it was the left button...
                     BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.RED))
                 elif e.button == 2:
@@ -66,7 +68,12 @@ class InGameState(gamestate.GameState):
                     self.ship.on_fire_bullet()
                 elif e.key == pygame.K_f:
                 #If the F key is pressed...
-                    self.frame_limit = not self.frame_limit    
+                    self.frame_limit = not self.frame_limit
+                elif e.key == pygame.K_u:
+                #If the U key is pressed...
+                    if self.ufo.state == ufo.STATES.IDLE:
+                        ENEMIES.add(self.ufo)
+                        self.ufo.state = ufo.STATES.APPEARING
                      
     
     def logic(self):
