@@ -53,7 +53,7 @@ class UFO(gameobject.GameObject):
         
     def die(self):
         self.kill()
-        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], random.choice(color.Colors.LIST)), special=True)
+        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], random.choice(color.Colors.LIST), specialblock=True))
         invade.stop()
         self.velocity[0]  = 0
         self.position     = list(START_POS)

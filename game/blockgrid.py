@@ -36,6 +36,15 @@ def clear_color(targetcolor):
     for i in itertools.ifilter(lambda x: id(x.color) == id(targetcolor), ingame.BLOCKS.sprites()):
     #For all blocks of the given color...
         i.state = block.STATES.DYING
+        
+def clear_row(row):
+    global blocks
+    if not 0 <= row < DIMENSIONS[0]:
+        #If we're not in the row range...
+        raise ValueError("Wrong row value!  Should be between 0 and 19, inclusive, but got ", row)
+    
+    for i in itertools.ifilter(lambda x: isinstance(x, block.Block), blocks[row]):
+        i.state = block.STATES.DYING
             
 def update():
     global blocks

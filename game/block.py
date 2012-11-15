@@ -16,6 +16,7 @@ FRAME     = pygame.Rect( 0*config.SCALE_FACTOR,
 GRAVITY   = .5
 MAX_SPEED = 12.0
 
+global blocks
 
 bump = pygame.mixer.Sound("./sfx/bump.wav")
 
@@ -25,7 +26,7 @@ class Block(gameobject.GameObject):
     '''Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
-    def __init__(self, pos, newcolor, special=False):
+    def __init__(self, pos, newcolor, specialblock = False):
         gameobject.GameObject.__init__(self)
         self.actions = {
                         STATES.IDLE         : None              ,
@@ -52,7 +53,7 @@ class Block(gameobject.GameObject):
         self.target          = blockgrid.DIMENSIONS[0] - 1
         
         self.state           = STATES.APPEARING
-        self.special         = special
+        self.special         = specialblock
         self.add(ingame.BLOCKS)
         
     def __str__(self):
@@ -65,6 +66,7 @@ class Block(gameobject.GameObject):
         self.state = STATES.START_FALLING
             
     def start_falling(self):
+        global blocks
         blockgrid.blockstocheck.discard(self)
         for i in xrange(self.gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
         #For all grid cells below this one...
@@ -87,7 +89,7 @@ class Block(gameobject.GameObject):
         '''Constantly checks to see if this block can fall.  Gets it moving
         if so.
         '''
-            
+        global blocks
         if self.rect.bottom < blockgrid.RECT.bottom \
         and (blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]] == None or blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].state == STATES.FALLING):
         #If we're not at the bottom and there's no block directly below...
@@ -101,16 +103,16 @@ class Block(gameobject.GameObject):
         of the collision detection system, since they're only going to move
         vertically, and only depend on other blocks for collisions.
         '''
+        global blocks
         self.velocity[1]  = min(MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
         self.rect.top     = self.position[1] + .5  #Round to the nearest integer
         self.gridcell[0]  = self.rect.centery/self.rect.height
         
         if self.special:
-            self.image = random.choice(block_frames)
-            
+        #If this is a special block...
+            self.image = random.choice(block_frames.values()) 
         
-
         while isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
         #While the target is equal to a space a block currently occupies...
             self.target -= 1
@@ -120,19 +122,16 @@ class Block(gameobject.GameObject):
             self.rect.bottom = blockgrid.RECT.bottom
             self.position    = list(self.rect.topleft)
             self.state       = STATES.IMPACT
-            
         elif isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
         #Else if there is a block below us...
             self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
             self.position    = list(self.rect.topleft)
-            if self.special:
-                self.color = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].color
-                blockgrid.clear_color(self.color)
             self.state       = STATES.IMPACT
         
             
     def stop(self):
         #Stop all motion
+        global blocks
         self.acceleration[1] = 0.0
         self.velocity[1]     = 0.0
         self.gridcell[0]     = self.rect.centery/self.rect.height #(row, column)
@@ -147,6 +146,15 @@ class Block(gameobject.GameObject):
         if len([id(b) for b in ingame.BLOCKS.sprites() if b.state == STATES.ACTIVE]) == len(ingame.BLOCKS.sprites()):
         #If no blocks are moving...
             blockgrid.update()
+        
+        if self.special:
+        #If this is a special block...
+            if self.gridcell[0] < blockgrid.DIMENSIONS[0] - 1:
+            #If we're not at the bottom of the grid...
+                self.color = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].color
+                blockgrid.clear_color(self.color)
+            else:
+                blockgrid.clear_row(self.gridcell[0])
         
     def vanish(self):
         #Maybe if there are any blocks above, they should all start falling.
