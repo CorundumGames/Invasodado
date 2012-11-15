@@ -10,12 +10,13 @@ from core import color
 from core import config
 import gameobject
 import ingame
+import enemybullet
 import shipbullet
 
 FRAMES    = [pygame.Rect( 0*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR),
              pygame.Rect(16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)]
 START_POS = (32, 32)
-STATES    = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING')
+STATES    = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'SHOOTING')
 SAFE_SPOT = (0, config.screen.get_height()*3)
 
 enemy_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAMES[0]).copy(), c)) for c in color.Colors.LIST])
@@ -44,7 +45,8 @@ class Enemy(gameobject.GameObject):
                         STATES.LOWERING : NotImplemented,
                         STATES.ACTIVE   : self.move     ,
                         STATES.DYING    : self.die      ,
-                        STATES.IDLE     : None
+                        STATES.IDLE     : None          ,
+                        STATES.SHOOTING : self.shoot
                         }
         
         self.color         = random.choice(color.Colors.LIST[:config.NUM_COLORS])
@@ -53,6 +55,7 @@ class Enemy(gameobject.GameObject):
         self.position      = list(START_POS)
         self.rect          = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
         self.state         = STATES.IDLE 
+        self.shootRange    = 10
         
     def appear(self):
         self.add(ingame.ENEMIES)
@@ -68,17 +71,28 @@ class Enemy(gameobject.GameObject):
     def move(self):
         self.position[0] += Enemy.velocity[0]
         self.rect.topleft = map(round, self.position)
-       
+        if random.uniform(1,5000) < self.shootRange:
+            self.state = STATES.SHOOTING
+        
         if not Enemy.should_flip:
             if self.rect.right > config.screen.get_width() or self.rect.left < 0:
             #If this enemy touches either end of the screen...
                 Enemy.should_flip = True
+                
+                
+    def shoot(self):
+        bullet = enemybullet.EnemyBullet()
+        bullet.add(ingame.ENEMIES)
+        bullet.rect.midbottom = self.rect.midbottom
+        bullet.state = enemybullet.STATES.FIRED
+        self.state = STATES.ACTIVE
+        
             
     def on_collide(self, other):
         if isinstance(other, shipbullet.ShipBullet) and self.state == STATES.ACTIVE:
         #If we got hit by the player's bullet...
             pass
-                
+               
     def die(self):
         ingame.ENEMIES.add(balloflight.BallOfLight(self.position, self.color))
         hurt.play()
