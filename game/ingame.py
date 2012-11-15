@@ -38,6 +38,8 @@ class InGameState(gamestate.GameState):
         
         self.hud_score       = hudobject.HudObject()
         self.hud_score.rect  = pygame.Rect(16, 16, 0, 0)
+        self.hud_lives       = hudobject.HudObject()
+        self.hud_lives.rect  = pygame.Rect(config.SCREEN_WIDTH-160, 16, 0, 0)
         
         
         self.frame_limit = True
@@ -45,6 +47,7 @@ class InGameState(gamestate.GameState):
         
         PLAYER.add(self.ship, shipbullet.ShipBullet())
         HUD.add(self.hud_score)
+        HUD.add(self.hud_lives)
         enemysquadron.reset()
         
     
@@ -100,6 +103,7 @@ class InGameState(gamestate.GameState):
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
         self.hud_score.image = config.FONT.render("Score: " + str(score), False, (255, 255, 255))
+        self.hud_lives.image = config.FONT.render("Lives: " + str(lives), False, (255, 255, 255))
         
         for g in self.group_list:
         #For all Sprite groups...
