@@ -5,6 +5,7 @@ import pygame.mixer
 import pygame.rect
 
 import block
+import balloflight
 from core import color
 from core import config
 import gameobject
@@ -29,7 +30,7 @@ Algorithm for storing one colored Enemy per color (with all animations)
 
 hurt = pygame.mixer.Sound("./sfx/enemyhurt.wav")
 
-class Enemy(gameobject.GameObject): 
+class Enemy(gameobject.GameObject):
     acceleration = [0.0, 0.0]
     count        = 0
     should_flip  = False
@@ -46,14 +47,12 @@ class Enemy(gameobject.GameObject):
                         STATES.IDLE     : None
                         }
         
-        self.color         = random.choice(color.Colors.LIST[0:config.NUM_COLORS])
+        self.color         = random.choice(color.Colors.LIST[:config.NUM_COLORS])
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)]
         self.position      = list(START_POS)
         self.rect          = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
-        self.state         = STATES.IDLE
-        
-        self.image.set_colorkey(color.COLOR_KEY)   
+        self.state         = STATES.IDLE 
         
     def appear(self):
         self.add(ingame.ENEMIES)
@@ -81,7 +80,7 @@ class Enemy(gameobject.GameObject):
             pass
                 
     def die(self):
-        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], self.color))
+        ingame.ENEMIES.add(balloflight.BallOfLight(self.position, self.color))
         hurt.play()
         self.kill()
         

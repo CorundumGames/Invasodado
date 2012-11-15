@@ -4,6 +4,7 @@ import pygame.sprite
 import pygame.time
 
 from game import block
+from game import balloflight
 from game import hudobject
 from game import shipbullet
 from game import enemy
@@ -13,7 +14,7 @@ import gsm
 do_not_compare = {
                   }
 
-do_not_check = {block.Block, hudobject.HudObject}
+do_not_check = {block.Block, balloflight.BallOfLight, hudobject.HudObject}
 
 class CollisionGrid:
     '''CollisionGrid is a grid meant to be used to easily determine whether or
