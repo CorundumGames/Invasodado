@@ -33,7 +33,9 @@ class EnemyBullet(gameobject.GameObject):
     
     def on_collide(self, other):
         if isinstance(other, player.Ship):
-            ingame.lives -= 1
+            if not other.invincible:
+                ingame.lives -= 1
+                other.state = player.STATES.RESPAWN
             self.state = STATES.RESET
             
     def start_moving(self):

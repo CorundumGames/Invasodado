@@ -14,7 +14,7 @@ Python singleton.
 '''
 
 #Constants/magic numbers#
-STATES       = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE')
+STATES       = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE','RESPAWN')
 SURFACE_CLIP = pygame.Rect(0, 0, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)
 START_POS    = pygame.Rect(config.screen.get_width() /  2,
                            config.screen.get_height()* .8,
@@ -31,13 +31,16 @@ class Ship(gameobject.GameObject):
                         STATES.IDLE      : None          ,
                         STATES.SPAWNING  : NotImplemented,
                         STATES.INVINCIBLE: NotImplemented,
-                        STATES.ACTIVE    : self.move
+                        STATES.ACTIVE    : self.move     ,
+                        STATES.RESPAWN: self.respawn
                         }
         self.bullet   = shipbullet.ShipBullet()
         self.image    = config.SPRITES.subsurface(SURFACE_CLIP) #@UndefinedVariable
         self.rect     = START_POS.copy()
         self.position = list(self.rect.topleft)
         self.state    = STATES.ACTIVE
+        self.invincible = False
+        self.invincibleCount = 0
         
         self.image.set_colorkey(color.COLOR_KEY)
         
@@ -47,6 +50,13 @@ class Ship(gameobject.GameObject):
             self.bullet.add(ingame.PLAYER)
             self.bullet.rect.midbottom = self.rect.midtop
             self.bullet.state          = shipbullet.STATES.FIRED
+            
+    def respawn(self):
+        self.rect     = START_POS.copy()
+        self.position = list(self.rect.topleft)
+        self.invincibleCount = 250
+        self.invincible = True
+        self.state = STATES.ACTIVE
         
     def move(self):
         #Shorthand for which keys have been pressed
@@ -64,3 +74,7 @@ class Ship(gameobject.GameObject):
         self.velocity[0] += self.acceleration[0]
         self.position[0] += self.velocity[0]
         self.rect.x = round(self.position[0])
+        if self.invincibleCount == 0:
+            self.invincible = False
+        else:
+            self.invincibleCount -= 1
