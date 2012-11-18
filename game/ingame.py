@@ -1,4 +1,5 @@
 import random
+import sys
 
 import pygame.event
 import pygame.display
@@ -27,7 +28,7 @@ DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
 
 score = 0
-lives = 3
+lives = 3000
 
 class InGameState(gamestate.GameState):    
     def __init__(self):
@@ -77,6 +78,8 @@ class InGameState(gamestate.GameState):
                     if self.ufo.state == ufo.STATES.IDLE:
                         ENEMIES.add(self.ufo)
                         self.ufo.state = ufo.STATES.APPEARING
+                elif e.key == pygame.K_c:
+                    blockgrid.clear()
                      
     
     def logic(self):
@@ -86,7 +89,7 @@ class InGameState(gamestate.GameState):
         #For all Sprite groups...
             g.update()
             
-        if ENEMIES.sprites() == []:
+        if len(ENEMIES) == 0:
         #If all enemies have been killed...
             enemysquadron.reset()
             
@@ -95,6 +98,9 @@ class InGameState(gamestate.GameState):
             enemy.Enemy.velocity[0] *= -1
             enemysquadron.move_down()
             enemy.Enemy.should_flip = False
+            
+        if lives == 0:
+            sys.exit()
             
         
 

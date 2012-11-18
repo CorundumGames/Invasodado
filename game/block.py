@@ -1,3 +1,4 @@
+import sys
 import random
 
 import pygame.mixer
@@ -115,7 +116,11 @@ class Block(gameobject.GameObject):
         
         while isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
         #While the target is equal to a space a block currently occupies...
+            if self.target < 0:
+                sys.exit()
             self.target -= 1
+        
+        
           
         if self.gridcell[0] == blockgrid.DIMENSIONS[0] - 1:
         #If we've hit the grid's bottom...
@@ -143,7 +148,7 @@ class Block(gameobject.GameObject):
         self.snap()
         self.state           = STATES.ACTIVE
         
-        if len([id(b) for b in ingame.BLOCKS.sprites() if b.state == STATES.ACTIVE]) == len(ingame.BLOCKS.sprites()):
+        if len([id(b) for b in ingame.BLOCKS if b.state == STATES.ACTIVE]) == len(ingame.BLOCKS):
         #If no blocks are moving...
             blockgrid.update()
         
