@@ -1,7 +1,8 @@
 import config
 from game import ingame
+from game import mainmenu
 
-current_state = ingame.InGameState()
+current_state = mainmenu.MainMenu()
 
 def update():
     '''Moves us forward a bit.
