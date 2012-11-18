@@ -20,7 +20,7 @@ from core import settings
 while True:
     if pygame.key.get_pressed()[pygame.K_F1]:
         settings.fullscreen = not settings.fullscreen
-        config.screen = pygame.display.set_mode(settings.resolution, pygame.FULLSCREEN * settings.fullscreen)
+        config.screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
             
     
     gsm.update()
