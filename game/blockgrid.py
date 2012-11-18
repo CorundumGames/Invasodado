@@ -13,7 +13,7 @@ LOCATION   = (0, 0)
 RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))
 
 global blocks
-blocks        = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
+blocks        = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
 blockstocheck = set()
 blockstoclear = set()
 
@@ -23,17 +23,17 @@ blockclear = pygame.mixer.Sound("./sfx/clear.wav")
         
 def clear():
     global blocks
-    for i in itertools.ifilter(lambda x: x.state != block.STATES.IDLE, ingame.BLOCKS.sprites()):
-    #For all blocks that are on-screen...
+    for i in (j for j in ingame.BLOCKS if j.state != block.STATES.IDLE):
+    #For all blocks on-screen...
         i.state = block.STATES.DYING
         
-    blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
+    blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     blockstocheck.clear()
     blockstoclear.clear()
     
 def clear_color(targetcolor):
     global blocks
-    for i in itertools.ifilter(lambda x: id(x.color) == id(targetcolor), ingame.BLOCKS.sprites()):
+    for i in (x for x in ingame.BLOCKS if x.color == targetcolor):
     #For all blocks of the given color...
         i.state = block.STATES.DYING
         
@@ -43,14 +43,15 @@ def clear_row(row):
         #If we're not in the row range...
         raise ValueError("Wrong row value!  Should be between 0 and 19, inclusive, but got ", row)
     
-    for i in itertools.ifilter(lambda x: isinstance(x, block.Block), blocks[row]):
+    for i in (x for x in blocks[row] if isinstance(x, block.Block)):
+    #For all blocks in this row...
         i.state = block.STATES.DYING
             
 def update():
     global blocks
-    blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
+    blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     
-    for b in itertools.ifilter(lambda x: x.state == block.STATES.ACTIVE, ingame.BLOCKS.sprites()):
+    for b in (x for x in ingame.BLOCKS if x.state == block.STATES.ACTIVE):
     #For all blocks that are on the grid and not moving...
         blocks[b.gridcell[0]][b.gridcell[1]] = b
 
@@ -61,16 +62,16 @@ def update():
         for j in (1, 2):
             if b.gridcell[0] + j < len(blocks):
             #If we're not out of bounds...
-                nextblocks[0].append(blocks[b.gridcell[0]+j][ b.gridcell[1]]) #add the block below if index isn't out of bounds
+                nextblocks[0].append(blocks[b.gridcell[0]+j][ b.gridcell[1]]) #add the block below
             if b.gridcell[0] + j < len(blocks) and b.gridcell[1] + j < len(blocks[0]):
             #If we're not out of bounds...
-                nextblocks[1].append(blocks[b.gridcell[0]+j][b.gridcell[1]+j])#add the block down and to the right if index isn't out of bounds
+                nextblocks[1].append(blocks[b.gridcell[0]+j][b.gridcell[1]+j])#add the block down and to the right
             if b.gridcell[1] + j < len(blocks[0]):
             #If we're not out of bounds...
-                nextblocks[2].append(blocks[b.gridcell[0]][b.gridcell[1]+j])#add the block to the right  if index isn't out of bounds
+                nextblocks[2].append(blocks[b.gridcell[0]][b.gridcell[1]+j])#add the block to the right
             if b.gridcell[0] - j >= 0 and b.gridcell[1] + j < len(blocks[0]):
             #If we're not out of bounds...
-                nextblocks[3].append(blocks[b.gridcell[0]-j][b.gridcell[1]+j])#add the block up and to the right if index isn't out of bounds
+                nextblocks[3].append(blocks[b.gridcell[0]-j][b.gridcell[1]+j])#add the block up and to the right
         
         #TODO: Optimize this so the above chain of conditionals is done in one loop, if possible
         
@@ -79,7 +80,7 @@ def update():
             if len([id(b) for x in i if \
                     id(i) != id(x) and \
                     isinstance(x, block.Block) and \
-                    id(b.color) == id(x.color)]) >= 2:
+                    b.color == x.color]) >= 2:
             #If there are two blocks and they're both the same color as the first...
                 matchset.update(i) #Mark these blocks as matching
                     

@@ -43,13 +43,11 @@ class CollisionGrid:
     def update(self):
         '''Removes objects no longer in this cell, and adds ones that just
         entered.  Called every frame.'''
-        for row in self.grid:
-        #For all rows in this grid...
-            for cell in row:
-            #For all cells in this row...
-                cell.remove_exiting()
-                cell.add_entering()
-                cell.check_collisions()
+        for cell in itertools.chain.from_iterable(self.grid):
+        #For all cells...
+            cell.remove_exiting()
+            cell.add_entering()
+            cell.check_collisions()
                 
         self.handle_collisions()
                 
@@ -63,7 +61,7 @@ class CollisionGrid:
             i.reset()
             
         self.spare_collisions += self.collisions
-        del self.collisions[:]
+        self.collisions = []
         
         
 ################################################################################
@@ -88,11 +86,9 @@ class GridCell:
 
     def remove_exiting(self):
         '''Removes objects that are no longer within this cell.'''
-        for o in self.objects:
-        #For all objects in this cell...
-            if not self.rect.colliderect(o.rect):
-            #If this object is no longer in this cell...
-                self.objects_to_remove.add(o)
+        for o in itertools.ifilterfalse(self.rect.colliderect, self.objects):
+        #For all objects no longer in this cell...
+            self.objects_to_remove.add(o)
                 
         self.objects -= self.objects_to_remove
         self.objects_to_remove.clear()
@@ -101,7 +97,7 @@ class GridCell:
         '''Adds objects that are held within this cell.'''
         for g in gsm.current_state.group_list:
         #For all groups on-screen...
-            for s in itertools.ifilter(lambda x: type(x) not in do_not_check, g):
+            for s in (x for x in g if type(x) not in do_not_check):
             #For all sprites in this group that aren't excluded from collisions...
                 if self.rect.colliderect(s.rect):
                 #If the sprite is not already in this cell...
