@@ -1,6 +1,6 @@
-import game.ingame as ingame
 
-current_state = ingame.InGameState()
+
+current_state = None
 
 def update():
     '''Moves us forward a bit.

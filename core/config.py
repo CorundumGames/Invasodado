@@ -16,8 +16,8 @@ SCALE_FACTOR = 2
 NUM_COLORS = 5
 
 #Screen Width and Height
-SCREEN_WIDTH = screen.get_width()
-SCREEN_HEIGHT = screen.get_height()
+SCREEN_WIDTH = screen.get_width()#640 20 cells 32
+SCREEN_HEIGHT = screen.get_height()#480 15 cells 32
 
 #The main spritesheet for this game.
 SPRITES = pygame.image.load("./gfx/sprites.png").convert()
