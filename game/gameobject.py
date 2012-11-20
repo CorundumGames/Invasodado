@@ -18,8 +18,8 @@ class GameObject(pygame.sprite.DirtySprite):
         #If this object can interact with more than one other types...
             if type(other) in self.collisions:
             #If we can interact with the other object...
-                if callable(self.collisions[type(other)]):
-                    self.collisions[type(other)](other)
+                if callable(self.collisions[other.__class__]):
+                    self.collisions[other.__class__](self, other)
         elif callable(self.collisions):
         #Else if we have any collisions...
             self.collisions(other)

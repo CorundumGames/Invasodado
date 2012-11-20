@@ -15,6 +15,8 @@ TIME_TO_MOVE = 30 #In frames
 ball_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.Colors.LIST])
 
 class BallOfLight(gameobject.GameObject):
+    collisions = None
+    
     STATES = config.Enum('IDLE', 'APPEARING', 'MOVING', 'DYING')
     
     def __init__(self, startpos, color, special=False):

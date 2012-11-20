@@ -22,8 +22,8 @@ def reset():
             if random.randint(0, 1):
             #With 50% odds...
                 ingame.ENEMIES.add(i[j], i[ROW_SIZE-1-j])
-                i[j].state            = enemy.STATES.APPEARING
-                i[ROW_SIZE-1-j].state = enemy.STATES.APPEARING   
+                i[j].state            = enemy.Enemy.STATES.APPEARING
+                i[ROW_SIZE-1-j].state = enemy.Enemy.STATES.APPEARING   
                 
 def move_down():
     global enemies

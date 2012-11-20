@@ -8,7 +8,7 @@ class HudObject(gameobject.GameObject):
     don't intend for these to collide with anything.
     '''
     actions    = {None: None}
-    collisions = {None: None}
+    collisions = None
     
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)

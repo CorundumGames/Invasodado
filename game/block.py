@@ -27,7 +27,7 @@ class Block(gameobject.GameObject):
     '''Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
-    
+    collisions = None
     GRAVITY   = .5
     MAX_SPEED = 12.0
     STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
