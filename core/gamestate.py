@@ -1,5 +1,4 @@
 import pygame.time
-import gsm
 
 #Every abstract method must raise an exception with this statement.
 ERROR_STATEMENT = "GameState must be sub-classed, not instantiated!"

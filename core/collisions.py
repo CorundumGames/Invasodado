@@ -3,13 +3,14 @@ import itertools
 import pygame.sprite
 import pygame.time
 
-from game import block
-from game import balloflight
-from game import hudobject
-from game import shipbullet
-from game import enemy
 import config
 import gsm
+
+import game.balloflight as balloflight
+import game.block       as block
+import game.hudobject   as hudobject
+
+
 
 do_not_compare = {
                   }

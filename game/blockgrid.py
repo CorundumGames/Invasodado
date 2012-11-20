@@ -1,9 +1,7 @@
-import itertools
-
 import pygame.rect
 import pygame.mixer
 
-from core import config
+import core.config as config
 import block
 import ingame
 
@@ -23,9 +21,9 @@ blockclear = pygame.mixer.Sound("./sfx/clear.wav")
         
 def clear():
     global blocks
-    for i in (j for j in ingame.BLOCKS if j.state != block.STATES.IDLE):
+    for i in (j for j in ingame.BLOCKS if j.state != block.Block.STATES.IDLE):
     #For all blocks on-screen...
-        i.state = block.STATES.DYING
+        i.state = block.Block.STATES.DYING
         
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     blockstocheck.clear()
@@ -35,7 +33,7 @@ def clear_color(targetcolor):
     global blocks
     for i in (x for x in ingame.BLOCKS if x.color == targetcolor):
     #For all blocks of the given color...
-        i.state = block.STATES.DYING
+        i.state = block.Block.STATES.DYING
         
 def clear_row(row):
     global blocks
@@ -45,13 +43,13 @@ def clear_row(row):
     
     for i in (x for x in blocks[row] if isinstance(x, block.Block)):
     #For all blocks in this row...
-        i.state = block.STATES.DYING
+        i.state = block.Block.STATES.DYING
             
 def update():
     global blocks
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     
-    for b in (x for x in ingame.BLOCKS if x.state == block.STATES.ACTIVE):
+    for b in (x for x in ingame.BLOCKS if x.state == block.Block.STATES.ACTIVE):
     #For all blocks that are on the grid and not moving...
         blocks[b.gridcell[0]][b.gridcell[1]] = b
 
@@ -97,5 +95,5 @@ def update():
         blockclear.play()
         for b in blockstoclear:
         #For every block marked for clearing...
-            b.state = block.STATES.DYING
+            b.state = block.Block.STATES.DYING
         blockstoclear.clear()

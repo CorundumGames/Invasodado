@@ -1,4 +1,3 @@
-import config
 '''This module provides access to the configurations made in the game's Options
 menu.  OBJECTS IN ALL CAPS are constants.
 '''

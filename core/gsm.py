@@ -1,5 +1,4 @@
-import config
-from game import ingame
+import game.ingame as ingame
 
 current_state = ingame.InGameState()
 
