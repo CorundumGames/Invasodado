@@ -1,22 +1,18 @@
-import math
 import random
 
 import pygame.mixer
 import pygame.rect
 
-import block
+import core.color  as color
+import core.config as config
+
 import balloflight
-from core import color
-from core import config
 import gameobject
 import ingame
-import enemybullet
-import shipbullet
 
 FRAMES    = [pygame.Rect( 0*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR),
              pygame.Rect(16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)]
 START_POS = (32, 32)
-STATES    = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'SHOOTING')
 SAFE_SPOT = (0, config.screen.get_height()*3)
 
 enemy_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAMES[0]).copy(), c)) for c in color.Colors.LIST])
@@ -32,6 +28,8 @@ Algorithm for storing one colored Enemy per color (with all animations)
 hurt = pygame.mixer.Sound("./sfx/enemyhurt.wav")
 
 class Enemy(gameobject.GameObject):
+    STATES    = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'SHOOTING')
+    
     acceleration = [0.0, 0.0]
     count        = 0
     should_flip  = False
@@ -39,22 +37,12 @@ class Enemy(gameobject.GameObject):
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
-        
-        self.actions = {
-                        STATES.APPEARING: self.appear   ,
-                        STATES.LOWERING : NotImplemented,
-                        STATES.ACTIVE   : self.move     ,
-                        STATES.DYING    : self.die      ,
-                        STATES.IDLE     : None          ,
-                        STATES.SHOOTING : self.shoot
-                        }
-        
         self.color         = random.choice(color.Colors.LIST[:config.NUM_COLORS])
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)]
         self.position      = list(START_POS)
         self.rect          = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
-        self.state         = STATES.IDLE 
+        self.state         = self.__class__.STATES.IDLE 
         self.shootRange    = 10
         
     def appear(self):
@@ -66,13 +54,13 @@ class Enemy(gameobject.GameObject):
         self.image        = enemy_frames[id(self.color)]
         self.image.set_colorkey(self.image.get_at((0, 0)))
         
-        self.state = STATES.ACTIVE
+        self.state = self.__class__.STATES.ACTIVE
         
     def move(self):
         self.position[0] += Enemy.velocity[0]
-        self.rect.topleft = map(round, self.position)
+        self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         if random.uniform(1,5000) < self.shootRange:
-            self.state = STATES.SHOOTING
+            self.state = self.__class__.STATES.SHOOTING
         
         if not Enemy.should_flip:
             if self.rect.right > config.screen.get_width() or self.rect.left < 0:
@@ -81,17 +69,11 @@ class Enemy(gameobject.GameObject):
                 
                 
     def shoot(self):
-        bullet = enemybullet.EnemyBullet()
-        bullet.add(ingame.ENEMIES)
-        bullet.rect.midbottom = self.rect.midbottom
-        bullet.state = enemybullet.STATES.FIRED
-        self.state = STATES.ACTIVE
-        
-            
-    def on_collide(self, other):
-        if isinstance(other, shipbullet.ShipBullet) and self.state == STATES.ACTIVE:
-        #If we got hit by the player's bullet...
-            pass
+        mybullet                    = enemybullet.EnemyBullet()
+        mybullet.add(ingame.ENEMIES)
+        mybullet.rect.midbottom     = self.rect.midbottom
+        mybullet.state              = mybullet.__class__.STATES.FIRED
+        self.state                  = self.__class__.STATES.ACTIVE
                
     def die(self):
         ingame.ENEMIES.add(balloflight.BallOfLight(self.position, self.color))
@@ -102,4 +84,15 @@ class Enemy(gameobject.GameObject):
         self.velocity     = [0, 0]
         self.rect.topleft = self.position
         
-        self.state = STATES.IDLE
+        self.state = self.__class__.STATES.IDLE
+        
+    actions = {
+                STATES.APPEARING: appear        ,
+                STATES.LOWERING : NotImplemented,
+                STATES.ACTIVE   : move          ,
+                STATES.DYING    : die           ,
+                STATES.IDLE     : None          ,
+                STATES.SHOOTING : shoot         ,
+               }
+    
+import enemybullet

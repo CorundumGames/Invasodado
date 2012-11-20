@@ -3,19 +3,19 @@ import random
 
 import pygame.mixer
 
-import blockgrid
-from core import config
-from core import color
-import ingame
-import gameobject
+import core.color  as color
+import core.config as config
 
-STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
+import blockgrid
+import gameobject
+import ingame
+
+
 FRAME     = pygame.Rect( 0*config.SCALE_FACTOR,
                         32*config.SCALE_FACTOR,
                         16*config.SCALE_FACTOR,
                         16*config.SCALE_FACTOR)
-GRAVITY   = .5
-MAX_SPEED = 12.0
+
 
 global blocks
 
@@ -27,19 +27,16 @@ class Block(gameobject.GameObject):
     '''Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
+    
+    GRAVITY   = .5
+    MAX_SPEED = 12.0
+    STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
+    
     def __init__(self, pos, newcolor, specialblock = False):
         gameobject.GameObject.__init__(self)
-        self.actions = {
-                        STATES.IDLE         : None              ,
-                        STATES.APPEARING    : self.appear       ,
-                        STATES.ACTIVE       : self.wait         ,
-                        STATES.FALLING      : self.fall         ,
-                        STATES.START_FALLING: self.start_falling,
-                        STATES.IMPACT       : self.stop         ,
-                        STATES.DYING        : self.vanish
-                        }
         
-        self.acceleration[1] = GRAVITY
+        
+        self.acceleration[1] = self.__class__.GRAVITY
         self.color           = newcolor
         self.image           = block_frames[id(self.color)]
         self.rect            = pygame.Rect(int(pos[0]/self.image.get_width())*self.image.get_width(),
@@ -53,7 +50,7 @@ class Block(gameobject.GameObject):
         self.position        = list(self.rect.topleft)
         self.target          = blockgrid.DIMENSIONS[0] - 1
         
-        self.state           = STATES.APPEARING
+        self.state           = self.__class__.STATES.APPEARING
         self.special         = specialblock
         self.add(ingame.BLOCKS)
         
@@ -64,7 +61,7 @@ class Block(gameobject.GameObject):
         pass      
     
     def appear(self):
-        self.state = STATES.START_FALLING
+        self.state = self.__class__.STATES.START_FALLING
             
     def start_falling(self):
         global blocks
@@ -80,11 +77,11 @@ class Block(gameobject.GameObject):
         #If there is a block above us...
             for i in xrange(self.gridcell[0], 0, -1):
                 if isinstance(blockgrid.blocks[i][self.gridcell[1]], Block):
-                    blockgrid.blocks[i][self.gridcell[1]].state = STATES.START_FALLING
+                    blockgrid.blocks[i][self.gridcell[1]].state = self.__class__.STATES.START_FALLING
                 else:
                     break
         
-        self.state = STATES.FALLING
+        self.state = self.__class__.STATES.FALLING
         
     def wait(self):
         '''Constantly checks to see if this block can fall.  Gets it moving
@@ -92,12 +89,13 @@ class Block(gameobject.GameObject):
         '''
         global blocks
         if self.rect.bottom < blockgrid.RECT.bottom \
-        and (blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]] == None or blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].state == STATES.FALLING):
+        and (blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]] == None or \
+             blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].state == self.__class__.STATES.FALLING):
         #If we're not at the bottom and there's no block directly below...
             blockgrid.blockstocheck.discard(self)
-            self.acceleration[1] = GRAVITY
+            self.acceleration[1] = self.__class__.GRAVITY
             self.target          = blockgrid.DIMENSIONS[0] - 1
-            self.state           = STATES.START_FALLING
+            self.state           = self.__class__.STATES.START_FALLING
         
     def fall(self):
         '''Falls down.  For the sake of efficiency, blocks work independently
@@ -105,7 +103,7 @@ class Block(gameobject.GameObject):
         vertically, and only depend on other blocks for collisions.
         '''
         global blocks
-        self.velocity[1]  = min(MAX_SPEED, self.velocity[1] + self.acceleration[1])
+        self.velocity[1]  = min(self.__class__.MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
         self.rect.top     = self.position[1] + .5  #Round to the nearest integer
         self.gridcell[0]  = self.rect.centery/self.rect.height
@@ -126,12 +124,12 @@ class Block(gameobject.GameObject):
         #If we've hit the grid's bottom...
             self.rect.bottom = blockgrid.RECT.bottom
             self.position    = list(self.rect.topleft)
-            self.state       = STATES.IMPACT
+            self.state       = self.__class__.STATES.IMPACT
         elif isinstance(blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]], Block):
         #Else if there is a block below us...
             self.rect.bottom = blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].rect.top
             self.position    = list(self.rect.topleft)
-            self.state       = STATES.IMPACT
+            self.state       = self.__class__.STATES.IMPACT
         
             
     def stop(self):
@@ -146,9 +144,9 @@ class Block(gameobject.GameObject):
         blockgrid.blockstocheck.add(self)  #Might remove later?
         bump.play()
         self.snap()
-        self.state           = STATES.ACTIVE
+        self.state           = self.__class__.STATES.ACTIVE
         
-        if len([id(b) for b in ingame.BLOCKS if b.state == STATES.ACTIVE]) == len(ingame.BLOCKS):
+        if len([id(b) for b in ingame.BLOCKS if b.state == self.__class__.STATES.ACTIVE]) == len(ingame.BLOCKS):
         #If no blocks are moving...
             blockgrid.update()
         
@@ -170,8 +168,18 @@ class Block(gameobject.GameObject):
         blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
         self.gridcell     = None
         self.target       = None
-        self.state        = STATES.IDLE
+        self.state        = self.__class__.STATES.IDLE
            
     def snap(self):
         self.rect.topleft = (round(self.position[0]/self.image.get_width())*self.image.get_height(),
                              round(self.position[1]/self.image.get_width())*self.image.get_height())
+        
+    actions = {
+                    STATES.IDLE         : None         ,
+                    STATES.APPEARING    : appear       ,
+                    STATES.ACTIVE       : wait         ,
+                    STATES.FALLING      : fall         ,
+                    STATES.START_FALLING: start_falling,
+                    STATES.IMPACT       : stop         ,
+                    STATES.DYING        : vanish       ,
+              }
