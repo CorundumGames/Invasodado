@@ -11,6 +11,7 @@ import hudobject
 from core import gamestate
 from core import config
 from core import gsm
+import ingame
 
 HUD     = pygame.sprite.LayeredUpdates()
 
@@ -28,8 +29,7 @@ class MainMenu(gamestate.GameState):
         
         self.frame_limit = True
 
-        HUD.add(self.hud_normalmode)
-        HUD.add(self.hud_invasodado)
+        HUD.add(self.hud_normalmode,self.hud_invasodado)
     
     def events(self):
         for e in pygame.event.get():
@@ -37,7 +37,8 @@ class MainMenu(gamestate.GameState):
             #If a mouse button is clicked...
                 if   e.button == 1:
                     if self.hud_normalmode.rect.collidepoint(pygame.mouse.get_pos()):
-                        pass
+                        gsm.current_state = ingame.InGameState()
+                        HUD.empty()
                                     
             
     def logic(self):
