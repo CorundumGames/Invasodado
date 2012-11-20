@@ -1,23 +1,20 @@
-import random
-import sys
-
-import pygame.event
 import pygame.display
+import pygame.event
 import pygame.sprite
+
+import core.collisions as collisions
+import core.color      as color
+import core.config     as config
+import core.gamestate  as gamestate
 
 import block
 import blockgrid
-from core import collisions
-from core import color
-from core import config
-import enemysquadron
 import enemy
+import enemysquadron
 import hudobject
 import player
 import shipbullet
 import ufo
-
-from core import gamestate
 
 PLAYER  = pygame.sprite.LayeredUpdates()
 ENEMIES = pygame.sprite.LayeredUpdates()
@@ -28,7 +25,7 @@ DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
 
 score = 0
-lives = 3000
+lives = 3
 
 class InGameState(gamestate.GameState):    
     def __init__(self):
@@ -44,6 +41,7 @@ class InGameState(gamestate.GameState):
         
         
         self.frame_limit = True
+        self.game_running = True
 
         
         PLAYER.add(self.ship, shipbullet.ShipBullet())
@@ -100,7 +98,10 @@ class InGameState(gamestate.GameState):
             enemy.Enemy.should_flip = False
             
         if lives == 0:
-            sys.exit()
+            self.game_running = False
+            
+        if not self.game_running:
+            self.game_over()
             
         
 
@@ -119,3 +120,11 @@ class InGameState(gamestate.GameState):
         pygame.display.set_caption("Score: " + str(score) + "    FPS: " + str(round(self.fpsTimer.get_fps(), 3)))
             
         self.fpsTimer.tick(60*self.frame_limit)
+        
+    def game_over(self):
+        enemy.Enemy.velocity = [0, 0]
+        gameovertext = hudobject.HudObject()
+        gameovertext.image = config.FONT.render("GAME OVER", False, (255, 255, 255))
+        gameovertext.rect = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2, 0, 0)
+        self.ship.state = player.STATES.DYING
+        HUD.add(gameovertext)
