@@ -16,13 +16,7 @@ invade   = pygame.mixer.Sound("./sfx/ufo.wav")
 class UFO(gameobject.GameObject):
     def __init__(self):
         gameobject.GameObject.__init__(self)
-        self.actions = {
-                        STATES.IDLE     : None       ,
-                        STATES.APPEARING: self.appear,
-                        STATES.MOVING   : self.move  ,
-                        STATES.DYING    : self.die   ,
-                        STATES.LEAVING  : NotImplemented
-                        }
+        
         self.image    = config.SPRITES.subsurface(pygame.Rect(16*config.SCALE_FACTOR, 32*config.SCALE_FACTOR,
                                                               32*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)).copy()
         self.frames   = tuple(color.blend_color(self.image.copy(), c) for c in color.Colors.LIST[:config.NUM_COLORS])
@@ -44,7 +38,7 @@ class UFO(gameobject.GameObject):
         invade.play()
             
         self.position[0] += self.velocity[0]
-        self.rect.left   = round(self.position[0])
+        self.rect.left   = self.position[0] + .5
         self.image       = random.choice(self.frames)
         
         if self.rect.right < 0:
@@ -59,3 +53,11 @@ class UFO(gameobject.GameObject):
         self.position     = list(START_POS)
         self.rect.topleft = START_POS
         self.state        = STATES.IDLE
+        
+    actions = {
+                STATES.IDLE     : None  ,
+                STATES.APPEARING: appear,
+                STATES.MOVING   : move  ,
+                STATES.DYING    : die   ,
+                STATES.LEAVING  : NotImplemented
+              }
