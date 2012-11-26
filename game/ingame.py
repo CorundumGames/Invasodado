@@ -1,3 +1,5 @@
+import math
+
 import pygame.display
 import pygame.event
 import pygame.sprite
@@ -40,13 +42,12 @@ class InGameState(gamestate.GameState):
         self.hud_lives.rect  = pygame.Rect(config.SCREEN_WIDTH-160, 16, 0, 0)
         
         
-        self.frame_limit = True
+        self.frame_limit  = True
         self.game_running = True
 
         
-        PLAYER.add(self.ship, shipbullet.ShipBullet())
-        HUD.add(self.hud_score)
-        HUD.add(self.hud_lives)
+        PLAYER.add(self.ship)
+        HUD.add(self.hud_score, self.hud_lives)
         enemysquadron.reset()
         
     
@@ -73,9 +74,9 @@ class InGameState(gamestate.GameState):
                     self.frame_limit = not self.frame_limit
                 elif e.key == pygame.K_u:
                 #If the U key is pressed...
-                    if self.ufo.state == ufo.STATES.IDLE:
+                    if self.ufo.state == ufo.UFO.STATES.IDLE:
                         ENEMIES.add(self.ufo)
-                        self.ufo.state = ufo.STATES.APPEARING
+                        self.ufo.state = ufo.UFO.STATES.APPEARING
                 elif e.key == pygame.K_c:
                     blockgrid.clear()
                      
@@ -90,6 +91,7 @@ class InGameState(gamestate.GameState):
         if len(ENEMIES) == 0:
         #If all enemies have been killed...
             enemysquadron.reset()
+            enemy.Enemy.velocity[0] += math.copysign(.05, enemy.Enemy.velocity[0])
             
         if enemy.Enemy.should_flip:
         #If at least one enemy has touched the side of the screen...
