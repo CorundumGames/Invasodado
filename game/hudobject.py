@@ -7,7 +7,7 @@ class HudObject(gameobject.GameObject):
     It is its own type so it can be in collisions.do_not_check, because we
     don't intend for these to collide with anything.
     '''
-    actions    = {None: None}
+    actions    = None
     collisions = None
     
     def __init__(self):
@@ -18,4 +18,6 @@ class HudObject(gameobject.GameObject):
         self.state        = None
         self.velocity     = None
         
+    def update(self):
+        pass
     
