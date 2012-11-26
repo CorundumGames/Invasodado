@@ -5,7 +5,7 @@ import core.config as config
 import block
 import ingame
 
-CELL_SIZE  = (16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)
+CELL_SIZE  = (32, 32)
 DIMENSIONS = (12, 20) #(row, column)
 LOCATION   = (0, 0)
 RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))

@@ -9,9 +9,6 @@ screen = pygame.display.set_mode(settings.resolution)
 #A tuple of all available screen resolutions.
 SCREEN_DIMS = tuple(pygame.display.list_modes())
 
-#How much to scale all the graphics by; only for playtesting purposes
-SCALE_FACTOR = 2
-
 #How many colors we'll use
 NUM_COLORS = 5
 
@@ -20,8 +17,8 @@ SCREEN_WIDTH = screen.get_width()#640 20 cells 32
 SCREEN_HEIGHT = screen.get_height()#480 15 cells 32
 
 #The main spritesheet for this game.
-SPRITES = pygame.image.load("./gfx/sprites.png").convert()
-SPRITES = pygame.transform.scale(SPRITES, (SPRITES.get_width()*SCALE_FACTOR, SPRITES.get_height()*SCALE_FACTOR))
+SPRITES = pygame.image.load("./gfx/sprites.png").convert(screen.get_bitsize(),
+                                                         pygame.HWSURFACE | pygame.ASYNCBLIT)
 
 #The background
 BG = pygame.image.load("./gfx/bg.png").convert()

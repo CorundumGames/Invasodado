@@ -10,8 +10,8 @@ import balloflight
 import gameobject
 import ingame
 
-FRAMES    = [pygame.Rect( 0*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR),
-             pygame.Rect(16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)]
+FRAMES    = [pygame.Rect( 0, 32, 32, 32),
+             pygame.Rect(32, 32, 32, 32)]
 START_POS = (32, 32)
 SAFE_SPOT = (0, config.screen.get_height()*3)
 
@@ -33,7 +33,7 @@ class Enemy(gameobject.GameObject):
     acceleration = [0.0, 0.0]
     count        = 0
     should_flip  = False
-    velocity     = [1.0, 0.0]
+    velocity     = [.5, 0.0]
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
@@ -41,14 +41,14 @@ class Enemy(gameobject.GameObject):
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)]
         self.position      = list(START_POS)
-        self.rect          = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
+        self.rect          = pygame.Rect(START_POS, self.image.get_size())
         self.state         = self.__class__.STATES.IDLE 
         self.shootRange    = 10
         
     def appear(self):
         self.add(ingame.ENEMIES)
-        self.position     = [START_POS[0] * (self.form_position[0]+1)*config.SCALE_FACTOR,
-                             START_POS[1] * (self.form_position[1]+1)*.75*config.SCALE_FACTOR]
+        self.position     = [START_POS[0] * (self.form_position[0]+1),
+                             START_POS[1] * (self.form_position[1]+1)*.75]
         self.rect.topleft = map(round, self.position)
         self.color        = random.choice(color.Colors.LIST[0:config.NUM_COLORS])
         self.image        = enemy_frames[id(self.color)]
@@ -87,12 +87,12 @@ class Enemy(gameobject.GameObject):
         self.state = self.__class__.STATES.IDLE
         
     actions = {
-                STATES.APPEARING: appear        ,
+                STATES.APPEARING: 'appear'        ,
                 STATES.LOWERING : NotImplemented,
-                STATES.ACTIVE   : move          ,
-                STATES.DYING    : die           ,
+                STATES.ACTIVE   : 'move'          ,
+                STATES.DYING    : 'die'           ,
                 STATES.IDLE     : None          ,
-                STATES.SHOOTING : shoot         ,
+                STATES.SHOOTING : 'shoot'         ,
                }
     
 import enemybullet

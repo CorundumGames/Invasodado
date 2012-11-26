@@ -7,17 +7,14 @@ import block
 import gameobject
 import ingame
 
-
-
-FRAME = pygame.Rect(0, 48*config.SCALE_FACTOR, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)
+FRAME        = pygame.Rect(0, 96, 32, 32)
 TIME_TO_MOVE = 30 #In frames
 
 ball_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.Colors.LIST])
 
 class BallOfLight(gameobject.GameObject):
     collisions = None
-    
-    STATES = config.Enum('IDLE', 'APPEARING', 'MOVING', 'DYING')
+    STATES     = config.Enum('IDLE', 'APPEARING', 'MOVING', 'DYING')
     
     def __init__(self, startpos, color, special=False):
         gameobject.GameObject.__init__(self)
@@ -55,7 +52,7 @@ class BallOfLight(gameobject.GameObject):
         
     actions = {
                 STATES.IDLE     : None  ,
-                STATES.APPEARING: appear,
-                STATES.MOVING   : move  ,
-                STATES.DYING    : vanish,
+                STATES.APPEARING: 'appear',
+                STATES.MOVING   : 'move'  ,
+                STATES.DYING    : 'vanish',
                 }

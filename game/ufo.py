@@ -8,31 +8,32 @@ from core import color
 from core import config
 import ingame
 
-STATES = config.Enum('IDLE', 'APPEARING', 'MOVING', 'DYING', 'LEAVING')
+
 START_POS = (640, 16)
 
-invade   = pygame.mixer.Sound("./sfx/ufo.wav")
+invade = pygame.mixer.Sound("./sfx/ufo.wav")
 
 class UFO(gameobject.GameObject):
+    STATES = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING')
+    
     def __init__(self):
         gameobject.GameObject.__init__(self)
         
-        self.image    = config.SPRITES.subsurface(pygame.Rect(16*config.SCALE_FACTOR, 32*config.SCALE_FACTOR,
-                                                              32*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)).copy()
+        self.image    = config.SPRITES.subsurface(pygame.Rect(32, 64, 64, 32)).copy()
         self.frames   = tuple(color.blend_color(self.image.copy(), c) for c in color.Colors.LIST[:config.NUM_COLORS])
         self.rect     = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
         self.position = list(START_POS)
 
         for c in self.frames:
             c.set_colorkey(c.get_at((0, 0)))
-        self.state    = STATES.IDLE
+        self.state    = self.__class__.STATES.IDLE
         
     def appear(self):
         self.velocity[0]  = -.9
         self.rect.topleft = list(START_POS)
         self.position     = list(START_POS)
         #self.add(ingame.ENEMIES)
-        self.state        = STATES.MOVING
+        self.state        = self.__class__.STATES.ACTIVE
     
     def move(self):
         invade.play()
@@ -43,7 +44,7 @@ class UFO(gameobject.GameObject):
         
         if self.rect.right < 0:
         #If we've gone past the left edge of the screen...
-            self.state = STATES.DYING
+            self.state = self.__class__.STATES.DYING
         
     def die(self):
         self.kill()
@@ -52,12 +53,12 @@ class UFO(gameobject.GameObject):
         self.velocity[0]  = 0
         self.position     = list(START_POS)
         self.rect.topleft = START_POS
-        self.state        = STATES.IDLE
+        self.state        = self.__class__.STATES.IDLE
         
     actions = {
                 STATES.IDLE     : None  ,
-                STATES.APPEARING: appear,
-                STATES.MOVING   : move  ,
-                STATES.DYING    : die   ,
+                STATES.APPEARING: 'appear',
+                STATES.ACTIVE   : 'move'  ,
+                STATES.DYING    : 'die'   ,
                 STATES.LEAVING  : NotImplemented
               }

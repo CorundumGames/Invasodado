@@ -15,35 +15,34 @@ Python singleton.
 
 #Constants/magic numbers#
 STATES       = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE', 'DYING', 'RESPAWN')
-SURFACE_CLIP = pygame.Rect(0, 0, 16*config.SCALE_FACTOR, 16*config.SCALE_FACTOR)
+SURFACE_CLIP = pygame.Rect(0, 0, 32, 32)
 START_POS    = pygame.Rect(config.screen.get_width() /  2,
                            config.screen.get_height()* .8,
-                           16*config.SCALE_FACTOR        ,
-                           16*config.SCALE_FACTOR)
+                           32        ,
+                           32)
 SPEED        = 4
 #########################
 
 class Ship(gameobject.GameObject):
-    
-    
     def __init__(self):
         gameobject.GameObject.__init__(self)
         
-        self.mybullet   = shipbullet.ShipBullet()
-        self.image    = config.SPRITES.subsurface(SURFACE_CLIP) #@UndefinedVariable
-        self.rect     = START_POS.copy()
-        self.position = list(self.rect.topleft)
-        self.state    = STATES.ACTIVE
-        self.invincible = False
+        self.mybullet        = shipbullet.ShipBullet()
+        self.image           = config.SPRITES.subsurface(SURFACE_CLIP).copy() #@UndefinedVariable
+        self.rect            = START_POS.copy()
+        self.position        = list(self.rect.topleft)
+        self.state           = STATES.ACTIVE
+        self.invincible      = False
         self.invincibleCount = 0
         
         self.image.set_colorkey(color.COLOR_KEY)
         
     def on_fire_bullet(self):
         if self.mybullet.state == self.mybullet.__class__.STATES.IDLE:
-        #If our bullet is not on-screen...
+        #If our bullet is not already on-screen...
             self.mybullet.add(ingame.PLAYER)
             self.mybullet.rect.midbottom = self.rect.midtop
+            self.mybullet.position       = list(self.rect.midbottom)
             self.mybullet.state          = self.mybullet.__class__.STATES.FIRED
             
     def respawn(self):
@@ -73,8 +72,12 @@ class Ship(gameobject.GameObject):
         if self.invincibleCount == 0:
         #If we're no longer invincible...
             self.invincible = False
+            self.image.set_alpha(255)
+            
         else:
             self.invincibleCount -= 1
+            self.image.set_alpha(128)
+            
             
     def die(self):
         self.visible = False
@@ -82,9 +85,9 @@ class Ship(gameobject.GameObject):
         
     actions = {
                STATES.IDLE      : None          ,
-               STATES.SPAWNING  : respawn       ,
+               STATES.SPAWNING  : 'respawn'       ,
                STATES.INVINCIBLE: NotImplemented,
-               STATES.ACTIVE    : move          ,
-               STATES.DYING     : die           ,
-               STATES.RESPAWN   : respawn
+               STATES.ACTIVE    : 'move'          ,
+               STATES.DYING     : 'die'           ,
+               STATES.RESPAWN   : 'respawn'
               }

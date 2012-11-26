@@ -11,10 +11,7 @@ import gameobject
 import ingame
 
 
-FRAME     = pygame.Rect( 0*config.SCALE_FACTOR,
-                        32*config.SCALE_FACTOR,
-                        16*config.SCALE_FACTOR,
-                        16*config.SCALE_FACTOR)
+FRAME     = pygame.Rect(0, 64, 32, 32)
 
 
 global blocks
@@ -39,8 +36,8 @@ class Block(gameobject.GameObject):
         self.acceleration[1] = self.__class__.GRAVITY
         self.color           = newcolor
         self.image           = block_frames[id(self.color)]
-        self.rect            = pygame.Rect(int(pos[0]/self.image.get_width())*self.image.get_width(),
-                                           int(pos[1]/self.image.get_height())*self.image.get_height(),
+        self.rect            = pygame.Rect(round(pos[0]/self.image.get_width())*self.image.get_width(),
+                                           round(pos[1]/self.image.get_height())*self.image.get_height(),
                                            self.image.get_width(),
                                            self.image.get_height())
         
@@ -176,10 +173,10 @@ class Block(gameobject.GameObject):
         
     actions = {
                     STATES.IDLE         : None         ,
-                    STATES.APPEARING    : appear       ,
-                    STATES.ACTIVE       : wait         ,
-                    STATES.FALLING      : fall         ,
-                    STATES.START_FALLING: start_falling,
-                    STATES.IMPACT       : stop         ,
-                    STATES.DYING        : vanish       ,
+                    STATES.APPEARING    : 'appear'       ,
+                    STATES.ACTIVE       : 'wait'         ,
+                    STATES.FALLING      : 'fall'         ,
+                    STATES.START_FALLING: 'start_falling',
+                    STATES.IMPACT       : 'stop'         ,
+                    STATES.DYING        : 'vanish'       ,
               }
