@@ -27,9 +27,12 @@ class MainMenu(gamestate.GameState):
         #middle of screen minus the appropriate number of cells
         self.hud_normalmode.rect  = pygame.Rect((config.SCREEN_WIDTH/2) - 112,(config.SCREEN_HEIGHT/2) - 64, 6*32, 16)
         
+        self.hud_quit = hudobject.HudObject()
+        self.hud_quit.rect = pygame.Rect(config.SCREEN_WIDTH/2 - 112, config.SCREEN_HEIGHT/2, 6*32, 16)
+        
         self.frame_limit = True
 
-        HUD.add(self.hud_normalmode,self.hud_invasodado)
+        HUD.add(self.hud_normalmode, self.hud_invasodado, self.hud_quit)
     
     def events(self):
         for e in pygame.event.get():
@@ -39,6 +42,8 @@ class MainMenu(gamestate.GameState):
                     if self.hud_normalmode.rect.collidepoint(pygame.mouse.get_pos()):
                         gsm.current_state = ingame.InGameState()
                         HUD.empty()
+                    elif self.hud_quit.rect.collidepoint(pygame.mouse.get_pos()):
+                        quit()
                                     
             
     def logic(self):
@@ -49,6 +54,7 @@ class MainMenu(gamestate.GameState):
         
         self.hud_normalmode.image = config.FONT.render("Normal Mode", False, (255, 255, 255))
         self.hud_invasodado.image = config.FONT.render("Invasodado", False, (255, 255, 255))
+        self.hud_quit.image = config.FONT.render("Quit", False, (255, 255, 255))
         
         for g in self.group_list:
         #For all Sprite groups...
