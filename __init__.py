@@ -20,6 +20,7 @@ from game import mainmenu
 
 
 gsm.current_state = mainmenu.MainMenu()
+
 while True:
     if pygame.key.get_pressed()[pygame.K_F1]:
         settings.fullscreen = not settings.fullscreen

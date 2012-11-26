@@ -19,7 +19,7 @@ class GameState:
     
     next_state = None
     
-    fpsTimer = pygame.time.Clock()
+    fpsTimer   = pygame.time.Clock()
     
     def __init__(self):
         '''Initialization logic is normally executed once here.'''

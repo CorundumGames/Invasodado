@@ -1,5 +1,3 @@
-
-
 current_state = None
 
 def update():
