@@ -16,15 +16,17 @@ class Colors:
     BLUE   = pygame.Color(  0,   0, 255)
     YELLOW = pygame.Color(255, 255,   0)
     PURPLE = pygame.Color(153,   0, 153)
+    WHITE  = pygame.Color(255, 255, 255)
     
     LIST = [RED, BLUE, GREEN, YELLOW, PURPLE]
 
 def blend_color(surface, color):
     '''Returns a new Surface blended with the given color.'''
-    colorsurface = Image.new(COLOR_MODE, surface.get_size(),
-                            (color.r, color.g, color.b, color.a))
-    temp = Image.fromstring(COLOR_MODE, surface.get_size(),
-                            pygame.image.tostring(surface, COLOR_MODE))
-    temp = Image.blend(temp, colorsurface, 0.5)
+    size         = surface.get_size()
+    colorsurface = Image.new(COLOR_MODE, size, tuple(color))
+    temp         = Image.fromstring(COLOR_MODE,
+                                    size,
+                                    pygame.image.tostring(surface, COLOR_MODE))
+    temp         = Image.blend(temp, colorsurface, 0.5)
     
-    return pygame.image.fromstring(temp.tostring(), surface.get_size(), COLOR_MODE)
+    return pygame.image.fromstring(temp.tostring(), size, COLOR_MODE)
