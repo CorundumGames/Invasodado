@@ -96,13 +96,11 @@ class GridCell:
 
     def add_entering(self):
         '''Adds objects that are held within this cell.'''
-        for g in gsm.current_state.group_list:
-        #For all groups on-screen...
-            for s in (x for x in g if type(x) not in do_not_check):
-            #For all sprites in this group that aren't excluded from collisions...
-                if self.rect.colliderect(s.rect):
-                #If the sprite is not already in this cell...
-                    self.objects_to_add.add(s)
+        for s in (x for x in itertools.chain.from_iterable(gsm.current_state.group_list) if x.__class__ not in do_not_check):
+        #For all sprites in this group that aren't excluded from collisions...
+            if self.rect.colliderect(s.rect):
+            #If the sprite is not already in this cell...
+                self.objects_to_add.add(s)
                     
         self.objects |= self.objects_to_add
         self.objects_to_add.clear()
