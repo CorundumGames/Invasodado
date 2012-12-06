@@ -58,8 +58,8 @@ class InGameState(gamestate.GameState):
         enemysquadron.reset()
         
     
-    def events(self):
-        for e in pygame.event.get():
+    def events(self,states):
+        for e in states:
             if e.type == pygame.MOUSEBUTTONDOWN:
             #If a mouse button is clicked...
                 if   e.button == 1:
@@ -86,6 +86,8 @@ class InGameState(gamestate.GameState):
                         self.ufo.state = ufo.UFO.STATES.APPEARING
                 elif e.key == pygame.K_c:
                     blockgrid.clear()
+                elif e.key == pygame.K_p:
+                    config.togglePause()
                      
     
     def logic(self):
@@ -111,10 +113,8 @@ class InGameState(gamestate.GameState):
             
         if not self.game_running:
             self.game_over()
-            
-        
 
-    
+
     def render(self):
         global score
         global lives
@@ -138,11 +138,12 @@ class InGameState(gamestate.GameState):
         pygame.display.set_caption("Score: " + str(score) + "    FPS: " + str(round(self.fpsTimer.get_fps(), 3)))
             
         self.fpsTimer.tick(60 * self.frame_limit)
-        
+
+
     def game_over(self):
         enemy.Enemy.velocity = [0, 0]
         gameovertext = hudobject.HudObject()
         gameovertext.image = config.FONT.render("GAME OVER", False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
         gameovertext.rect = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2, 0, 0)
         self.ship.state = player.STATES.DYING
-        HUD.add(gameovertext)
+        HUD.add(gameovertext)

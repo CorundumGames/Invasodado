@@ -38,16 +38,15 @@ class MainMenu(gamestate.GameState):
 
         HUD.add(self.hud_normalmode, self.hud_invasodado, self.hud_quit)
     
-    def events(self):
-        for e in pygame.event.get():
-            if e.type == pygame.MOUSEBUTTONDOWN:
-            #If a mouse button is clicked...
-                if   e.button == 1:
-                    if self.hud_normalmode.rect.collidepoint(e.pos):
-                        gsm.current_state = ingame.InGameState()
-                        HUD.empty()
-                    elif self.hud_quit.rect.collidepoint(e.pos):
-                        quit()
+    def events(self,states):
+        for e in states:
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+            #If the left mouse button is clicked...
+                if self.hud_normalmode.rect.collidepoint(e.pos):
+                    gsm.current_state = ingame.InGameState()
+                    HUD.empty()
+                elif self.hud_quit.rect.collidepoint(e.pos):
+                    quit()
                                     
             
     def logic(self):
@@ -56,13 +55,10 @@ class MainMenu(gamestate.GameState):
     def render(self):
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
-        
-        
         for g in self.group_list:
         #For all Sprite groups...
             pygame.display.update(g.draw(pygame.display.get_surface()))
             
         pygame.display.flip()
         pygame.display.set_caption("FPS: " + str(round(self.fpsTimer.get_fps(), 3)))
-            
         self.fpsTimer.tick(60*self.frame_limit)

@@ -32,3 +32,24 @@ FONT = pygame.font.Font("./gfx/font.ttf", 18)
 class Enum(object):
     def __init__(self, *keys):
         self.__dict__.update(zip(keys, range(len(keys))))
+
+#Causes the game to go fullscreen
+def fullScreen():
+        settings.fullscreen = not settings.fullscreen
+        screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
+
+#Handlges pasuing of the game
+pause = False
+
+def togglePause():
+    global pause
+    pause = not pause
+    
+    while pause:
+    #While the game is paused...
+        for event in pygame.event.get():
+        #For all received events...
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            #If the P key is pressed...
+                pause = not pause
+                break
