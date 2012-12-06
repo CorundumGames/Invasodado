@@ -34,8 +34,8 @@ class MainMenu(gamestate.GameState):
 
         HUD.add(self.hud_normalmode, self.hud_invasodado, self.hud_quit)
     
-    def events(self):
-        for e in pygame.event.get():
+    def events(self,states):
+        for e in states:
             if e.type == pygame.MOUSEBUTTONDOWN:
             #If a mouse button is clicked...
                 if   e.button == 1:

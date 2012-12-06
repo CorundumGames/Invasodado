@@ -58,8 +58,8 @@ class InGameState(gamestate.GameState):
         enemysquadron.reset()
         
     
-    def events(self):
-        for e in pygame.event.get():
+    def events(self,states):
+        for e in states:
             if e.type == pygame.MOUSEBUTTONDOWN:
             #If a mouse button is clicked...
                 if   e.button == 1:
@@ -86,6 +86,8 @@ class InGameState(gamestate.GameState):
                         self.ufo.state = ufo.UFO.STATES.APPEARING
                 elif e.key == pygame.K_c:
                     blockgrid.clear()
+                elif e.key == pygame.K_p:
+                    config.togglePause()
                      
     
     def logic(self):
