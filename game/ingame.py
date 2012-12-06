@@ -26,8 +26,15 @@ HUD     = pygame.sprite.LayeredUpdates()
 DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
 
+global score
+global prev_score
 score = 0
+prev_score = None
+
+global lives
+global prev_lives
 lives = 3
+prev_lives = None
 
 class InGameState(gamestate.GameState):    
     def __init__(self):
@@ -109,10 +116,19 @@ class InGameState(gamestate.GameState):
 
     
     def render(self):
+        global score
+        global lives
+        global prev_score
+        global prev_lives
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
-        self.hud_score.image = config.FONT.render("Score: " + str(score), False, (255, 255, 255))
-        self.hud_lives.image = config.FONT.render("Lives: " + str(lives), False, (255, 255, 255))
+        if score != prev_score:
+            self.hud_score.image = config.FONT.render("Score: " + str(score), False, (255, 255, 255))
+            prev_score = score
+            
+        if lives != prev_lives:
+            self.hud_lives.image = config.FONT.render("Lives: " + str(lives), False, (255, 255, 255))
+            prev_lives = lives
         
         for g in self.group_list:
         #For all Sprite groups...

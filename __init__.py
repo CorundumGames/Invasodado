@@ -21,12 +21,19 @@ from game import mainmenu
 
 gsm.current_state = mainmenu.MainMenu()
 
-while True:
-    if pygame.key.get_pressed()[pygame.K_F1]:
-        settings.fullscreen = not settings.fullscreen
-        config.screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
-            
-    gsm.update()
+def main():
+    while True:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_F1]:
+            settings.fullscreen = not settings.fullscreen
+            config.screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
+        elif keys[pygame.K_ESCAPE]:
+            break
     
-    if pygame.event.peek(pygame.QUIT):
-        break
+        gsm.update()
+    
+        if pygame.event.peek(pygame.QUIT):
+            break
+        
+if __name__ == '__main__':
+    main()
