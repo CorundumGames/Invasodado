@@ -35,7 +35,7 @@ class Ship(gameobject.GameObject):
         self.invincible      = False
         self.invincibleCount = 0
         
-        self.image.set_colorkey(color.COLOR_KEY)
+        self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
         
     def on_fire_bullet(self):
         bul = self.mybullet

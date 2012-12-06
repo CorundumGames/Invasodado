@@ -25,7 +25,7 @@ class UFO(gameobject.GameObject):
         self.position = list(START_POS)
 
         for c in self.frames:
-            c.set_colorkey(c.get_at((0, 0)))
+            c.set_colorkey(c.get_at((0, 0)), config.FLAGS)
         self.state    = self.__class__.STATES.IDLE
         
     def appear(self):

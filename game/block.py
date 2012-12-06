@@ -50,6 +50,7 @@ class Block(gameobject.GameObject):
         self.state           = self.__class__.STATES.APPEARING
         self.special         = specialblock
         self.add(ingame.BLOCKS)
+        self.image.set_colorkey(None, config.FLAGS)
         
     def __str__(self):
         return "Block of color " + str(self.color) + " at grid cell " + str(self.gridcell) + " with target " + str(self.target)  

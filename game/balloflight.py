@@ -30,6 +30,8 @@ class BallOfLight(gameobject.GameObject):
         self.acceleration = None
         self.velocity     = None
         
+        self.image.set_colorkey(self.image.get_at((0, 0)), config.FLAGS)
+        
     def appear(self):
         self.state = self.__class__.STATES.MOVING
         

@@ -123,11 +123,11 @@ class InGameState(gamestate.GameState):
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
         if score != prev_score:
-            self.hud_score.image = config.FONT.render("Score: " + str(score), False, (255, 255, 255))
+            self.hud_score.image = config.FONT.render("Score: " + str(score), False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
             prev_score = score
             
         if lives != prev_lives:
-            self.hud_lives.image = config.FONT.render("Lives: " + str(lives), False, (255, 255, 255))
+            self.hud_lives.image = config.FONT.render("Lives: " + str(lives), False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
             prev_lives = lives
         
         for g in self.group_list:
@@ -137,12 +137,12 @@ class InGameState(gamestate.GameState):
         pygame.display.flip()
         pygame.display.set_caption("Score: " + str(score) + "    FPS: " + str(round(self.fpsTimer.get_fps(), 3)))
             
-        self.fpsTimer.tick(60*self.frame_limit)
+        self.fpsTimer.tick(60 * self.frame_limit)
         
     def game_over(self):
         enemy.Enemy.velocity = [0, 0]
         gameovertext = hudobject.HudObject()
-        gameovertext.image = config.FONT.render("GAME OVER", False, (255, 255, 255))
+        gameovertext.image = config.FONT.render("GAME OVER", False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
         gameovertext.rect = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2, 0, 0)
         self.ship.state = player.STATES.DYING
         HUD.add(gameovertext)

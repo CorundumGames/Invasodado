@@ -29,4 +29,4 @@ def blend_color(surface, color):
                                     pygame.image.tostring(surface, COLOR_MODE))
     temp         = Image.blend(temp, colorsurface, 0.5)
     
-    return pygame.image.fromstring(temp.tostring(), size, COLOR_MODE)
+    return pygame.image.fromstring(temp.tostring(), size, COLOR_MODE).convert(config.DEPTH, config.FLAGS)

@@ -1,6 +1,7 @@
 import pygame
 
 import core.config as config
+import core.color  as color
 import gameobject
 
 '''Bullet is an abstract class which ShipBullet and EnemyBullet will inherit
@@ -17,6 +18,8 @@ class Bullet(gameobject.GameObject):
         self.rect     = self.__class__.START_POS.copy()
         self.position = list(self.rect.topleft)
         self.state    = self.__class__.STATES.IDLE
+        
+        self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
         
     def start_moving(self):
         '''Plays a sound and begins moving.'''

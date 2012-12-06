@@ -31,6 +31,10 @@ class MainMenu(gamestate.GameState):
         self.hud_quit.rect = pygame.Rect(config.SCREEN_WIDTH/2 - 112, config.SCREEN_HEIGHT/2, 6*32, 16)
         
         self.frame_limit = True
+        
+        self.hud_normalmode.image = config.FONT.render("Normal Mode", False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
+        self.hud_invasodado.image = config.FONT.render("Invasodado", False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
+        self.hud_quit.image       = config.FONT.render("Quit", False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
 
         HUD.add(self.hud_normalmode, self.hud_invasodado, self.hud_quit)
     
@@ -39,10 +43,10 @@ class MainMenu(gamestate.GameState):
             if e.type == pygame.MOUSEBUTTONDOWN:
             #If a mouse button is clicked...
                 if   e.button == 1:
-                    if self.hud_normalmode.rect.collidepoint(pygame.mouse.get_pos()):
+                    if self.hud_normalmode.rect.collidepoint(e.pos):
                         gsm.current_state = ingame.InGameState()
                         HUD.empty()
-                    elif self.hud_quit.rect.collidepoint(pygame.mouse.get_pos()):
+                    elif self.hud_quit.rect.collidepoint(e.pos):
                         quit()
                                     
             
@@ -52,9 +56,7 @@ class MainMenu(gamestate.GameState):
     def render(self):
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
-        self.hud_normalmode.image = config.FONT.render("Normal Mode", False, (255, 255, 255))
-        self.hud_invasodado.image = config.FONT.render("Invasodado", False, (255, 255, 255))
-        self.hud_quit.image = config.FONT.render("Quit", False, (255, 255, 255))
+        
         
         for g in self.group_list:
         #For all Sprite groups...

@@ -52,7 +52,7 @@ class Enemy(gameobject.GameObject):
         self.rect.topleft = map(round, self.position)
         self.color        = random.choice(color.Colors.LIST[0:config.NUM_COLORS])
         self.image        = enemy_frames[id(self.color)]
-        self.image.set_colorkey(self.image.get_at((0, 0)))
+        self.image.set_colorkey(self.image.get_at((0, 0)), config.FLAGS)
         
         self.state = self.__class__.STATES.ACTIVE
         
@@ -78,7 +78,7 @@ class Enemy(gameobject.GameObject):
     def die(self):
         ingame.ENEMIES.add(balloflight.BallOfLight(self.position, self.color))
         hurt.play()
-        self.kill()
+        self.remove(ingame.ENEMIES)
         
         self.position     = [-300.0, -300.0]
         self.velocity     = [0, 0]
