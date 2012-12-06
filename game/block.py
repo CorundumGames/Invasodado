@@ -11,7 +11,7 @@ import gameobject
 import ingame
 
 
-FRAME     = pygame.Rect(0, 64, 32, 32)
+FRAME = pygame.Rect(0, 64, 32, 32)
 
 
 global blocks
@@ -25,9 +25,9 @@ class Block(gameobject.GameObject):
     color, and they'll disappear.
     '''
     collisions = None
-    GRAVITY   = .5
-    MAX_SPEED = 12.0
-    STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
+    GRAVITY    = .5
+    MAX_SPEED  = 12.0
+    STATES     = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
     
     def __init__(self, pos, newcolor, specialblock = False):
         gameobject.GameObject.__init__(self)
@@ -52,29 +52,27 @@ class Block(gameobject.GameObject):
         self.add(ingame.BLOCKS)
         
     def __str__(self):
-        return "Block of color " + str(self.color) + " at grid cell " + str(self.gridcell) + " with target " + str(self.target)
-        
-    def on_collide(self, other):
-        pass      
+        return "Block of color " + str(self.color) + " at grid cell " + str(self.gridcell) + " with target " + str(self.target)  
     
     def appear(self):
         self.state = self.__class__.STATES.START_FALLING
             
     def start_falling(self):
         global blocks
+        bl = blockgrid.blocks
         blockgrid.blockstocheck.discard(self)
         for i in xrange(self.gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
         #For all grid cells below this one...
-                if isinstance(blockgrid.blocks[i][self.gridcell[1]], Block):
+                if isinstance(bl[i][self.gridcell[1]], Block):
                 #If this grid cell is occupied...
                     self.target = i - 1
                     break
         
-        if self.gridcell[0] > 0 and isinstance(blockgrid.blocks[self.gridcell[0] - 1][self.gridcell[1]], Block):
+        if self.gridcell[0] > 0 and isinstance(bl[self.gridcell[0] - 1][self.gridcell[1]], Block):
         #If there is a block above us...
             for i in xrange(self.gridcell[0], 0, -1):
-                if isinstance(blockgrid.blocks[i][self.gridcell[1]], Block):
-                    blockgrid.blocks[i][self.gridcell[1]].state = self.__class__.STATES.START_FALLING
+                if isinstance(bl[i][self.gridcell[1]], Block):
+                    bl[i][self.gridcell[1]].state = self.__class__.STATES.START_FALLING
                 else:
                     break
         
@@ -85,9 +83,10 @@ class Block(gameobject.GameObject):
         if so.
         '''
         global blocks
+        bl = blockgrid.blocks
         if self.rect.bottom < blockgrid.RECT.bottom \
-        and (blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]] == None or \
-             blockgrid.blocks[self.gridcell[0]+1][self.gridcell[1]].state == self.__class__.STATES.FALLING):
+        and (bl[self.gridcell[0]+1][self.gridcell[1]] == None or \
+             bl[self.gridcell[0]+1][self.gridcell[1]].state == self.__class__.STATES.FALLING):
         #If we're not at the bottom and there's no block directly below...
             blockgrid.blockstocheck.discard(self)
             self.acceleration[1] = self.__class__.GRAVITY

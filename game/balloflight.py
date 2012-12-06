@@ -36,18 +36,20 @@ class BallOfLight(gameobject.GameObject):
     def move(self):
         self.progress += 1
         percent = self.progress/TIME_TO_MOVE
+        target = self.target
         
         dx = (percent**2)*(3-2*percent)
-        self.position[0] = (self.startpos[0]*dx) + (self.target[0]*(1-dx))
-        self.position[1] = (self.startpos[1]*(1-dx)) + (self.target[1]*(dx))
+        ddx = 1 - dx
+        self.position[0] = (self.startpos[0]* dx   ) + (target[0] * ddx)
+        self.position[1] = (self.startpos[1]*ddx) + (target[1] * dx    )
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         
-        if self.position[1] == self.target[1]:
+        if self.position[1] == target[1]:
             self.state = self.__class__.STATES.DYING
             
     def vanish(self):
         ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], self.color))
-        self.kill()
+        self.remove(ingame.ENEMIES)
         self.state = self.__class__.STATES.IDLE
         
     actions = {

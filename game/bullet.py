@@ -9,10 +9,11 @@ from.  Bullet should NOT be created in and of itself.'''
 class Bullet(gameobject.GameObject):
     FRAME  = pygame.Rect(46, 10, 10, 10)
     STATES = config.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
+    SPRITE = config.SPRITES.subsurface(FRAME)
     
     def __init__(self):
         gameobject.GameObject.__init__(self)
-        self.image    = config.SPRITES.subsurface(self.__class__.FRAME) #@UndefinedVariable
+        self.image    = self.__class__.SPRITE #@UndefinedVariable
         self.rect     = self.__class__.START_POS.copy()
         self.position = list(self.rect.topleft)
         self.state    = self.__class__.STATES.IDLE

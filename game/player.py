@@ -38,12 +38,13 @@ class Ship(gameobject.GameObject):
         self.image.set_colorkey(color.COLOR_KEY)
         
     def on_fire_bullet(self):
-        if self.mybullet.state == self.mybullet.__class__.STATES.IDLE:
+        bul = self.mybullet
+        if bul.state == bul.__class__.STATES.IDLE:
         #If our bullet is not already on-screen...
-            self.mybullet.add(ingame.PLAYER)
-            self.mybullet.rect.midbottom = self.rect.midtop
-            self.mybullet.position       = list(self.rect.midbottom)
-            self.mybullet.state          = self.mybullet.__class__.STATES.FIRED
+            bul.add(ingame.PLAYER)
+            bul.rect.midbottom = self.rect.midtop
+            bul.position       = list(self.rect.midbottom)
+            bul.state          = bul.__class__.STATES.FIRED
             
     def respawn(self):
         self.rect            = START_POS.copy()

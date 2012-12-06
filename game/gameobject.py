@@ -13,16 +13,17 @@ class GameObject(pygame.sprite.Sprite):
         self.velocity     = [0.0, 0.0]
         
     def on_collide(self, other):
-        x = other.__class__
-        if isinstance(self.collisions, dict):
+        x   = other.__class__
+        col = self.collisions
+        if isinstance(col, dict):
         #If this object can interact with more than one other type...
-            if x in self.collisions:
+            if x in col:
             #If we can interact with the other object...
-                if callable(self.collisions[x]):
-                    self.collisions[x](self, other)
-        elif callable(self.collisions):
+                if callable(col[x]):
+                    col[x](self, other)
+        elif callable(col):
         #Else if we have any collisions...
-            self.collisions(other)
+            col(other)
     
     def update(self):
         method_name = self.__class__.actions[self.state]
