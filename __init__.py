@@ -24,7 +24,8 @@ gsm.current_state = mainmenu.MainMenu()
 pause = False
 
 while True:
-    if pygame.key.get_pressed()[pygame.K_F1]:
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_F1]:
         settings.fullscreen = not settings.fullscreen
         config.screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
     elif keys[pygame.K_ESCAPE]:
