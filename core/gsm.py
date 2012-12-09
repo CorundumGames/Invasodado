@@ -1,15 +1,26 @@
 import pygame.display
-current_state = None
+
+import game.mainmenu as mainmenu
+
+current_state = mainmenu.MainMenu()
 
 def update():
-    '''Moves us forward a bit.
+    '''
+    Moves us forward one frame.
     
     First it sees if we're changing states.  If not, we handle input, make
     decisions, then render the graphics.
     '''
-    states = pygame.event.get()
-    current_state.events(states)
-    current_state.logic()
-    current_state.render()
+    global current_state
+
+    if current_state != None:
+        if current_state.next_state == None:
+        #If we're not changing to another state...
+            states = pygame.event.get()
+            current_state.events(states)
+            current_state.logic()
+            current_state.render()
+        else:
+            current_state = current_state.next_state
     
     
