@@ -13,6 +13,7 @@ SCREEN_DIMS = tuple(pygame.display.list_modes())
 NUM_COLORS = 5
 
 FLAGS = pygame.HWSURFACE | pygame.HWACCEL | pygame.ASYNCBLIT | pygame.RLEACCEL
+#The flags used to create all Surfaces; these are best for performance.
 
 DEPTH = screen.get_bitsize()
 
@@ -28,20 +29,23 @@ BG = pygame.image.load("./gfx/bg.png").convert(DEPTH, FLAGS)
 
 
 FONT = pygame.font.Font("./gfx/font.ttf", 18)
+#The main typeface we will use; we might use more.
+
+pause = False
+#True if the game is paused
 
 class Enum(object):
     def __init__(self, *keys):
         self.__dict__.update(zip(keys, range(len(keys))))
 
-#Causes the game to go fullscreen
-def fullScreen():
-        settings.fullscreen = not settings.fullscreen
-        screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
 
-#Handlges pasuing of the game
-pause = False
+def fullScreen():
+#Toggles fullscreen.
+    settings.fullscreen = not settings.fullscreen
+    screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
 
 def togglePause():
+#Handles pausing of the game...
     global pause
     pause = not pause
     

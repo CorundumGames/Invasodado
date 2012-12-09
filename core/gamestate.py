@@ -4,7 +4,8 @@ import pygame.time
 ERROR_STATEMENT = "GameState must be sub-classed, not instantiated!"
 
 class GameState:
-    '''Consider GameState to be abstract; that is, do not instantiate it!
+    '''
+    Consider GameState to be abstract; that is, do not instantiate it!
     
     GameState is meant to be derived from to represent different screens with
     different objects (e.g. the in-game state would have the player, the blocks,
@@ -14,12 +15,14 @@ class GameState:
     phase with something like 'gsm.current_state = new MenuState()'.
     '''
     
-    #The pygame.Groups in this state; left-most groups are drawn first.
     group_list = []
+    #The pygame.Groups in this state; left-most groups are drawn first.
     
     next_state = None
+    #If this isn't None, the gsm switches to this state
     
     fpsTimer   = pygame.time.Clock()
+    #The timer used to regulate frames per second
     
     def __init__(self):
         '''Initialization logic is normally executed once here.'''
@@ -34,7 +37,8 @@ class GameState:
         raise NotImplementedError(ERROR_STATEMENT)
     
     def render(self):
-        '''Blits all Sprites (or derived) to the screen.
+        '''
+        Blits all Sprites (or derived) to the screen.
         
         Remember, Group.blit() renders Sprites in arbitrary order, so we must
         assign Sprites to groups by layer, then call Group.blit() sequentially.
