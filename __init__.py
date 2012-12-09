@@ -1,9 +1,11 @@
-'''Invasodado alpha 1
+'''
+Invasodado alpha 2
 
 Invasodado is a mix between Space Invaders and Columns.
 
 Copyright 2012 Corundum Games
 '''
+
 
 import pygame.display
 import pygame.event
@@ -18,9 +20,6 @@ from core import gsm
 from core import settings
 from game import mainmenu
 
-
-gsm.current_state = mainmenu.MainMenu()
-
 def main():
     while True:
         keys = pygame.key.get_pressed()
@@ -28,12 +27,12 @@ def main():
         if keys[pygame.K_F1]:
             config.fullScreen()
         elif keys[pygame.K_ESCAPE]:
-            break
+            return
         
         gsm.update()
         
         if pygame.event.peek(pygame.QUIT):
-            break
-    
+            return
+        
 if __name__ == '__main__':
     main()
