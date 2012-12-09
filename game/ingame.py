@@ -9,6 +9,7 @@ import core.color      as color
 import core.config     as config
 import core.gamestate  as gamestate
 
+
 import block
 import blockgrid
 import enemy
@@ -43,11 +44,8 @@ class InGameState(gamestate.GameState):
         self.ship           = player.Ship()
         self.ufo            = ufo.UFO()
         
-        self.hud_score       = hudobject.HudObject()
-        self.hud_score.rect  = pygame.Rect(16, 16, 0, 0)
-        self.hud_lives       = hudobject.HudObject()
-        self.hud_lives.rect  = pygame.Rect(config.SCREEN_WIDTH-160, 16, 0, 0)
-        
+        self.hud_score       = hudobject.HudObject(pygame.Surface((0, 0)), pygame.Rect(16, 16, 0, 0))
+        self.hud_lives       = hudobject.HudObject(pygame.Surface((0, 0)), pygame.Rect(config.SCREEN_WIDTH-160, 16, 0, 0))
         
         self.frame_limit  = True
         self.game_running = True
@@ -64,13 +62,13 @@ class InGameState(gamestate.GameState):
             #If a mouse button is clicked...
                 if   e.button == 1:
                 #If it was the left button...
-                    BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.RED))
+                    BLOCKS.add(block.Block((e.pos[0], 0), color.RED))
                 elif e.button == 2:
                 #If it was the middle button...
-                    BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.YELLOW))
+                    BLOCKS.add(block.Block((e.pos[0], 0), color.YELLOW))
                 elif e.button == 3:
                 #If it was the right button...
-                    BLOCKS.add(block.Block((e.pos[0], 0), color.Colors.BLUE))
+                    BLOCKS.add(block.Block((e.pos[0], 0), color.BLUE))
             elif e.type == pygame.KEYDOWN:
             #If a key is pressed...
                 if e.key == pygame.K_SPACE:
@@ -123,11 +121,11 @@ class InGameState(gamestate.GameState):
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
         if score != prev_score:
-            self.hud_score.image = config.FONT.render("Score: " + str(score), False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
+            self.hud_score.image = config.FONT.render("Score: " + str(score), False, color.WHITE).convert(config.DEPTH, config.FLAGS)
             prev_score = score
             
         if lives != prev_lives:
-            self.hud_lives.image = config.FONT.render("Lives: " + str(lives), False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
+            self.hud_lives.image = config.FONT.render("Lives: " + str(lives), False, color.WHITE).convert(config.DEPTH, config.FLAGS)
             prev_lives = lives
         
         for g in self.group_list:
@@ -146,4 +144,5 @@ class InGameState(gamestate.GameState):
         gameovertext.image = config.FONT.render("GAME OVER", False, color.Colors.WHITE).convert(config.DEPTH, config.FLAGS)
         gameovertext.rect = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2, 0, 0)
         self.ship.state = player.STATES.DYING
-        HUD.add(gameovertext)
+        HUD.add(gameovertext)
+
