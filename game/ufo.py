@@ -20,7 +20,7 @@ class UFO(gameobject.GameObject):
         gameobject.GameObject.__init__(self)
         
         self.image    = config.SPRITES.subsurface(pygame.Rect(32, 64, 64, 32)).copy()
-        self.frames   = tuple(color.blend_color(self.image.copy(), c) for c in color.Colors.LIST[:config.NUM_COLORS])
+        self.frames   = tuple(color.blend_color(self.image.copy(), c) for c in color.LIST[:config.NUM_COLORS])
         self.rect     = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
         self.position = list(START_POS)
 
@@ -48,7 +48,7 @@ class UFO(gameobject.GameObject):
         
     def die(self):
         self.kill()
-        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], random.choice(color.Colors.LIST), specialblock=True))
+        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], random.choice(color.LIST), specialblock=True))
         invade.stop()
         self.velocity[0]  = 0
         self.position     = list(START_POS)

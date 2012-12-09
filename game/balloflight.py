@@ -8,9 +8,9 @@ import gameobject
 import ingame
 
 FRAME        = pygame.Rect(0, 96, 32, 32)
-TIME_TO_MOVE = 30 #In frames
+TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
 
-ball_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.Colors.LIST])
+ball_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.LIST])
 
 class BallOfLight(gameobject.GameObject):
     collisions = None
@@ -38,7 +38,7 @@ class BallOfLight(gameobject.GameObject):
     def move(self):
         self.progress += 1
         percent = self.progress/TIME_TO_MOVE
-        target = self.target
+        target  = self.target
         
         dx = (percent**2)*(3-2*percent)
         ddx = 1 - dx

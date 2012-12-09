@@ -6,6 +6,7 @@ import pygame.mixer
 import core.color  as color
 import core.config as config
 
+import pyximport; pyximport.install()
 import blockgrid
 import gameobject
 import ingame
@@ -18,7 +19,7 @@ global blocks
 
 bump = pygame.mixer.Sound("./sfx/bump.wav")
 
-block_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.Colors.LIST])
+block_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.LIST])
 
 class Block(gameobject.GameObject):
     '''Blocks are left by enemies when they're killed.  Match three of the same

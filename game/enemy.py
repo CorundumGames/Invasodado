@@ -15,7 +15,7 @@ FRAMES    = [pygame.Rect( 0, 32, 32, 32),
 START_POS = (32, 32)
 SAFE_SPOT = (0, config.screen.get_height()*3)
 
-enemy_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAMES[0]).copy(), c)) for c in color.Colors.LIST])
+enemy_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAMES[0]).copy(), c)) for c in color.LIST])
 
 '''
 Algorithm for storing one colored Enemy per color (with all animations)
@@ -37,7 +37,7 @@ class Enemy(gameobject.GameObject):
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
-        self.color         = random.choice(color.Colors.LIST[:config.NUM_COLORS])
+        self.color         = random.choice(color.LIST[:config.NUM_COLORS])
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)]
         self.position      = list(START_POS)
@@ -50,7 +50,7 @@ class Enemy(gameobject.GameObject):
         self.position     = [START_POS[0] * (self.form_position[0]+1),
                              START_POS[1] * (self.form_position[1]+1)*.75]
         self.rect.topleft = map(round, self.position)
-        self.color        = random.choice(color.Colors.LIST[0:config.NUM_COLORS])
+        self.color        = random.choice(color.LIST[0:config.NUM_COLORS])
         self.image        = enemy_frames[id(self.color)]
         self.image.set_colorkey(self.image.get_at((0, 0)), config.FLAGS)
         
