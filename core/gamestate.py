@@ -28,7 +28,7 @@ class GameState:
         '''Initialization logic is normally executed once here.'''
         raise NotImplementedError(ERROR_STATEMENT)
         
-    def events(self):
+    def events(self, events):
         '''Handles external input (mostly from the keyboard).'''
         raise NotImplementedError(ERROR_STATEMENT)
     

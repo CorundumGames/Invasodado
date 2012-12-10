@@ -14,10 +14,10 @@ def update():
     global current_state
 
     if current_state != None:
+    #If we actually have a state...
         if current_state.next_state == None:
         #If we're not changing to another state...
-            states = pygame.event.get()
-            current_state.events(states)
+            current_state.events(pygame.event.get())
             current_state.logic()
             current_state.render()
         else:
