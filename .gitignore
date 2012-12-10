@@ -38,3 +38,7 @@ nosetests.xml
 # Other
 *.*~
 *.orig
+pygame.display
+.settings
+profile.out
+
