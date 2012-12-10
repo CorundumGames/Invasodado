@@ -22,11 +22,7 @@ from game import mainmenu
 
 def main():
     while True:
-        keys = pygame.key.get_pressed()
-        
-        if keys[pygame.K_F1]:
-            config.fullScreen()
-        elif keys[pygame.K_ESCAPE]:
+        if pygame.key.get_pressed()[pygame.K_ESCAPE]:
             return
         
         gsm.update()
