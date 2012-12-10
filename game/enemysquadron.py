@@ -7,17 +7,16 @@ import ingame
 ROW_SIZE = 7
 COL_SIZE = 4
 
-global enemies
 enemies = None
 
 def reset():
     global enemies
     ingame.ENEMIES.empty()
-    enemies = [[enemy.Enemy((i, j)) for i in range(ROW_SIZE)] for j in range(COL_SIZE)]
+    enemies = [[enemy.Enemy((i, j)) for i in xrange(ROW_SIZE)] for j in xrange(COL_SIZE)]
     
     for i in enemies:
     #For all rows of enemies...
-        for j in range(ROW_SIZE/2):
+        for j in xrange(ROW_SIZE/2):
         #For the first half of each row...
             if random.randint(0, 1):
             #With 50% odds...
@@ -27,6 +26,7 @@ def reset():
                 
 def move_down():
     global enemies
-    for e in itertools.chain.from_iterable(enemies):
+    for e in ingame.ENEMIES:
     #For all enemies...
         e.position[1] += 8
+        e.rect.topleft = list(e.position)

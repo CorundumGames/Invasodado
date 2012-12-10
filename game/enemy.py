@@ -37,6 +37,7 @@ class Enemy(gameobject.GameObject):
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
+        self.bullet        = enemybullet.EnemyBullet()
         self.color         = random.choice(color.LIST[:config.NUM_COLORS])
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)]
@@ -47,8 +48,8 @@ class Enemy(gameobject.GameObject):
         
     def appear(self):
         self.add(ingame.ENEMIES)
-        self.position     = [START_POS[0] * (self.form_position[0]+1),
-                             START_POS[1] * (self.form_position[1]+1)*.75]
+        self.position     = [START_POS[0] * (self.form_position[0]+1)* 1.5,
+                             START_POS[1] * (self.form_position[1]+1)* 1.5]
         self.rect.topleft = map(round, self.position)
         self.color        = random.choice(color.LIST[0:config.NUM_COLORS])
         self.image        = enemy_frames[id(self.color)]
@@ -69,14 +70,13 @@ class Enemy(gameobject.GameObject):
                 
                 
     def shoot(self):
-        mybullet                    = enemybullet.EnemyBullet()
-        mybullet.add(ingame.ENEMIES)
-        mybullet.rect.midbottom     = self.rect.midbottom
-        mybullet.state              = mybullet.__class__.STATES.FIRED
-        self.state                  = self.__class__.STATES.ACTIVE
+        self.bullet.add(ingame.ENEMIES)
+        self.bullet.rect.midbottom = self.rect.midbottom
+        self.bullet.state          = self.bullet.__class__.STATES.FIRED
+        self.state                 = self.__class__.STATES.ACTIVE
                
     def die(self):
-        ingame.ENEMIES.add(balloflight.BallOfLight(self.position, self.color))
+        balloflight.get_ball(self.position, self.color).add(ingame.ENEMIES)
         hurt.play()
         self.remove(ingame.ENEMIES)
         

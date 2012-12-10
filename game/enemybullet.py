@@ -15,7 +15,6 @@ class EnemyBullet(bullet.Bullet):
     
     def __init__(self):
         super(self.__class__, self).__init__()
-        self.add(ingame.ENEMIES)
         
     def move(self):
         '''Moves up the screen, seeing if it's hit an enemy or exited.'''
