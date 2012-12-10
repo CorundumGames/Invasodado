@@ -14,16 +14,14 @@ TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
 
 ball_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.LIST])
 
-global balls
 balls = set()
 
 def get_ball(thestartpos, thecolor):
     global balls
     if len(balls) == 0:
-        print "france"
         balls.add(BallOfLight())
         
-    b          = balls.pop()
+    b          = balls.pop()  #Teehee
     b.color    = thecolor
     b.startpos = tuple(thestartpos)
     b.state    = BallOfLight.STATES.APPEARING
@@ -64,7 +62,7 @@ class BallOfLight(gameobject.GameObject):
         percent        = self.progress/TIME_TO_MOVE
         target         = self.target
         
-        dx = (percent**2)*(3-2*percent)
+        dx  = (percent**2)*(3-2*percent)
         ddx = 1 - dx
         self.position[0]  = (self.startpos[0] * dx ) + (target[0] * ddx)
         self.position[1]  = (self.startpos[1] * ddx) + (target[1] * dx )
@@ -76,7 +74,7 @@ class BallOfLight(gameobject.GameObject):
     def vanish(self):
         global balls
         balls.add(self)
-        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], self.color))
+        ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], self.color))
         self.remove(ingame.ENEMIES)
         self.position = [-300, -300]
         self.rect.topleft = self.position

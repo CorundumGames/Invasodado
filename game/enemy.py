@@ -37,7 +37,6 @@ class Enemy(gameobject.GameObject):
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
-        self.bullet        = enemybullet.EnemyBullet()
         self.color         = random.choice(color.LIST[:config.NUM_COLORS])
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)]
@@ -60,7 +59,7 @@ class Enemy(gameobject.GameObject):
     def move(self):
         self.position[0] += Enemy.velocity[0]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
-        if random.uniform(1,5000) < self.shootRange:
+        if random.uniform(1, 5000) < self.shootRange:
             self.state = self.__class__.STATES.SHOOTING
         
         if not Enemy.should_flip:
@@ -70,10 +69,11 @@ class Enemy(gameobject.GameObject):
                 
                 
     def shoot(self):
-        self.bullet.add(ingame.ENEMIES)
-        self.bullet.rect.midbottom = self.rect.midbottom
-        self.bullet.state          = self.bullet.__class__.STATES.FIRED
-        self.state                 = self.__class__.STATES.ACTIVE
+        b             = enemybullet.get_enemy_bullet()
+        b.rect.midtop = self.rect.midbottom
+        b.position    = list(b.rect.topleft)
+        b.add(ingame.ENEMIES)
+        self.state    = self.__class__.STATES.ACTIVE
                
     def die(self):
         balloflight.get_ball(self.position, self.color).add(ingame.ENEMIES)

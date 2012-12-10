@@ -153,7 +153,7 @@ class InGameState(gamestate.GameState):
             self.ufo.state = ufo.UFO.STATES.APPEARING
             
     def make_block(self, pos, c):
-        BLOCKS.add(block.Block((pos, 0), c))
+        BLOCKS.add(block.get_block([pos, 0], c))
         
     def clear_blocks(self):
         if config.debug:
