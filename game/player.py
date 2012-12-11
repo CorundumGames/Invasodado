@@ -8,7 +8,8 @@ import gameobject
 import ingame
 import shipbullet
 
-'''The Ship is the player character.  There's only going to be one instance of
+'''
+The Ship is the player character.  There's only going to be one instance of
 it, but it has to inherit from pygame.sprite.Sprite, so I can't make it a true
 Python singleton.
 '''

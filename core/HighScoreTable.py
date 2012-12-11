@@ -84,7 +84,7 @@ class HighScoreTable():
 
     def addScores(self, iterable):
         for i in iterable:
-            addscore(i)
+            self.addScore(i)
         
     def getScores(self):
         a = self.scorefile.values()

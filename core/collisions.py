@@ -10,8 +10,6 @@ import game.balloflight as balloflight
 import game.block       as block
 import game.hudobject   as hudobject
 
-
-
 do_not_compare = { }
 #Contains 2-tuples of types.  Don't check for collisions between objects
 #with these type pairings.

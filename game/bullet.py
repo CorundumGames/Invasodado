@@ -4,8 +4,10 @@ import core.config as config
 import core.color  as color
 import gameobject
 
-'''Bullet is an abstract class which ShipBullet and EnemyBullet will inherit
-from.  Bullet should NOT be created in and of itself.'''
+'''
+Bullet is an abstract class which ShipBullet and EnemyBullet will inherit
+from.  Bullet should NOT be created in and of itself.
+'''
 
 class Bullet(gameobject.GameObject):
     FRAME  = pygame.Rect(46, 10, 10, 10)
