@@ -13,8 +13,10 @@ import balloflight
 import block
 import blockgrid
 import enemy
+import enemybullet
 import enemysquadron
 import hudobject
+import mainmenu
 import player
 import shipbullet
 import ufo
@@ -41,7 +43,7 @@ class InGameState(gamestate.GameState):
         self.collision_grid = collisions.CollisionGrid(4, 4, 1)
         #The collision-handling system
         
-        self.group_list    += [BLOCKS, ENEMIES, PLAYER, HUD]
+        self.group_list     = [BLOCKS, ENEMIES, PLAYER, HUD]
         #The groups of sprites to process
         
         self.ship           = player.Ship()
@@ -58,6 +60,7 @@ class InGameState(gamestate.GameState):
         #False if we've gotten a game over
         
         self.key_actions = {
+                            pygame.K_ESCAPE: self.return_to_menu      ,
                             pygame.K_SPACE : self.ship.on_fire_bullet ,
                             pygame.K_F1    : config.toggle_fullscreen ,
                             pygame.K_c     : self.clear_blocks        ,
@@ -82,7 +85,32 @@ class InGameState(gamestate.GameState):
     def __del__(self):
         for g in self.group_list:
             g.empty()
-    
+            
+        global score, prev_score
+        global lives, prev_lives
+        global multiplier
+        
+        pygame.display.get_surface().blit(config.BG, (0, 0))
+        balloflight.clean_up()
+        blockgrid.clean_up()
+        block.clean_up()
+        enemybullet.clean_up()
+        enemysquadron.clean_up()
+        
+        self.group_list = []
+        del self.hud_score
+        del self.hud_lives
+        del self.ship
+        del self.ufo
+        
+        score = 0
+        prev_score = None
+        lives = 3
+        prev_lives = None
+        multiplier = DEFAULT_MULTIPLIER
+        
+        self.next_state = None
+        
     def events(self, events):
         for e in events:
         #For all events passed in...
@@ -159,6 +187,9 @@ class InGameState(gamestate.GameState):
         if config.debug:
         #If we're in debug mode...
             blockgrid.blocks.clear()
+            
+    def return_to_menu(self):
+        self.next_state = mainmenu.MainMenu()
 
     def game_over(self):
         enemy.Enemy.velocity = [0, 0]

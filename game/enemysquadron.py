@@ -9,6 +9,10 @@ COL_SIZE = 4
 
 enemies = None
 
+def clean_up():
+    global enemies
+    enemies = None
+
 def reset():
     global enemies
     ingame.ENEMIES.empty()

@@ -13,10 +13,11 @@ from core import config
 import ingame
 
 HUD = pygame.sprite.LayeredUpdates()
+MENU = pygame.sprite.LayeredUpdates()
 
 class MainMenu(gamestate.GameState):    
     def __init__(self):
-        self.group_list += [HUD]
+        self.group_list = [HUD, MENU]
         
         make_text = config.FONT.render
         middle_x  = config.SCREEN_WIDTH / 2
@@ -40,13 +41,20 @@ class MainMenu(gamestate.GameState):
         
         self.frame_limit = True
         
-        HUD.add([self.hud_normalmode, self.hud_invasodado, self.hud_quit, self.hud_selection])
+        HUD.add(self.hud_invasodado)
+        MENU.add(self.hud_normalmode, self.hud_quit, self.hud_selection)
         
         self.menuLen        = 2
         self.curActionIndex = 0
         
     def __del__(self):
-        HUD.empty()
+        pygame.display.get_surface().blit(config.BG, (0, 0))
+        for g in self.group_list:
+            g.empty()
+        
+        self.group_list = []
+        
+        self.next_state = None
 
     def events(self, states):
         #This could DEFINITELY use some improvement.
@@ -61,6 +69,8 @@ class MainMenu(gamestate.GameState):
                         self.curActionIndex -= 1    
                 elif e.key == pygame.K_DOWN:
                         self.curActionIndex += 1
+                elif e.key == pygame.K_ESCAPE:
+                    quit()
                         
                 self.curActionIndex %= self.menuLen
             
@@ -83,6 +93,6 @@ class MainMenu(gamestate.GameState):
             pygame.display.update(g.draw(pygame.display.get_surface()))
             
         pygame.display.flip()
-        pygame.display.set_caption("FPS: " + str(round(self.fpsTimer.get_fps(), 3)))
+        pygame.display.set_caption("FPS: %f" % round(self.fpsTimer.get_fps(), 3))
             
         self.fpsTimer.tick(60 * self.frame_limit)

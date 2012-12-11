@@ -13,6 +13,10 @@ much time creating and destroying bullets).
 
 enemy_bullets = set()
 
+def clean_up():
+    global enemy_bullets
+    enemy_bullets.clear()
+
 def get_enemy_bullet():
     global enemy_bullets
     if len(enemy_bullets) == 0:

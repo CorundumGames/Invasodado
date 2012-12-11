@@ -18,10 +18,13 @@ bump = pygame.mixer.Sound("./sfx/bump.wav")
 
 block_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.LIST])
 
+def clean_up():
+    global blocks_set
+    blocks_set.clear()
+
 def get_block(pos, newcolor, special = False):
     global blocks_set
     if len(blocks_set) == 0:
-        print "china"
         blocks_set.add(Block((0, 0)))
     
     b          = blocks_set.pop()
@@ -34,7 +37,8 @@ def get_block(pos, newcolor, special = False):
     
 
 class Block(gameobject.GameObject):
-    '''Blocks are left by enemies when they're killed.  Match three of the same
+    '''
+    Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
     collisions = None
@@ -47,6 +51,7 @@ class Block(gameobject.GameObject):
         self.color           = newcolor
         self.image           = block_frames[id(self.color)]
         self.position        = pos
+        
         size = self.image.get_size()
         self.rect            = pygame.Rect(round(pos[0] / size[0]) * size[0],
                                            round(pos[1] / size[1]) * size[1],
@@ -79,7 +84,6 @@ class Block(gameobject.GameObject):
         self.add(ingame.BLOCKS)
 
     def start_falling(self):
-        global blocks
         bl = blockgrid.blocks
         blockgrid.blockstocheck.discard(self)
         for i in xrange(self.gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
@@ -154,7 +158,6 @@ class Block(gameobject.GameObject):
 
     def stop(self):
         #Stop all motion
-        global blocks
         self.acceleration[1] = 0.0
         self.velocity[1]     = 0.0
         self.gridcell[0]     = self.rect.centery / self.rect.height #(row, column)

@@ -21,6 +21,8 @@ def update():
             current_state.logic()
             current_state.render()
         else:
-            current_state = current_state.next_state
+            temp = current_state.next_state
+            current_state.__del__()
+            current_state = temp
     
     

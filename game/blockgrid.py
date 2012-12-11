@@ -18,7 +18,18 @@ blockstoclear = set()
 matchset = set()
 
 blockclear = pygame.mixer.Sound("./sfx/clear.wav")
-        
+
+def clean_up():
+    global blocks
+    global blockstocheck
+    global blockstoclear
+    global matchset
+    
+    blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
+    blockstocheck.clear()
+    blockstoclear.clear()
+    matchset.clear()
+
 def clear():
     global blocks
     for i in (j for j in ingame.BLOCKS if j.state != block.Block.STATES.IDLE):

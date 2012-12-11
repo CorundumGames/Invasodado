@@ -21,7 +21,7 @@ class UFO(gameobject.GameObject):
         
         self.image    = config.SPRITES.subsurface(pygame.Rect(32, 64, 64, 32)).copy()
         self.frames   = tuple(color.blend_color(self.image.copy(), c) for c in color.LIST[:config.NUM_COLORS])
-        self.rect     = pygame.Rect(START_POS, (self.image.get_width(), self.image.get_height()))
+        self.rect     = pygame.Rect(START_POS, self.image.get_size())
         self.position = list(START_POS)
 
         for c in self.frames:
@@ -29,7 +29,7 @@ class UFO(gameobject.GameObject):
         self.state    = self.__class__.STATES.IDLE
         
     def appear(self):
-        self.velocity[0]  = -.9
+        self.velocity[0]  = -0.9
         self.rect.topleft = list(START_POS)
         self.position     = list(START_POS)
         #self.add(ingame.ENEMIES)
@@ -39,8 +39,8 @@ class UFO(gameobject.GameObject):
         invade.play()
             
         self.position[0] += self.velocity[0]
-        self.rect.left   = self.position[0] + .5
-        self.image       = random.choice(self.frames)
+        self.rect.left    = self.position[0] + .5
+        self.image        = random.choice(self.frames)
         
         if self.rect.right < 0:
         #If we've gone past the left edge of the screen...
@@ -48,7 +48,7 @@ class UFO(gameobject.GameObject):
         
     def die(self):
         self.kill()
-        ingame.BLOCKS.add(block.Block([self.rect.centerx, 0], random.choice(color.LIST), specialblock=True))
+        ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], random.choice(color.LIST), special = True))
         invade.stop()
         self.velocity[0]  = 0
         self.position     = list(START_POS)

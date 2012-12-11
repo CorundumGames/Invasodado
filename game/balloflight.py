@@ -16,6 +16,10 @@ ball_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).c
 
 balls = set()
 
+def clean_up():
+    global balls
+    balls.clear()
+
 def get_ball(thestartpos, thecolor):
     global balls
     if len(balls) == 0:
