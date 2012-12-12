@@ -9,6 +9,8 @@ screen = pygame.display.set_mode(settings.resolution, pygame.DOUBLEBUF)
 SCREEN_DIMS = tuple(pygame.display.list_modes())
 #A tuple of all available screen resolutions.
 
+SCREEN_RECT = pygame.Rect((0, 0), screen.get_size())
+
 NUM_COLORS = 5
 #How many colors we'll use for the blocks
 

@@ -10,12 +10,12 @@ class HudObject(gameobject.GameObject):
     actions    = None
     collisions = None
     
-    def __init__(self, image, rect):
+    def __init__(self, image, pos):
         pygame.sprite.Sprite.__init__(self)
         self.acceleration = None
         self.image        = image
         self.position     = None
-        self.rect         = rect
+        self.rect         = pygame.Rect(pos, self.image.get_size())
         self.state        = None
         self.velocity     = None
         

@@ -21,10 +21,10 @@ import player
 import shipbullet
 import ufo
 
-PLAYER  = pygame.sprite.LayeredUpdates()
-ENEMIES = pygame.sprite.LayeredUpdates()
-BLOCKS  = pygame.sprite.LayeredUpdates()
-HUD     = pygame.sprite.LayeredUpdates()
+PLAYER  = pygame.sprite.RenderUpdates()
+ENEMIES = pygame.sprite.RenderUpdates()
+BLOCKS  = pygame.sprite.RenderUpdates()
+HUD     = pygame.sprite.RenderUpdates()
 
 DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
@@ -52,8 +52,8 @@ class InGameState(gamestate.GameState):
         self.ufo            = ufo.UFO()
         #The UFO
         
-        self.hud_score = hudobject.HudObject(pygame.Surface((0, 0)), pygame.Rect(16, 16, 0, 0))
-        self.hud_lives = hudobject.HudObject(pygame.Surface((0, 0)), pygame.Rect(config.SCREEN_WIDTH-160, 16, 0, 0))
+        self.hud_score = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
+        self.hud_lives = hudobject.HudObject(pygame.Surface((0, 0)), (config.SCREEN_WIDTH-160, 16))
         #The components of our HUD; let the player know how he's doing!
     
         self.game_running = True
@@ -194,7 +194,7 @@ class InGameState(gamestate.GameState):
     def game_over(self):
         enemy.Enemy.velocity = [0, 0]
         gameovertext         = hudobject.HudObject(config.FONT.render("GAME OVER", False, color.WHITE).convert(config.DEPTH, config.FLAGS),
-                                                   pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT/2, 0, 0)
+                                                   config.SCREEN_RECT.center
                                                    )
         self.ship.state      = player.STATES.DYING
         HUD.add(gameovertext)
