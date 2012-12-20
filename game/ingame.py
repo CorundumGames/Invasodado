@@ -1,4 +1,5 @@
 import math
+import random
 
 import pygame.display
 import pygame.event
@@ -50,6 +51,7 @@ class InGameState(gamestate.GameState):
         #The player
         
         self.ufo            = ufo.UFO()
+        self.ufoSpawnRange  = 10
         #The UFO
         
         self.hud_score = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
@@ -145,6 +147,10 @@ class InGameState(gamestate.GameState):
             
         if not self.game_running:
             self.game_over()
+        #handles UFO spawn
+        if random.uniform(1, 50000) < self.ufoSpawnRange:
+            self.add_ufo()
+        
 
 
     def render(self):
@@ -175,8 +181,7 @@ class InGameState(gamestate.GameState):
 
 
     def add_ufo(self):
-        if config.debug and self.ufo.state == ufo.UFO.STATES.IDLE:
-        #If we're in debug mode and the UFO is not active...
+        if self.ufo.state == ufo.UFO.STATES.IDLE:
             ENEMIES.add(self.ufo)
             self.ufo.state = ufo.UFO.STATES.APPEARING
             
