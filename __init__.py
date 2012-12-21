@@ -21,9 +21,11 @@ from game import mainmenu
 
 def main():
     while True:
+    #Until the game is closed...
         gsm.update()
         
         if pygame.event.peek(pygame.QUIT):
+        #If we've received a request to quit (either by the user or the OS)...
             return
         
 if __name__ == '__main__':

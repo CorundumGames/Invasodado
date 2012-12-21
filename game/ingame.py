@@ -8,6 +8,7 @@ import core.collisions as collisions
 import core.color      as color
 import core.config     as config
 import core.gamestate  as gamestate
+import core.highscoretable as highscoretable
 
 import balloflight
 import block
@@ -15,6 +16,7 @@ import blockgrid
 import enemy
 import enemybullet
 import enemysquadron
+import highscore
 import hudobject
 import mainmenu
 import player
@@ -60,14 +62,14 @@ class InGameState(gamestate.GameState):
         #False if we've gotten a game over
         
         self.key_actions = {
-                            pygame.K_ESCAPE: self.return_to_menu      ,
+                            pygame.K_ESCAPE: self.__return_to_menu      ,
                             pygame.K_SPACE : self.ship.on_fire_bullet ,
                             pygame.K_F1    : config.toggle_fullscreen ,
-                            pygame.K_c     : self.clear_blocks        ,
+                            pygame.K_c     : self.__clear_blocks        ,
                             pygame.K_d     : config.toggle_debug      ,
                             pygame.K_f     : config.toggle_frame_limit,
                             pygame.K_p     : config.toggle_pause      ,
-                            pygame.K_u     : self.add_ufo             ,
+                            pygame.K_u     : self.__add_ufo             ,
                             }
         #The keys available for use; key is keycode, element is a function
         
@@ -109,14 +111,12 @@ class InGameState(gamestate.GameState):
         prev_lives = None
         multiplier = DEFAULT_MULTIPLIER
         
-        self.next_state = None
-        
     def events(self, events):
         for e in events:
         #For all events passed in...
             if e.type == pygame.MOUSEBUTTONDOWN and config.debug:
             #If a mouse button is clicked...
-                self.make_block(e.pos[0], self.mouse_actions[e.button])
+                self.__make_block(e.pos[0], self.mouse_actions[e.button])
             elif e.type == pygame.KEYDOWN and e.key in self.key_actions:
             #If a key is pressed...
                 self.key_actions[e.key]()  
@@ -144,7 +144,7 @@ class InGameState(gamestate.GameState):
             self.game_running = False
             
         if not self.game_running:
-            self.game_over()
+            self.__game_over()
 
 
     def render(self):
@@ -169,33 +169,34 @@ class InGameState(gamestate.GameState):
             pygame.display.update(g.draw(pygame.display.get_surface()))
             
         pygame.display.flip()
-        pygame.display.set_caption("Score: %i    FPS: %f" % (score, round(self.fpsTimer.get_fps(), 3)))
+        pygame.display.set_caption("Score: %i    FPS: %f" % (score, round(self.fps_timer.get_fps(), 3)))
             
-        self.fpsTimer.tick(60 * config.limit_frame)
+        self.fps_timer.tick(60 * config.limit_frame)
 
 
-    def add_ufo(self):
+    def __add_ufo(self):
         if config.debug and self.ufo.state == ufo.UFO.STATES.IDLE:
         #If we're in debug mode and the UFO is not active...
             ENEMIES.add(self.ufo)
             self.ufo.state = ufo.UFO.STATES.APPEARING
             
-    def make_block(self, pos, c):
+    def __make_block(self, pos, c):
         BLOCKS.add(block.get_block([pos, 0], c))
         
-    def clear_blocks(self):
+    def __clear_blocks(self):
         if config.debug:
         #If we're in debug mode...
             blockgrid.blocks.clear()
             
-    def return_to_menu(self):
+    def __return_to_menu(self):
         self.next_state = mainmenu.MainMenu()
 
-    def game_over(self):
+    def __game_over(self):
         enemy.Enemy.velocity = [0, 0]
         gameovertext         = hudobject.HudObject(config.FONT.render("GAME OVER", False, color.WHITE).convert(config.DEPTH, config.FLAGS),
                                                    config.SCREEN_RECT.center
                                                    )
         self.ship.state      = player.STATES.DYING
+        highscore.score_tables[0] = highscoretable.HighScoreEntry("JTG", score, 1)
         HUD.add(gameovertext)
 
