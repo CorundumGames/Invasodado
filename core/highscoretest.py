@@ -3,13 +3,13 @@ import string
 import sys
 import unittest
 
-import HighScoreTable
+import highscoretable
 
 TABLE_SIZE = 10
 MODE       = random.choice(xrange(1, 6))
 
 class HighScoreTest(unittest.TestCase):
-    scores = HighScoreTable.HighScoreTable("scores.cg", MODE, TABLE_SIZE, "Scores", 'n')
+    scores = highscoretable.HighScoreTable("scores.cg", MODE, TABLE_SIZE, "Scores", 'n')
     
     def setUp(self):
         print "Start test!"

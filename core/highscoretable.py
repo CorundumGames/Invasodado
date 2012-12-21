@@ -6,10 +6,11 @@ import shelve
 
 PATTERN = '%Y-%m-%d %H:%M:%S.%f'
 
-class HighScoreEntry():  
+class HighScoreEntry:  
     def __init__(self, name, score, mode, entry = None):
 
         if entry == None:
+        #If we were not passed in a high score entry string...
             self.name     = name
             self.score    = int(score)
             self.mode     = int(mode) #Can represent game modes or difficulty
@@ -21,6 +22,7 @@ class HighScoreEntry():
                 raise ValueError("Name must be alphanumeric!")
 
         elif isinstance(entry, str):
+        #Else if we were passed a string for entry...
             a = entry.split('|')
             self.name     = a[0]
             self.score    = int(a[1])
@@ -28,26 +30,12 @@ class HighScoreEntry():
             self.country  = a[3]
             self.platform = a[4]
             self.time     = datetime.datetime.strptime(a[5], PATTERN)
-        
-    def __cmp__(self, other):
-        return cmp(self.score, other.score)
-
-    def __str__(self):
-        
-        a = '|'.join([self.name      ,
-                         str(self.score),
-                         str(self.mode) ,
-                         self.country   ,
-                         self.platform  ,
-                         str(self.time)
-                      ]
-                     )
-        return a
-
-    def __repr__(self):
-        return str(self)
 
     def scramble(self):
+        '''
+        Scrambles the high score so users don't mess with the local
+        high score database.
+        '''
         self.name     = base64.b64encode(self.name)
         self.score   ^= hash(self.name)
         self.mode    ^= self.score
@@ -56,6 +44,10 @@ class HighScoreEntry():
         self.time     = base64.b64encode(str(self.time))
 
     def unscramble(self):
+        '''
+        Unscrambles the high score so we can retrieve and print
+        the high score.
+        '''
         self.time     = datetime.datetime.strptime(base64.b64decode(self.time), PATTERN)
         self.platform = base64.b64decode(self.platform)
         self.country  = base64.b64decode(self.country)
@@ -63,9 +55,27 @@ class HighScoreEntry():
         self.score   ^= hash(self.name)
         self.name     = base64.b64decode(self.name)
         
-        
+    def __cmp__(self, other):
+        '''Allows us to sort by score.'''
+        return cmp(self.score, other.score)
 
-class HighScoreTable():
+    def __str__(self):
+        ''''Returns this entry as a string for local storage.'''
+        return '|'.join([self.name      ,
+                         str(self.score),
+                         str(self.mode) ,
+                         self.country   ,
+                         self.platform  ,
+                         str(self.time)
+                        ]
+                     )
+
+    def __repr__(self):
+        return str(self)
+        
+###############################################################################
+
+class HighScoreTable:
     def __init__(self, name, mode, size, title, db_flag = 'c'):
         self.filename  = name
         self.mode      = mode
@@ -74,19 +84,22 @@ class HighScoreTable():
         self.scorefile = shelve.open(self.filename, db_flag)
 
        
-    def addScore(self, scoreobject):
+    def add_score(self, scoreobject):
         if not isinstance(scoreobject, HighScoreEntry):
+        #If we weren't given a high score entry...
             raise TypeError("HighScoreTables may only hold HighScoreEntry objects!")
         elif scoreobject.mode != self.mode:
+        #If this score entry is for the wrong game mode...
             raise ValueError("HighScoreEntries must be the same mode as the table that holds them!")
         scoreobject.scramble()
         self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject
 
-    def addScores(self, iterable):
+    def add_scores(self, iterable):
         for i in iterable:
-            self.addScore(i)
+        #For every entry in the given list of scores...
+            self.add_score(i)
         
-    def getScores(self):
+    def get_scores(self):
         a = self.scorefile.values()
         for i in a: i.unscramble()
         a.sort(reverse = True)
