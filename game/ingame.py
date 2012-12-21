@@ -1,4 +1,5 @@
 import math
+import random
 
 import pygame.display
 import pygame.event
@@ -8,7 +9,6 @@ import core.collisions as collisions
 import core.color      as color
 import core.config     as config
 import core.gamestate  as gamestate
-import core.highscoretable as highscoretable
 
 import balloflight
 import block
@@ -16,7 +16,6 @@ import blockgrid
 import enemy
 import enemybullet
 import enemysquadron
-import highscore
 import hudobject
 import mainmenu
 import player
@@ -52,6 +51,7 @@ class InGameState(gamestate.GameState):
         #The player
         
         self.ufo            = ufo.UFO()
+        self.ufoSpawnRange  = 10
         #The UFO
         
         self.hud_score = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
@@ -63,12 +63,12 @@ class InGameState(gamestate.GameState):
         
         self.key_actions = {
                             pygame.K_ESCAPE: self.__return_to_menu      ,
-                            pygame.K_SPACE : self.ship.on_fire_bullet ,
-                            pygame.K_F1    : config.toggle_fullscreen ,
+                            pygame.K_SPACE : self.ship.on_fire_bullet   ,
+                            pygame.K_F1    : config.toggle_fullscreen   ,
                             pygame.K_c     : self.__clear_blocks        ,
-                            pygame.K_d     : config.toggle_debug      ,
-                            pygame.K_f     : config.toggle_frame_limit,
-                            pygame.K_p     : config.toggle_pause      ,
+                            pygame.K_d     : config.toggle_debug        ,
+                            pygame.K_f     : config.toggle_frame_limit  ,
+                            pygame.K_p     : config.toggle_pause        ,
                             pygame.K_u     : self.__add_ufo             ,
                             }
         #The keys available for use; key is keycode, element is a function
@@ -145,6 +145,9 @@ class InGameState(gamestate.GameState):
             
         if not self.game_running:
             self.__game_over()
+            
+        if random.uniform(1, 50000) < self.ufoSpawnRange:
+            self.__add_ufo()
 
 
     def render(self):
@@ -173,12 +176,6 @@ class InGameState(gamestate.GameState):
             
         self.fps_timer.tick(60 * config.limit_frame)
 
-
-    def __add_ufo(self):
-        if config.debug and self.ufo.state == ufo.UFO.STATES.IDLE:
-        #If we're in debug mode and the UFO is not active...
-            ENEMIES.add(self.ufo)
-            self.ufo.state = ufo.UFO.STATES.APPEARING
             
     def __make_block(self, pos, c):
         BLOCKS.add(block.get_block([pos, 0], c))
@@ -190,6 +187,12 @@ class InGameState(gamestate.GameState):
             
     def __return_to_menu(self):
         self.next_state = mainmenu.MainMenu()
+        
+    def __add_ufo(self):
+        if self.ufo.state == ufo.UFO.STATES.IDLE:
+        #If the UFO is not currently on-screen...
+            ENEMIES.add(self.ufo)
+            self.ufo.state = ufo.UFO.STATES.APPEARING
 
     def __game_over(self):
         enemy.Enemy.velocity = [0, 0]
@@ -199,4 +202,3 @@ class InGameState(gamestate.GameState):
         self.ship.state      = player.STATES.DYING
         highscore.score_tables[0] = highscoretable.HighScoreEntry("JTG", score, 1)
         HUD.add(gameovertext)
-

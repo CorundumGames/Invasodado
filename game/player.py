@@ -1,5 +1,4 @@
 import pygame.key
-import pygame.rect
 
 import core.color  as color
 import core.config as config
