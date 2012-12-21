@@ -18,7 +18,7 @@ from core import config
 from core import gsm
 from core import settings
 from game import mainmenu
-
+        
 def main():
     while True:
     #Until the game is closed...

@@ -65,6 +65,7 @@ def toggle_pause():
             #If the P key is pressed...
                 pause = not pause
                 break
+            
 def toggle_frame_limit():
     global limit_frame
     limit_frame = not limit_frame

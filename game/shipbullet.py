@@ -8,9 +8,11 @@ import enemy
 import ingame
 import ufo
 
-'''This is the bullet the ship has available.  It is not meant to be created
+'''
+This is the bullet the ship has available.  It is not meant to be created
 and deleted over and over, but to be reused by the ship (so we don't take as
-much time creating and destroying bullets).'''
+much time creating and destroying bullets).
+'''
 
 class ShipBullet(bullet.Bullet):
     SPEED     = -8

@@ -22,6 +22,7 @@ def update():
             current_state.render()
         else:
             temp = current_state.next_state
+            current_state.next_state = None
             current_state.__del__()
             current_state = temp
     

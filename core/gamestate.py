@@ -21,7 +21,7 @@ class GameState:
     next_state = None
     #If this isn't None, the gsm switches to this state
     
-    fpsTimer   = pygame.time.Clock()
+    fps_timer   = pygame.time.Clock()
     #The timer used to regulate frames per second
     
     def __init__(self):

@@ -15,7 +15,7 @@ class HudObject(gameobject.GameObject):
         self.acceleration = None
         self.image        = image
         self.position     = None
-        self.rect         = pygame.Rect(pos, self.image.get_size())
+        self.rect         = pygame.Rect(pos, image.get_size())
         self.state        = None
         self.velocity     = None
         
