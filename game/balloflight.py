@@ -35,7 +35,7 @@ class BallOfLight(gameobject.GameObject):
     collisions = None
     STATES     = config.Enum('IDLE', 'APPEARING', 'MOVING', 'DYING', 'RESET')
     
-    def __init__(self, startpos = (0, 0), color = random.choice(color.LIST)):
+    def __init__(self, startpos = (-300, -300), color = random.choice(color.LIST)):
         gameobject.GameObject.__init__(self)
         self.color    = color
         self.image    = ball_frames[id(self.color)]
