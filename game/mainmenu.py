@@ -59,15 +59,15 @@ class MainMenu(gamestate.GameState):
                              }
         
         self.menu_actions = {
-                             self.hud_normalmode.rect.midleft : self.start_game      ,
-                             self.hud_highscore.rect.midleft  : self.view_high_scores,
+                             self.hud_normalmode.rect.midleft : self.__start_game      ,
+                             self.hud_highscore.rect.midleft  : self.__view_high_scores,
                              self.hud_quit.rect.midleft       : quit                 ,
                              }
         
         self.key_actions  = {
-                             pygame.K_RETURN : self.enter_selection,
-                             pygame.K_UP     : self.move_up        ,
-                             pygame.K_DOWN   : self.move_down      ,
+                             pygame.K_RETURN : self.__enter_selection,
+                             pygame.K_UP     : self.__move_up        ,
+                             pygame.K_DOWN   : self.__move_down      ,
                              pygame.K_ESCAPE : quit                ,
                              }
         
@@ -115,26 +115,26 @@ class MainMenu(gamestate.GameState):
             
         self.fps_timer.tick(60 * self.frame_limit)
         
-    def start_game(self):
+    def __start_game(self):
         '''Begin the game.'''
         self.next_state = ingame.InGameState()
         
-    def enter_selection(self):
+    def __enter_selection(self):
         '''Go with the selection the player made.'''
         if self.hud_selection.rect.midright in self.menu_actions:
         #If we're highlighting a valid menu entry...
             self.menu_actions[self.hud_selection.rect.midright]()
             
-    def view_high_scores(self):
+    def __view_high_scores(self):
         '''Bring the player to the high score table.'''
         self.next_state = highscore.HighScoreState()
             
-    def move_up(self):
+    def __move_up(self):
         '''Move the cursor up.'''
         #There should probably be some animation here later.
         self.selection -= 1
         
-    def move_down(self):
+    def __move_down(self):
         '''Move the cursor down.'''
         #Likewise here.
         self.selection += 1
