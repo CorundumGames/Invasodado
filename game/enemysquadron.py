@@ -12,6 +12,7 @@ enemies = None
 def clean_up():
     global enemies
     enemies = None
+    enemy.Enemy.velocity = [.5, 0.0]
 
 def reset():
     global enemies
@@ -34,3 +35,10 @@ def move_down():
     #For all enemies...
         e.position[1] += 8
         e.rect.topleft = list(e.position)
+        
+def celebrate():
+    global enemies
+    for e in itertools.chain.from_iterable(enemies):
+    #For all enemies...
+        if e.state != e.__class__.STATES.IDLE:
+            e.state = enemy.Enemy.STATES.CHEERING

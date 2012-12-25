@@ -28,12 +28,12 @@ Algorithm for storing one colored Enemy per color (with all animations)
 hurt = pygame.mixer.Sound("./sfx/enemyhurt.wav")
 
 class Enemy(gameobject.GameObject):
-    STATES    = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'SHOOTING')
+    STATES    = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'SHOOTING', 'CHEERING')
     
     acceleration = [0.0, 0.0]
     count        = 0
     should_flip  = False
-    velocity     = [.5, 0.0]
+    velocity     = [0.5, 0.0]
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
@@ -63,6 +63,7 @@ class Enemy(gameobject.GameObject):
             self.state = self.__class__.STATES.SHOOTING
         
         if not Enemy.should_flip:
+        #If the squadron of enemies is marked to reverse direction...
             if self.rect.right > config.screen.get_width() or self.rect.left < 0:
             #If this enemy touches either end of the screen...
                 Enemy.should_flip = True
@@ -86,13 +87,17 @@ class Enemy(gameobject.GameObject):
         
         self.state = self.__class__.STATES.IDLE
         
+    def cheer(self):
+        pass
+        
     actions = {
-                STATES.APPEARING: 'appear'        ,
+                STATES.APPEARING: 'appear'      ,
                 STATES.LOWERING : NotImplemented,
-                STATES.ACTIVE   : 'move'          ,
-                STATES.DYING    : 'die'           ,
+                STATES.ACTIVE   : 'move'        ,
+                STATES.DYING    : 'die'         ,
                 STATES.IDLE     : None          ,
-                STATES.SHOOTING : 'shoot'         ,
+                STATES.SHOOTING : 'shoot'       ,
+                STATES.CHEERING : 'cheer',
                }
     
 import enemybullet
