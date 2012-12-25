@@ -24,8 +24,14 @@ class GameState:
     fps_timer   = pygame.time.Clock()
     #The timer used to regulate frames per second
     
-    def __init__(self):
-        '''Initialization logic is normally executed once here.'''
+    def __init__(self, *args):
+        '''
+        Initialization logic is normally executed once here.
+        That *args (which is accessible as a list) means we can pass in
+        arguments so our game state can run a certain way.  This way, rather
+        than creating a new object or subclass for a state that's slightly
+        different than another, we can just pass in an argument.
+        '''
         raise NotImplementedError(ERROR_STATEMENT)
         
     def events(self, events):
