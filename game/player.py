@@ -14,7 +14,7 @@ Python singleton.
 '''
 
 #Constants/magic numbers#
-STATES       = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE', 'DYING', 'RESPAWN')
+STATES       = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
 SURFACE_CLIP = pygame.Rect(0, 0, 32, 32)
 START_POS    = pygame.Rect(config.screen.get_width() /  2,
                            config.screen.get_height()* .8,
@@ -33,13 +33,13 @@ class Ship(gameobject.GameObject):
         self.position        = list(self.rect.topleft)
         self.state           = STATES.ACTIVE
         self.invincible      = False
-        self.invincibleCount = 0
+        self.invincible_count = 0
         
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
         
     def on_fire_bullet(self):
         bul = self.mybullet
-        if bul.state == bul.__class__.STATES.IDLE:
+        if bul.state == bul.__class__.STATES.IDLE and self.state == STATES.ACTIVE:
         #If our bullet is not already on-screen...
             bul.add(ingame.PLAYER)
             bul.rect.midbottom = self.rect.midtop
@@ -47,48 +47,50 @@ class Ship(gameobject.GameObject):
             bul.state          = bul.__class__.STATES.FIRED
             
     def respawn(self):
-        self.rect            = START_POS.copy()
-        self.position        = list(self.rect.topleft)
-        self.invincibleCount = 250
-        self.invincible      = True
-        self.state           = STATES.ACTIVE
+        self.image.set_alpha(128)
+        self.rect             = START_POS.copy()
+        self.position         = list(self.rect.topleft)
+        self.invincible_count = 250
+        self.invincible       = True
+        self.state            = STATES.ACTIVE
         
     def move(self):
         #Shorthand for which keys have been pressed
         keys = pygame.key.get_pressed()
         
-        if keys[pygame.K_LEFT] and self.rect.left > 0:
-        #If we're pressing left and not at the left edge of the screen...
-            self.velocity[0] = -SPEED
-        elif keys[pygame.K_RIGHT] and self.rect.right < config.screen.get_width():
-        #If we're pressing right and not at the right edge of the screen...
-            self.velocity[0] = SPEED
-        else:
-            self.velocity[0] = 0
+        if self.state not in (STATES.DYING, STATES.DEAD, STATES.IDLE):
+            if keys[pygame.K_LEFT] and self.rect.left > 0:
+            #If we're pressing left and not at the left edge of the screen...
+                self.velocity[0] = -SPEED
+            elif keys[pygame.K_RIGHT] and self.rect.right < config.SCREEN_RECT.right:
+            #If we're pressing right and not at the right edge of the screen...
+                self.velocity[0] = SPEED
+            else:
+                self.velocity[0] = 0
             
         self.velocity[0] += self.acceleration[0]
         self.position[0] += self.velocity[0]
         self.rect.x       = self.position[0] + .5
         
-        if self.invincibleCount == 0:
+        if self.invincible_count == 0:
         #If we're no longer invincible...
             self.invincible = False
-            self.image.set_alpha(255)
-            
+            self.image.set_alpha(255)    
         else:
-            self.invincibleCount -= 1
-            self.image.set_alpha(128)
+            self.invincible_count -= 1
+            
             
             
     def die(self):
         self.visible = False
-        self.state   = STATES.IDLE
+        self.state   = STATES.RESPAWN
         
     actions = {
-               STATES.IDLE      : None          ,
+               STATES.IDLE      : None            ,
                STATES.SPAWNING  : 'respawn'       ,
-               STATES.INVINCIBLE: NotImplemented,
+               STATES.INVINCIBLE: None,
                STATES.ACTIVE    : 'move'          ,
                STATES.DYING     : 'die'           ,
+               STATES.DEAD      : NotImplemented,
                STATES.RESPAWN   : 'respawn'
               }

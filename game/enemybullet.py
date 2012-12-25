@@ -48,10 +48,10 @@ class EnemyBullet(bullet.Bullet):
         enemy_bullets.add(self)
             
     def kill_player(self, other):
-        if not other.invincible:
+        if not other.invincible and other.state == player.STATES.ACTIVE:
         #If the player is not invincible...
             ingame.lives -= 1
-            other.state = player.STATES.RESPAWN
+            other.state = player.STATES.DYING
             other.image.set_alpha(128)
             self.state = self.__class__.STATES.RESET  
             

@@ -9,6 +9,7 @@ import core.collisions as collisions
 import core.color      as color
 import core.config     as config
 import core.gamestate  as gamestate
+import core.highscoretable as highscoretable
 
 import balloflight
 import block
@@ -16,6 +17,7 @@ import blockgrid
 import enemy
 import enemybullet
 import enemysquadron
+import highscore
 import hudobject
 import mainmenu
 import player
@@ -37,7 +39,10 @@ lives      = 3
 prev_lives = None
 
 class InGameState(gamestate.GameState):    
-    def __init__(self):
+    def __init__(self, *args):
+        self.args           = args
+        #The arguments we can use to change this gamestate
+        
         self.block_list     = []
         #The blocks available for use
         
@@ -56,6 +61,9 @@ class InGameState(gamestate.GameState):
         
         self.hud_score = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
         self.hud_lives = hudobject.HudObject(pygame.Surface((0, 0)), (config.SCREEN_WIDTH-160, 16))
+        self.gameovertext  = hudobject.HudObject(config.FONT.render("GAME OVER", False, color.WHITE).convert(config.DEPTH, config.FLAGS),
+                                                 config.SCREEN_RECT.center
+                                                )
         #The components of our HUD; let the player know how he's doing!
     
         self.game_running = True
@@ -85,12 +93,14 @@ class InGameState(gamestate.GameState):
         enemysquadron.reset()
         
     def __del__(self):
-        for g in self.group_list:
-            g.empty()
-            
         global score, prev_score
         global lives, prev_lives
         global multiplier
+        
+        for g in self.group_list:
+            g.empty()
+            
+        
         
         pygame.display.get_surface().blit(config.BG, (0, 0))
         balloflight.clean_up()
@@ -102,7 +112,6 @@ class InGameState(gamestate.GameState):
         self.group_list = []
         del self.hud_score
         del self.hud_lives
-        del self.ship
         del self.ufo
         
         score = 0
@@ -139,13 +148,12 @@ class InGameState(gamestate.GameState):
             enemysquadron.move_down()
             enemy.Enemy.should_flip = False
             
-        if lives == 0:
+        if lives == 0 and self.game_running:
         #If we run out of lives...
-            self.game_running = False
-            
-        if not self.game_running:
             self.__game_over()
-            
+            enemysquadron.celebrate()
+            self.game_running = False
+      
         if random.uniform(1, 50000) < self.ufoSpawnRange:
             self.__add_ufo()
 
@@ -196,9 +204,8 @@ class InGameState(gamestate.GameState):
 
     def __game_over(self):
         enemy.Enemy.velocity = [0, 0]
-        gameovertext         = hudobject.HudObject(config.FONT.render("GAME OVER", False, color.WHITE).convert(config.DEPTH, config.FLAGS),
-                                                   config.SCREEN_RECT.center
-                                                   )
-        self.ship.state      = player.STATES.DYING
-        highscore.score_tables[0] = highscoretable.HighScoreEntry("JTG", score, 1)
-        HUD.add(gameovertext)
+        
+        self.ship.kill()
+        self.ship.state      = player.STATES.IDLE
+        highscore.score_tables[0].add_score(highscoretable.HighScoreEntry("JTG", score, 1))
+        HUD.add(self.gameovertext)
