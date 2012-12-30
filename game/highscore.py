@@ -9,9 +9,9 @@ import core.highscoretable as highscoretable
 
 MENU = pygame.sprite.RenderUpdates()
 
-ROW_WIDTH = 20
-V_SPACE   = 8
-TABLE_CORNER = (16, 16)
+ROW_WIDTH = 32
+V_SPACE   = 24
+TABLE_CORNER = (16, 64)
 
 score_tables  = [
                  highscoretable.HighScoreTable("normal.wtf", 1, 10, "Scores")
@@ -34,12 +34,14 @@ def make_score_table(table, pos, vspace, width):
     for i in scores:
         b.append(i.name + '.'*(width - len(i.name) - len(str(i.score))) + str(i.score))
         
-    return hudobject.HudObject.make_text(b, TABLE_CORNER)
+    return hudobject.HudObject.make_text(b, TABLE_CORNER, vspace = V_SPACE)
     
 
 class HighScoreState(gameobject.GameObject):
-    def __init__(self):
+    def __init__(self, *args):
         global score_tables
+        self.args = args
+        
         self.key_actions = {
                             pygame.K_LEFT   : NotImplemented,
                             pygame.K_RIGHT  : NotImplemented,
@@ -49,7 +51,7 @@ class HighScoreState(gameobject.GameObject):
                             pygame.K_ESCAPE : self.__return_to_menu,
                             }
         
-        self.hud_titles   = [hudobject.HudObject(config.FONT.render("Scores", False, color.WHITE).convert(config.DEPTH, config.FLAGS), (0, 0))]
+        self.hud_titles   = [hudobject.HudObject.make_text("Scores", (config.SCREEN_RECT.midtop[0], 16))]
         #The list of the titles of high score tables
         
         self.hud_scores   = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)
@@ -60,6 +62,10 @@ class HighScoreState(gameobject.GameObject):
         self.group_list   = [MENU]
         
         MENU.add(self.hud_scores, self.hud_titles)
+        
+        if self.args:
+        #If we were passed in any arguments...
+            score_tables[0].add_score(highscoretable.HighScoreEntry("JesseTG", args[0], 1))
     
     def __del__(self):
         MENU.empty()
@@ -76,10 +82,10 @@ class HighScoreState(gameobject.GameObject):
         pass
     
     def render(self):
+        pygame.display.get_surface().blit(config.BG, (0, 0))
         for g in self.group_list:
             pygame.display.update(g.draw(pygame.display.get_surface()))
             
-        pygame.display.get_surface().blit(config.BG, (0, 0))
         pygame.display.flip()
     
     def __return_to_menu(self):

@@ -70,14 +70,14 @@ class InGameState(gamestate.GameState):
         #False if we've gotten a game over
         
         self.key_actions = {
-                            pygame.K_ESCAPE: self.__return_to_menu      ,
-                            pygame.K_SPACE : self.ship.on_fire_bullet   ,
-                            pygame.K_F1    : config.toggle_fullscreen   ,
-                            pygame.K_c     : self.__clear_blocks        ,
-                            pygame.K_d     : config.toggle_debug        ,
-                            pygame.K_f     : config.toggle_frame_limit  ,
-                            pygame.K_p     : config.toggle_pause        ,
-                            pygame.K_u     : self.__add_ufo             ,
+                            pygame.K_ESCAPE: self.__return_to_menu    ,
+                            pygame.K_SPACE : self.ship.on_fire_bullet ,
+                            pygame.K_F1    : config.toggle_fullscreen ,
+                            pygame.K_c     : self.__clear_blocks      ,
+                            pygame.K_d     : config.toggle_debug      ,
+                            pygame.K_f     : config.toggle_frame_limit,
+                            pygame.K_p     : config.toggle_pause      ,
+                            pygame.K_u     : self.__add_ufo           ,
                             }
         #The keys available for use; key is keycode, element is a function
         
@@ -128,7 +128,11 @@ class InGameState(gamestate.GameState):
                 self.__make_block(e.pos[0], self.mouse_actions[e.button])
             elif e.type == pygame.KEYDOWN and e.key in self.key_actions:
             #If a key is pressed...
-                self.key_actions[e.key]()  
+                if self.game_running:
+                #If we haven't gotten a game over...
+                    self.key_actions[e.key]()
+                else:
+                    self.next_state = highscore.HighScoreState(int(score))
     
     def logic(self):
         self.collision_grid.update()
@@ -182,7 +186,7 @@ class InGameState(gamestate.GameState):
         pygame.display.flip()
         pygame.display.set_caption("Score: %i    FPS: %f" % (score, round(self.fps_timer.get_fps(), 3)))
             
-        self.fps_timer.tick(60 * config.limit_frame)
+        self.fps_timer.tick_busy_loop(60 * config.limit_frame)
 
             
     def __make_block(self, pos, c):
@@ -207,5 +211,5 @@ class InGameState(gamestate.GameState):
         
         self.ship.kill()
         self.ship.state      = player.STATES.IDLE
-        highscore.score_tables[0].add_score(highscoretable.HighScoreEntry("JTG", score, 1))
+        
         HUD.add(self.gameovertext)

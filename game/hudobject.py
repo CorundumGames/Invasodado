@@ -25,6 +25,7 @@ class HudObject(gameobject.GameObject):
     def update(self):
         pass
     
+    @staticmethod
     def make_text(text, pos, color = color.WHITE, font = fonts[0], vspace = 8):
         '''
         text is the text we want visible to the user.  If text is an iterable,
@@ -39,9 +40,9 @@ class HudObject(gameobject.GameObject):
         vspace is the space between line in pixels.  Ignored if we only make one line.
         '''
         if isinstance(text, str):
-            return HudObject(font.render(text, False, color), pos)
+            return HudObject(font.render(text, False, color).convert(config.DEPTH, config.FLAGS), pos)
         else:
             a = []
-            for t in text:
-                a.append(HudObject(font.render(t, False, color).convert(config.DEPTH, config.FLAGS), (pos[0], pos[1] + vspace)))
+            for t in xrange(len(text)):
+                a.append(HudObject(font.render(text[t], False, color).convert(config.DEPTH, config.FLAGS), (pos[0], pos[1] + vspace*t)))
             return a

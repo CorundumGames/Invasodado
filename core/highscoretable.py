@@ -91,8 +91,11 @@ class HighScoreTable:
         elif scoreobject.mode != self.mode:
         #If this score entry is for the wrong game mode...
             raise ValueError("HighScoreEntries must be the same mode as the table that holds them!")
-        scoreobject.scramble()
-        self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject
+        
+        if scoreobject.score > self.lowest_score():
+        #If our score doesn't rank out...
+            scoreobject.scramble()
+            self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject
 
     def add_scores(self, iterable):
         for i in iterable:
@@ -104,6 +107,16 @@ class HighScoreTable:
         for i in a: i.unscramble()
         a.sort(reverse = True)
         return a
+    
+    def highest_score(self):
+        a = self.scorefile.values()[0]
+        a.unscramble()
+        return a.score
+    
+    def lowest_score(self):
+        a = self.scorefile.values()[-1]
+        a.unscramble()
+        return a.score
        
     def __len__(self):
         return self.size
