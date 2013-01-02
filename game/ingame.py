@@ -100,8 +100,6 @@ class InGameState(gamestate.GameState):
         for g in self.group_list:
             g.empty()
             
-        
-        
         pygame.display.get_surface().blit(config.BG, (0, 0))
         balloflight.clean_up()
         blockgrid.clean_up()
@@ -152,8 +150,8 @@ class InGameState(gamestate.GameState):
             enemysquadron.move_down()
             enemy.Enemy.should_flip = False
             
-        if lives == 0 and self.game_running:
-        #If we run out of lives...
+        if (lives == 0 or block.Block.block_full) and self.game_running:
+        #If we run out of lives or the blocks go past the top of the screen...
             self.__game_over()
             enemysquadron.celebrate()
             self.game_running = False

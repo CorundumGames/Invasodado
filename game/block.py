@@ -1,4 +1,3 @@
-import sys
 import random
 
 import pygame.mixer
@@ -41,6 +40,7 @@ class Block(gameobject.GameObject):
     Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
+    block_full = False
     collisions = None
     GRAVITY    = 0.5
     MAX_SPEED  = 12.0
@@ -133,11 +133,13 @@ class Block(gameobject.GameObject):
         #If this is a special block...
             self.image = random.choice(block_frames.values())
 
-        while isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
+        while self.target >= 0 and isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
         #While the target is equal to a space a block currently occupies...
             if self.target < 0:
-                sys.exit()
-            self.target -= 1
+            #If this column of blocks is full...
+                block_full = True
+            else:
+                self.target -= 1
 
 
 
@@ -200,11 +202,11 @@ class Block(gameobject.GameObject):
                              round(self.position[1] / self.image.get_width()) * self.image.get_height())
 
     actions = {
-                    STATES.IDLE         : None         ,
-                    STATES.APPEARING    : 'appear'       ,
-                    STATES.ACTIVE       : 'wait'         ,
-                    STATES.FALLING      : 'fall'         ,
-                    STATES.START_FALLING: 'start_falling',
-                    STATES.IMPACT       : 'stop'         ,
-                    STATES.DYING        : 'vanish'       ,
+                STATES.IDLE         : None           ,
+                STATES.APPEARING    : 'appear'       ,
+                STATES.ACTIVE       : 'wait'         ,
+                STATES.FALLING      : 'fall'         ,
+                STATES.START_FALLING: 'start_falling',
+                STATES.IMPACT       : 'stop'         ,
+                STATES.DYING        : 'vanish'       ,
               }
