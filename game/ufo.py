@@ -44,7 +44,7 @@ class UFO(gameobject.GameObject):
         self.state        = UFO.STATES.ACTIVE
     
     def move(self):
-        UFO.invade.play()
+        #UFO.invade.play()
             
         self.position[0] += self.velocity[0]
         self.rect.left    = self.position[0] + .5
@@ -52,11 +52,14 @@ class UFO(gameobject.GameObject):
         
         if self.rect.right < 0:
         #If we've gone past the left edge of the screen...
-            self.state = UFO.STATES.DYING
+            self.state = UFO.STATES.LEAVING
         
     def die(self):
-        self.kill()
         ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], random.choice(color.LIST), special = True))
+        self.state        = UFO.STATES.LEAVING
+        
+    def leave(self):
+        self.kill()
         UFO.invade.stop()
         self.velocity[0]  = 0
         self.position     = list(START_POS)
@@ -68,5 +71,5 @@ class UFO(gameobject.GameObject):
                 STATES.APPEARING: 'appear',
                 STATES.ACTIVE   : 'move'  ,
                 STATES.DYING    : 'die'   ,
-                STATES.LEAVING  : NotImplemented
+                STATES.LEAVING  : 'leave' ,
               }
