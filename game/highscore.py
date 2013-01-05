@@ -130,6 +130,7 @@ class HighScoreState(gameobject.GameObject):
             self.hud_scores = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)
             MENU.add(self.hud_scores)
         else:
+            self.curalphanumericindex = 0
             self.entryname += 'A'
             
     
