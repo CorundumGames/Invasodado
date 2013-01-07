@@ -1,6 +1,7 @@
 import pygame.display
 import pygame.image
 
+import color
 import settings
 
 screen = pygame.display.set_mode(settings.resolution, pygame.DOUBLEBUF)
@@ -73,3 +74,10 @@ def toggle_frame_limit():
 def toggle_debug():
     global debug
     debug = not debug
+    
+def get_colored_objects(frames):
+    a = dict([(id(c), [color.blend_color(SPRITES.subsurface(f).copy(), c) for f in frames]) for c in color.LIST])
+    for f in a:
+        for c in a[f]:
+            c.set_colorkey(c.get_at([0, 0]), FLAGS)
+    return a

@@ -14,35 +14,40 @@ Python singleton.
 '''
 
 #Constants/magic numbers#
-STATES       = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
-SURFACE_CLIP = pygame.Rect(0, 0, 32, 32)
-START_POS    = pygame.Rect(config.screen.get_width() /  2,
-                           config.screen.get_height()* .8,
-                           32        ,
-                           32)
-SPEED        = 4
+STATES    = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
+FRAMES    = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)).copy() for i in range(5)]
+START_POS = pygame.Rect(config.screen.get_width() /  2,
+                        config.screen.get_height()* .8,
+                        32        ,
+                        32)
+SPEED     = 4
 #########################
 
 class Ship(gameobject.GameObject):
     def __init__(self):
         gameobject.GameObject.__init__(self)
         
+        self.anim            = 0.0
         self.mybullet        = shipbullet.ShipBullet()
-        self.image           = config.SPRITES.subsurface(SURFACE_CLIP).copy() #@UndefinedVariable
+        self.image           = FRAMES[0] #@UndefinedVariable
         self.rect            = START_POS.copy()
         self.position        = list(self.rect.topleft)
         self.state           = STATES.ACTIVE
         self.invincible      = False
         self.invincible_count = 0
         
-        self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
+        for i in FRAMES:
+            i.set_colorkey(color.COLOR_KEY, config.FLAGS)
         
     def on_fire_bullet(self):
         bul = self.mybullet
         if bul.state == bul.__class__.STATES.IDLE and self.state == STATES.ACTIVE:
         #If our bullet is not already on-screen...
+            self.anim = 1
+            self.image = FRAMES[self.anim]
             bul.add(ingame.PLAYER)
-            bul.rect.midbottom = self.rect.midtop
+            #bul.rect.midbottom = self.rect.midtop
+            bul.rect.center = self.rect.center
             bul.position       = list(self.rect.midbottom)
             bul.state          = bul.__class__.STATES.FIRED
             
@@ -79,6 +84,11 @@ class Ship(gameobject.GameObject):
         else:
             self.invincible_count -= 1
             
+        if 0 < self.anim < len(FRAMES) - 1:
+            self.anim += 1.0/3.0
+        else:
+            self.anim  = 0
+        self.image = FRAMES[int(self.anim)]
             
             
     def die(self):
@@ -94,3 +104,6 @@ class Ship(gameobject.GameObject):
                STATES.DEAD      : NotImplemented,
                STATES.RESPAWN   : 'respawn'
               }
+    
+class FlameTrail(gameobject.GameObject):
+    pass

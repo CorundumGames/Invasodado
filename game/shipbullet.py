@@ -16,7 +16,7 @@ much time creating and destroying bullets).
 
 class ShipBullet(bullet.Bullet):
     SPEED     = -8
-    START_POS = pygame.Rect(30, config.screen.get_height()*2, 10, 10)
+    START_POS = pygame.Rect(30, config.screen.get_height()*2, 26, 19)
     
     def __init__(self):
         super(self.__class__, self).__init__()

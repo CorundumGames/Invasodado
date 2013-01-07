@@ -10,7 +10,7 @@ from.  Bullet should NOT be created in and of itself.
 '''
 
 class Bullet(gameobject.GameObject):
-    FRAME  = pygame.Rect(46, 10, 10, 10)
+    FRAME  = pygame.Rect(227, 6, 26, 19)
     STATES = config.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
     SPRITE = config.SPRITES.subsurface(FRAME)
     

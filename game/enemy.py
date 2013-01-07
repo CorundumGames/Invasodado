@@ -10,12 +10,11 @@ import balloflight
 import gameobject
 import ingame
 
-FRAMES    = [pygame.Rect( 0, 32, 32, 32),
-             pygame.Rect(32, 32, 32, 32)]
+FRAMES    = [pygame.Rect(32*i, 32, 32, 32) for i in range(4)]
 START_POS = (32, 32)
 SAFE_SPOT = (0, config.screen.get_height()*3)
 
-enemy_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAMES[0]).copy(), c)) for c in color.LIST])
+enemy_frames = config.get_colored_objects(FRAMES)
 
 '''
 Algorithm for storing one colored Enemy per color (with all animations)
@@ -37,9 +36,10 @@ class Enemy(gameobject.GameObject):
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
+        self.anim          = 0.0
         self.color         = random.choice(color.LIST[:config.NUM_COLORS])
         self.form_position = form_position
-        self.image         = enemy_frames[id(self.color)]
+        self.image         = enemy_frames[id(self.color)][0]
         self.position      = list(START_POS)
         self.rect          = pygame.Rect(START_POS, self.image.get_size())
         self.state         = self.__class__.STATES.IDLE 
@@ -51,12 +51,13 @@ class Enemy(gameobject.GameObject):
                              START_POS[1] * (self.form_position[1]+1)* 1.5]
         self.rect.topleft = map(round, self.position)
         self.color        = random.choice(color.LIST[0:config.NUM_COLORS])
-        self.image        = enemy_frames[id(self.color)]
-        self.image.set_colorkey(self.image.get_at((0, 0)), config.FLAGS)
+        self.image        = enemy_frames[id(self.color)][0]
         
         self.state = self.__class__.STATES.ACTIVE
         
     def move(self):
+        self.anim += 1.0/3.0
+        self.image = enemy_frames[id(self.color)][int(-abs(self.anim - 3) + 3) % 4]
         self.position[0] += Enemy.velocity[0]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         if random.uniform(1, 5000) < self.shootRange:

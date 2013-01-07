@@ -9,10 +9,10 @@ import block
 import gameobject
 import ingame
 
-FRAME        = pygame.Rect(0, 96, 32, 32)
+FRAMES        = [pygame.Rect(32 * i, 96, 32, 32) for i in range(5)]
 TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
 
-ball_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.LIST])
+ball_frames = config.get_colored_objects(FRAMES)
 
 balls = set()
 
@@ -37,8 +37,9 @@ class BallOfLight(gameobject.GameObject):
     
     def __init__(self, startpos = (-300, -300), color = random.choice(color.LIST)):
         gameobject.GameObject.__init__(self)
+        self.anim     = 0
         self.color    = color
-        self.image    = ball_frames[id(self.color)]
+        self.image    = ball_frames[id(self.color)][0]
         self.rect     = pygame.Rect(startpos, self.image.get_size())
         self.position = list(startpos)
         self.progress = 0.0
@@ -51,9 +52,7 @@ class BallOfLight(gameobject.GameObject):
         
         
     def appear(self):
-        self.image    = ball_frames[id(self.color)]
-        self.image.set_colorkey(self.image.get_at((0, 0)), config.FLAGS)
-        
+        self.image    = ball_frames[id(self.color)][0]
         self.rect.topleft = self.startpos
         self.position     = list(self.startpos)
         self.progress     = 0.0
@@ -65,6 +64,10 @@ class BallOfLight(gameobject.GameObject):
         self.progress += 1
         percent        = self.progress/TIME_TO_MOVE
         target         = self.target
+        
+        if self.anim < len(FRAMES) - 1:
+            self.anim += 1
+            self.image = ball_frames[id(self.color)][self.anim]
         
         dx  = (percent**2)*(3-2*percent)
         ddx = 1 - dx
@@ -79,6 +82,7 @@ class BallOfLight(gameobject.GameObject):
         global balls
         balls.add(self)
         ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], self.color))
+        self.anim = 0
         self.remove(ingame.ENEMIES)
         self.position = [-300, -300]
         self.rect.topleft = self.position

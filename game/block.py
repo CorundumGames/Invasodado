@@ -1,3 +1,4 @@
+import itertools
 import random
 
 import pygame.mixer
@@ -9,19 +10,18 @@ import blockgrid
 import gameobject
 import ingame
 
-
-FRAME = pygame.Rect(0, 64, 32, 32)
+FRAMES = [pygame.Rect(32 * i, 160, 32, 32) for i in range(8)]
 
 blocks_set = set()
 bump = pygame.mixer.Sound("./sfx/bump.wav")
 
-block_frames = dict([(id(c), color.blend_color(config.SPRITES.subsurface(FRAME).copy(), c)) for c in color.LIST])
+block_frames = config.get_colored_objects(FRAMES)
 
 def clean_up():
     global blocks_set
     blocks_set.clear()
 
-def get_block(pos, newcolor, special = False):
+def get_block(pos, newcolor = random.choice(color.LIST), special = False):
     global blocks_set
     if len(blocks_set) == 0:
         blocks_set.add(Block((pos[0],pos[1],newcolor)))
@@ -48,8 +48,9 @@ class Block(gameobject.GameObject):
 
     def __init__(self, pos, newcolor = random.choice(color.LIST), specialblock = False):
         gameobject.GameObject.__init__(self)
+        self.anim            = 0
         self.color           = newcolor
-        self.image           = block_frames[id(self.color)]
+        self.image           = block_frames[id(self.color)][0]
         self.position        = pos
         
         size = self.image.get_size()
@@ -66,8 +67,7 @@ class Block(gameobject.GameObject):
 
     def appear(self):
         self.acceleration[1] = self.__class__.GRAVITY
-        self.image           = block_frames[id(self.color)]
-        self.image.set_colorkey(None, config.FLAGS)
+        self.image           = block_frames[id(self.color)][0]
         
         size = self.image.get_size()
         self.rect     = pygame.Rect(round(self.position[0] / size[0]) * size[0],
@@ -128,10 +128,14 @@ class Block(gameobject.GameObject):
         self.position[1] += self.velocity[1]
         self.rect.top     = self.position[1] + .5  #Round to the nearest integer
         self.gridcell[0]  = self.rect.centery / self.rect.height
+        
+        if self.anim < len(FRAMES) - 1:
+            self.anim += 1
+            self.image = block_frames[id(self.color)][self.anim]
 
         if self.special:
         #If this is a special block...
-            self.image = random.choice(block_frames.values())
+            self.image = random.choice(block_frames.values())[self.anim]
 
         while self.target >= 0 and isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
         #While the target is equal to a space a block currently occupies...
@@ -185,8 +189,8 @@ class Block(gameobject.GameObject):
                 blockgrid.clear_row(self.gridcell[0])
 
     def vanish(self):
-        #Maybe if there are any blocks above, they should all start falling.
         global blocks_set
+        self.anim                                            = 0
         self.remove(ingame.BLOCKS)
         blockgrid.blockstocheck.discard(self)
         self.position                                        = [-300, -300]

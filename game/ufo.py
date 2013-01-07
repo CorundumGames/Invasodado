@@ -20,7 +20,7 @@ class UFO(gameobject.GameObject):
     def __init__(self):
         gameobject.GameObject.__init__(self)
         
-        self.image    = config.SPRITES.subsurface(pygame.Rect(32, 64, 64, 32)).copy()
+        self.image    = config.SPRITES.subsurface(pygame.Rect(0, 64, 64, 32)).copy()
         #The UFO image; by default, the plain white one (it will be recolored)
         
         self.frames   = tuple(color.blend_color(self.image.copy(), c) for c in color.LIST[:config.NUM_COLORS])
@@ -55,7 +55,7 @@ class UFO(gameobject.GameObject):
             self.state = UFO.STATES.LEAVING
         
     def die(self):
-        ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], random.choice(color.LIST), special = True))
+        ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], special = True))
         self.state        = UFO.STATES.LEAVING
         
     def leave(self):
