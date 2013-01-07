@@ -14,10 +14,7 @@ pygame.mixer.init()
 pygame.display.init()
 pygame.font.init()
 
-from core import config
 from core import gsm
-from core import settings
-from game import mainmenu
         
 def main():
     while True:

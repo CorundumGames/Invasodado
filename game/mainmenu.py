@@ -18,6 +18,10 @@ This is where the user makes his decisions about what to do in the game.
 Not really special compared to any other main menu.
 '''
 
+def menu_text(text):
+    '''Returns a text graphic in the main menu's font style.'''
+    return config.FONT.render(text, False, color.WHITE).convert(config.DEPTH, config.FLAGS)
+
 HUD  = pygame.sprite.RenderUpdates()
 MENU = pygame.sprite.RenderUpdates()
 
@@ -26,10 +30,6 @@ DIST_APART = 64
 
 MENU_CORNER = (config.SCREEN_RECT.centerx - 112, config.SCREEN_RECT.centery - 64)
 #The location of the top-left corner of the menu
-
-def menu_text(text):
-    '''Returns a text graphic in the main menu's font style.'''
-    return config.FONT.render(text, False, color.WHITE).convert(config.DEPTH, config.FLAGS)
 
 class MainMenu(gamestate.GameState):    
     def __init__(self):
