@@ -137,12 +137,10 @@ class SettingsMenu(gamestate.GameState):
         
     def __toggle_fullscreen(self):
         config.toggle_fullscreen()
-        self.hud_fullscreen_status.kill()
         if config.settings.fullscreen:
-            self.hud_fullscreen_status = hudobject.HudObject(menu_text("On"), (MENU_CORNER[0] + self.hud_fullscreen.rect.width + DIST_APART_STATUS, MENU_CORNER[1]))
+            self.hud_fullscreen_status.image = hudobject.HudObject.make_text("On", surfaces = True)
         else:
-            self.hud_fullscreen_status = hudobject.HudObject(menu_text("Off"), (MENU_CORNER[0] + self.hud_fullscreen.rect.width + DIST_APART_STATUS, MENU_CORNER[1]))
-        HUD.add(self.hud_fullscreen_status)
+            self.hud_fullscreen_status.image = hudobject.HudObject.make_text("Off", surfaces = True)
     
     def __toggle_color_blind_mode(self):
         pass

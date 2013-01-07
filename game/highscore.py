@@ -96,9 +96,7 @@ class HighScoreState(gameobject.GameObject):
     def render(self):
         pygame.display.get_surface().blit(config.BG, (0, 0))
         if self.enteringname:
-            self.hud_name.kill()
-            self.hud_name = hudobject.HudObject.make_text(self.entryname, ENTRY_NAME_POS)
-            MENU.add(self.hud_name)
+            self.hud_name.image = hudobject.HudObject.make_text(self.entryname, surfaces = True)
         for g in self.group_list:
             pygame.display.update(g.draw(pygame.display.get_surface()))
             
