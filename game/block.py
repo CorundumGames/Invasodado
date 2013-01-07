@@ -24,7 +24,7 @@ def clean_up():
 def get_block(pos, newcolor, special = False):
     global blocks_set
     if len(blocks_set) == 0:
-        blocks_set.add(Block((pos[0],pos[1])))
+        blocks_set.add(Block((pos[0],pos[1],newcolor)))
     
     b          = blocks_set.pop()
     b.color    = newcolor
