@@ -1,5 +1,6 @@
 import base64
 import datetime
+import json
 import platform
 import re
 import shelve
@@ -76,13 +77,21 @@ class HighScoreEntry:
 ###############################################################################
 
 class HighScoreTable:
-    def __init__(self, name, mode, size, title, db_flag = 'c'):
+    def __init__(self, name, mode, size, title, default, db_flag = 'c'):
         self.filename  = name
         self.mode      = mode
         self.size      = size
         self.title     = title
         self.scorefile = shelve.open(self.filename, db_flag)
-
+        
+        if len(self.scorefile.keys()) < self.size:
+        #If our high score table has missing entries...
+            a = self.set_to_default(default)
+            for i in a:
+                self.add_score(HighScoreEntry(i, a[i], self.mode))
+            
+    def __del__(self):
+        self.scorefile.close()
        
     def add_score(self, scoreobject):
         if not isinstance(scoreobject, HighScoreEntry):
@@ -92,7 +101,7 @@ class HighScoreTable:
         #If this score entry is for the wrong game mode...
             raise ValueError("HighScoreEntries must be the same mode as the table that holds them!")
         
-        if scoreobject.score > self.lowest_score():
+        if len(self.scorefile.keys()) < self.size or scoreobject.score > self.lowest_score():
         #If our score doesn't rank out...
             scoreobject.scramble()
             self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject
@@ -117,6 +126,13 @@ class HighScoreTable:
         a = self.scorefile.values()[-1]
         a.unscramble()
         return a.score
+    
+    def set_to_default(self, filename):
+        '''
+        Takes in a JSON file and loads default scores from there.
+        This is meant to be used for default high score tables, and NOT for storage.
+        '''
+        return json.load(open(filename))
        
     def __len__(self):
         return self.size

@@ -16,7 +16,7 @@ ENTRY_NAME_POS = (0,config.SCREEN_HEIGHT - 32)
 ALPHANUMERIC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '
 
 score_tables  = [
-                 highscoretable.HighScoreTable("normal.wtf", 1, 10, "Scores")
+                 highscoretable.HighScoreTable("normal.wtf", 1, 10, "Scores", "./save/norm_default.json")
                  ]
 
 def make_score_table(table, pos, vspace, width):
