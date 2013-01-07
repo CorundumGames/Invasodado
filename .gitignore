@@ -42,4 +42,5 @@ pygame.display
 .settings
 profile.out
 *.wtf
+git.sh
 

@@ -9,34 +9,33 @@ import core.highscoretable as highscoretable
 
 MENU = pygame.sprite.RenderUpdates()
 
-ROW_WIDTH = 32
-V_SPACE   = 24
-TABLE_CORNER = (16, 64)
+ROW_WIDTH      = 32
+V_SPACE        = 24
+TABLE_CORNER   = (16, 64)
 ENTRY_NAME_POS = (0,config.SCREEN_HEIGHT - 32)
-ALPHANUMERIC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 '
+ALPHANUMERIC   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-'
 
 score_tables  = [
-                 highscoretable.HighScoreTable("normal.wtf", 1, 10, "Scores", "./save/norm_default.json")
+                 highscoretable.HighScoreTable("./save/normal.wtf", 1, 10, "Scores", "./save/norm_default.json")
                  ]
 
-def make_score_table(table, pos, vspace, width):
+def make_score_table(table, pos, vspace, width, surfaces = False):
     '''
     Creates a visual representation of a high score table.
-    Returns a list of pygame.HudObjects.
+    Returns a list of HudObjects, or pygame.Surfaces if surfaces is True
     
-    table is the HighScoreTable
-    pos is the position of the top-left corner
-    vspace is the vertical space between each line
-    width is the width of the table in characters
-    
+    @param table: The HighScoreTable to take the scores from
+    @param pos: The position of the top-left corner
+    @param vspace: The vertical space between each line in pixels
+    @param width: The width of the table in characters
     '''
     
     b = []
     scores = table.get_scores()
     for i in scores:
         b.append(i.name + '.'*(width - len(i.name) - len(str(i.score))) + str(i.score))
-        
-    return hudobject.HudObject.make_text(b, TABLE_CORNER, vspace = V_SPACE)
+    
+    return hudobject.HudObject.make_text(b, TABLE_CORNER, color.WHITE, config.FONT, V_SPACE, surfaces)
     
 
 class HighScoreState(gameobject.GameObject):
@@ -69,7 +68,6 @@ class HighScoreState(gameobject.GameObject):
         
         if self.args:
         #If we were passed in any arguments...
-            #score_tables[0].add_score(highscoretable.HighScoreEntry("Test", self.args[0], 1))
             print(score_tables[0].lowest_score())
             if self.args[0] > score_tables[0].lowest_score():
                 print(args[0])

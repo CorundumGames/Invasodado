@@ -5,7 +5,9 @@ import core.color  as color
 import gameobject
 
 class HudObject(gameobject.GameObject):
-    '''HudObject is meant for displays like lives, score, etc.
+    '''
+    HudObject is meant for displays like lives, score, etc.
+    
     It is its own type so it can be in collisions.do_not_check, because we
     don't intend for these to collide with anything.
     '''
@@ -26,23 +28,31 @@ class HudObject(gameobject.GameObject):
         pass
     
     @staticmethod
-    def make_text(text, pos, color = color.WHITE, font = fonts[0], vspace = 8):
+    def make_text(text, pos = (0, 0), color = color.WHITE, font = fonts[0], vspace = 8, surfaces = False):
         '''
-        text is the text we want visible to the user.  If text is an iterable,
-        each entry is on another line.
-        
-        pos is where the topleft corner of the pygame.Surface should be.
-        
-        color is the color of the text.
-        
-        font is the font used; it defaults to the first font entry
-        
-        vspace is the space between line in pixels.  Ignored if we only make one line.
+        @param text: The text we want visible to the user. If a list, one element per line
+        @param pos: The topleft corner of the position rect
+        @param color: The color of the text
+        @param font: The font used; it defaults to the first font entry
+        @param vspace: Space between lines in pixels. Ignored if only one line.
+        @param surfaces: True if we want Surfaces instead of HudObjects (pos is then ignored)
         '''
+        
         if isinstance(text, str):
-            return HudObject(font.render(text, False, color).convert(config.DEPTH, config.FLAGS), pos)
+        #If we were given a single string...
+            a = font.render(text, False, color).convert(config.DEPTH, config.FLAGS)
+            if surfaces:
+                return a
+            else:
+                return HudObject(a, pos)
         else:
-            a = []
+            b = []
             for t in xrange(len(text)):
-                a.append(HudObject(font.render(text[t], False, color).convert(config.DEPTH, config.FLAGS), (pos[0], pos[1] + vspace*t)))
-            return a
+                c = font.render(text[t], False, color).convert(config.DEPTH, config.FLAGS)
+                if surfaces:
+                #If we want to return surfaces...
+                    b.append(c)
+                else:
+                    b.append(HudObject(c, (pos[0], pos[1] + vspace*t)))
+
+            return b

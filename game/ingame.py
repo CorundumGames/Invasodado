@@ -59,11 +59,9 @@ class InGameState(gamestate.GameState):
         self.ufoSpawnRange  = 10
         #The UFO
         
-        self.hud_score = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
-        self.hud_lives = hudobject.HudObject(pygame.Surface((0, 0)), (config.SCREEN_WIDTH-160, 16))
-        self.gameovertext  = hudobject.HudObject(config.FONT.render("GAME OVER", False, color.WHITE).convert(config.DEPTH, config.FLAGS),
-                                                 config.SCREEN_RECT.center
-                                                )
+        self.hud_score     = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
+        self.hud_lives     = hudobject.HudObject(pygame.Surface((0, 0)), (config.SCREEN_WIDTH-160, 16))
+        self.gameovertext  = hudobject.HudObject.make_text("GAME OVER", config.SCREEN_RECT.center)
         #The components of our HUD; let the player know how he's doing!
     
         self.game_running = True
@@ -99,7 +97,7 @@ class InGameState(gamestate.GameState):
         
         for g in self.group_list:
             g.empty()
-            
+             
         pygame.display.get_surface().blit(config.BG, (0, 0))
         balloflight.clean_up()
         blockgrid.clean_up()
@@ -112,9 +110,9 @@ class InGameState(gamestate.GameState):
         del self.hud_lives
         del self.ufo
         
-        score = 0
+        score      = 0
         prev_score = None
-        lives = 3
+        lives      = 3
         prev_lives = None
         multiplier = DEFAULT_MULTIPLIER
         
@@ -169,12 +167,12 @@ class InGameState(gamestate.GameState):
         
         if score != prev_score:
         #If our score has changed since the last frame...
-            self.hud_score.image = config.FONT.render("Score: %i" % score, False, color.WHITE).convert(config.DEPTH, config.FLAGS)
+            self.hud_score.image = hudobject.HudObject.make_text("Score: %i" % score, surfaces = True)
             prev_score = score
             
         if lives != prev_lives:
-        #If our lives have changed since the last frame...
-            self.hud_lives.image = config.FONT.render("Lives: %i" % lives, False, color.WHITE).convert(config.DEPTH, config.FLAGS)
+        #If we've gained or lost lives since the last frame...
+            self.hud_lives.image = hudobject.HudObject.make_text("Lives: %i" % lives, surfaces = True)
             prev_lives = lives
         
         for g in self.group_list:
