@@ -15,8 +15,10 @@ This is a menu that lets the user change settings within the game.
 HUD  = pygame.sprite.RenderUpdates()
 MENU = pygame.sprite.RenderUpdates()
 
-DIST_APART = 64
+DIST_APART_MENU = 64
 #How far apart, vertically, the menu entries are (in pixels)
+DIST_APART_STATUS = 32
+#How far apart, horizontally, the status of a menu entry is from the menu entry
 
 MENU_CORNER = (config.SCREEN_RECT.topleft[0] + 32 , config.SCREEN_RECT.topleft[1] + 64)
 #The location of the top-left corner of the menu
@@ -32,17 +34,25 @@ class SettingsMenu(gamestate.GameState):
         self.hud_title = hudobject.HudObject(menu_text("Settings"),
                                              (config.SCREEN_RECT.centerx - 64, 32)
                                              )
-        #Will be replaced with a logo (aka an actual image) later.
-        
-        self.hud_selection      = hudobject.HudObject(menu_text("->"), (0, 0))
         
         self.hud_fullscreen     = hudobject.HudObject(menu_text("Full Screen"), MENU_CORNER)
         
-        self.hud_colorblindmode = hudobject.HudObject(menu_text("Color Blind mode"), (MENU_CORNER[0], MENU_CORNER[1] + DIST_APART))
+        self.hud_colorblindmode = hudobject.HudObject(menu_text("Color Blind mode"), (MENU_CORNER[0], MENU_CORNER[1] + DIST_APART_MENU))
         
-        self.hud_difficulty     = hudobject.HudObject(menu_text("Difficulty"), (MENU_CORNER[0], MENU_CORNER[1] + 2*DIST_APART))
+        self.hud_difficulty     = hudobject.HudObject(menu_text("Difficulty"), (MENU_CORNER[0], MENU_CORNER[1] + 2*DIST_APART_MENU))
         
-        self.hud_mainmenu       = hudobject.HudObject(menu_text("Return to Main Menu"), (config.SCREEN_RECT.centerx - 160, MENU_CORNER[1] + 3*DIST_APART))
+        self.hud_mainmenu       = hudobject.HudObject(menu_text("Return to Main Menu"), (config.SCREEN_RECT.centerx - 160, MENU_CORNER[1] + 3*DIST_APART_MENU))
+        
+        self.hud_selection              = hudobject.HudObject(menu_text("->"), (0, 0))
+        
+        if config.settings.fullscreen:
+            self.hud_fullscreen_status = hudobject.HudObject(menu_text("On"), (MENU_CORNER[0] + self.hud_fullscreen.rect.width + DIST_APART_STATUS, MENU_CORNER[1]))
+        else:
+            self.hud_fullscreen_status = hudobject.HudObject(menu_text("Off"), (MENU_CORNER[0] + self.hud_fullscreen.rect.width + DIST_APART_STATUS, MENU_CORNER[1]))
+        
+        self.hud_colorblindmode_status  = hudobject.HudObject(menu_text("Off"), (MENU_CORNER[0] + self.hud_colorblindmode.rect.width + DIST_APART_STATUS, MENU_CORNER[1] + DIST_APART_MENU))#Add a conditional to display correct status
+        
+        self.hud_difficulty_status      = hudobject.HudObject(menu_text("Easy"), (MENU_CORNER[0] + self.hud_difficulty.rect.width + DIST_APART_STATUS, MENU_CORNER[1] + 2*DIST_APART_MENU))#Add a conditional to diplay correct status
         
         self.frame_limit = True
         #True if we're limiting the frame rate to 60 FPS
@@ -71,7 +81,7 @@ class SettingsMenu(gamestate.GameState):
         
         self.selection    = 0
         
-        HUD.add(self.hud_title, self.hud_selection)
+        HUD.add(self.hud_title, self.hud_selection, self.hud_fullscreen_status, self.hud_colorblindmode_status, self.hud_difficulty_status)
         MENU.add(self.hud_fullscreen, self.hud_colorblindmode, self.hud_difficulty, self.hud_mainmenu)
         
     def __del__(self):
@@ -127,6 +137,12 @@ class SettingsMenu(gamestate.GameState):
         
     def __toggle_fullscreen(self):
         config.toggle_fullscreen()
+        self.hud_fullscreen_status.kill()
+        if config.settings.fullscreen:
+            self.hud_fullscreen_status = hudobject.HudObject(menu_text("On"), (MENU_CORNER[0] + self.hud_fullscreen.rect.width + DIST_APART_STATUS, MENU_CORNER[1]))
+        else:
+            self.hud_fullscreen_status = hudobject.HudObject(menu_text("Off"), (MENU_CORNER[0] + self.hud_fullscreen.rect.width + DIST_APART_STATUS, MENU_CORNER[1]))
+        HUD.add(self.hud_fullscreen_status)
     
     def __toggle_color_blind_mode(self):
         pass

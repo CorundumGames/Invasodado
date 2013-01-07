@@ -55,7 +55,7 @@ class HighScoreState(gameobject.GameObject):
                             pygame.K_ESCAPE : self.__return_to_menu,
                             }
         
-        self.hud_titles   = [hudobject.HudObject.make_text("Scores", (config.SCREEN_RECT.midtop[0], 16))]
+        self.hud_titles   = [hudobject.HudObject.make_text("Scores", (config.SCREEN_RECT.midtop[0] - 64, 16))]
         #The list of the titles of high score tables
         
         self.hud_scores   = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)
@@ -122,13 +122,13 @@ class HighScoreState(gameobject.GameObject):
     
     def __confirmchar(self):
         self.curnameindex += 1
-        if self.curnameindex > self.charLimit:
-            self.enteringname = False
-            self.hud_name.kill()
-            score_tables[0].add_score(highscoretable.HighScoreEntry(self.entryname, self.args[0], 1))
-            MENU.remove(self.hud_scores)
-            self.hud_scores = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)
-            MENU.add(self.hud_scores)
+        if self.curnameindex > self.charLimit:#Finished entering the name
+            self.enteringname = False#End the entering name process
+            self.hud_name.kill()#Get rid of the name entry characters
+            score_tables[0].add_score(highscoretable.HighScoreEntry(self.entryname, self.args[0], 1))#add the entry to the leaderboard
+            MENU.remove(self.hud_scores)#remove the menu from the screen
+            self.hud_scores = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
+            MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
         else:
             self.curalphanumericindex = 0
             self.entryname += 'A'
