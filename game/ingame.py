@@ -61,7 +61,8 @@ class InGameState(gamestate.GameState):
         
         self.hud_score     = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
         self.hud_lives     = hudobject.HudObject(pygame.Surface((0, 0)), (config.SCREEN_WIDTH-160, 16))
-        self.gameovertext  = hudobject.HudObject.make_text("GAME OVER", config.SCREEN_RECT.center)
+        self.gameovertext  = hudobject.HudObject.make_text("GAME OVER", (config.SCREEN_RECT.centerx - 64, config.SCREEN_RECT.centery - 64))
+        self.gameovertext2 = hudobject.HudObject.make_text("Press fire to continue", (config.SCREEN_RECT.centerx - 192,config.SCREEN_RECT.centery))
         #The components of our HUD; let the player know how he's doing!
     
         self.game_running = True
@@ -128,7 +129,8 @@ class InGameState(gamestate.GameState):
                 #If we haven't gotten a game over...
                     self.key_actions[e.key]()
                 else:
-                    self.next_state = highscore.HighScoreState(int(score))
+                    if e.key == pygame.K_SPACE:
+                        self.next_state = highscore.HighScoreState(int(score))
     
     def logic(self):
         self.collision_grid.update()
@@ -209,3 +211,4 @@ class InGameState(gamestate.GameState):
         self.ship.state      = player.STATES.IDLE
         
         HUD.add(self.gameovertext)
+        HUD.add(self.gameovertext2)
