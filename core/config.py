@@ -40,7 +40,7 @@ pause = False
 limit_frame = True
 #True if we're restricting framerate to 60FPS
 
-debug = False
+debug = True
 #True if we're in debug mode
 
 class Enum(object):

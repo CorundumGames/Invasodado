@@ -139,11 +139,9 @@ class Block(gameobject.GameObject):
 
         while self.target >= 0 and isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
         #While the target is equal to a space a block currently occupies...
-            if self.target < 0:
-            #If this column of blocks is full...
-                block_full = True
-            else:
                 self.target -= 1
+        if self.target < 2:
+            self.__class__.block_full = True
 
 
 

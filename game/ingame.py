@@ -90,6 +90,8 @@ class InGameState(gamestate.GameState):
         PLAYER.add(self.ship)
         HUD.add(self.hud_score, self.hud_lives)
         enemysquadron.reset()
+        if block.Block.block_full:
+            block.Block.block_full = False
         
     def __del__(self):
         global score, prev_score
