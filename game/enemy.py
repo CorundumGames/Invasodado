@@ -62,7 +62,7 @@ class Enemy(gameobject.GameObject):
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         if random.uniform(1, 5000) < self.shootRange:
             self.state = self.__class__.STATES.SHOOTING
-        
+    
         if not Enemy.should_flip:
         #If the squadron of enemies is marked to reverse direction...
             if self.rect.right > config.screen.get_width() or self.rect.left < 0:
@@ -87,6 +87,11 @@ class Enemy(gameobject.GameObject):
         self.rect.topleft = self.position
         
         self.state = self.__class__.STATES.IDLE
+        #increase the velocity of the squadron
+        if Enemy.velocity[0] > 0:
+            Enemy.velocity[0] += .1
+        else:
+            Enemy.velocity[0] -= .1
         
     def cheer(self):
         pass

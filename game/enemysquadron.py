@@ -18,6 +18,7 @@ def reset():
     global enemies
     ingame.ENEMIES.empty()
     enemies = [[enemy.Enemy((i, j)) for i in xrange(ROW_SIZE)] for j in xrange(COL_SIZE)]
+    enemy.Enemy.velocity = [.5, 0.0]
     
     for i in enemies:
     #For all rows of enemies...
