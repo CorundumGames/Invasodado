@@ -107,6 +107,8 @@ class MainMenu(gamestate.GameState):
         pass
     
     def render(self):
+        pygame.display.get_surface().fill((0, 0, 0))
+        pygame.display.get_surface().blit(config.EARTH, (16, 16))
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
         self.hud_selection.rect.midright = self.menu_entries[self.selection].rect.midleft

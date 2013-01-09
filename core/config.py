@@ -28,7 +28,11 @@ SCREEN_HEIGHT = screen.get_height() #480 15 cells 32
 SPRITES = pygame.image.load("./gfx/sprites.png").convert(DEPTH, FLAGS)
 #The main spritesheet for this game.
 
+EARTH   = pygame.image.load("./gfx/earth.png").convert(DEPTH, FLAGS)
+EARTH.set_colorkey(pygame.Color(0, 0, 0))
+
 BG = pygame.image.load("./gfx/bg.png").convert(DEPTH, FLAGS)
+BG.set_colorkey(pygame.Color(0, 0, 0))
 #The background
 
 FONT = pygame.font.Font("./gfx/font.ttf", 18)

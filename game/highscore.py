@@ -94,6 +94,8 @@ class HighScoreState(gameobject.GameObject):
         pass
     
     def render(self):
+        pygame.display.get_surface().fill((0, 0, 0))
+        pygame.display.get_surface().blit(config.EARTH, (16, 16))
         pygame.display.get_surface().blit(config.BG, (0, 0))
         if self.enteringname:
             self.hud_name.image = hudobject.HudObject.make_text(self.entryname, surfaces = True)

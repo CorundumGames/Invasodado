@@ -1,3 +1,4 @@
+import math
 import random
 
 import pygame
@@ -8,8 +9,9 @@ from core import color
 from core import config
 import ingame
 
+FRAMES    = [pygame.Rect(64 * (i % 4), 192 + 32*(i/4), 64, 32) for i in range(10, -1, -1)]
 START_POS = (640, 16)
-#The UFO's starting position; it waits here when idle.
+ufo_frames = config.get_colored_objects(FRAMES)
 
 class UFO(gameobject.GameObject):
     STATES = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING')
@@ -20,35 +22,32 @@ class UFO(gameobject.GameObject):
     def __init__(self):
         gameobject.GameObject.__init__(self)
         
-        self.image    = config.SPRITES.subsurface(pygame.Rect(0, 64, 64, 32)).copy()
+        self.anim     = 0.0
+        
+        self.image    = config.SPRITES.subsurface(FRAMES[0]).copy()
         #The UFO image; by default, the plain white one (it will be recolored)
         
-        self.frames   = tuple(color.blend_color(self.image.copy(), c) for c in color.LIST[:config.NUM_COLORS])
-        #The colors that the UFO cycles through
-        
         self.rect     = pygame.Rect(START_POS, self.image.get_size())
-        #The collision boundary of the USO
+        #The collision boundary of the UFO
         
         self.position = list(START_POS)
-
-        for c in self.frames:
-        #For all colored UFO sprites...
-            c.set_colorkey(c.get_at((0, 0)), config.FLAGS)
             
         self.state = UFO.STATES.IDLE
         
     def appear(self):
-        self.velocity[0]  = -0.9
+        self.velocity[0]  = -1.1
         self.rect.topleft = list(START_POS)
         self.position     = list(START_POS)
         self.state        = UFO.STATES.ACTIVE
     
     def move(self):
         #UFO.invade.play()
-            
+        self.anim        += 1.0/2
+        self.image        = ufo_frames[id(random.choice(color.LIST))][int(self.anim) % len(FRAMES)]
         self.position[0] += self.velocity[0]
-        self.rect.left    = self.position[0] + .5
-        self.image        = random.choice(self.frames)
+        self.position[1] += math.sin(self.anim/4)
+        self.rect.topleft    = (self.position[0] + .5, self.position[1] + .5)
+        
         
         if self.rect.right < 0:
         #If we've gone past the left edge of the screen...
@@ -56,7 +55,7 @@ class UFO(gameobject.GameObject):
         
     def die(self):
         ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], special = True))
-        self.state        = UFO.STATES.LEAVING
+        self.state = UFO.STATES.LEAVING
         
     def leave(self):
         self.kill()

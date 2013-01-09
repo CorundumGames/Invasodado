@@ -163,6 +163,8 @@ class InGameState(gamestate.GameState):
         global lives
         global prev_score
         global prev_lives
+        pygame.display.get_surface().fill((0, 0, 0))
+        pygame.display.get_surface().blit(config.EARTH, (160, 160))
         pygame.display.get_surface().blit(config.BG, (0, 0))
         
         if score != prev_score:
