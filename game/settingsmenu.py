@@ -5,6 +5,7 @@ from core import color
 from core import config
 from core import gamestate
 
+import bg
 import mainmenu
 import hudobject
 
@@ -14,6 +15,7 @@ This is a menu that lets the user change settings within the game.
 
 HUD  = pygame.sprite.RenderUpdates()
 MENU = pygame.sprite.RenderUpdates()
+BG   = pygame.sprite.LayeredUpdates()
 
 DIST_APART_MENU = 64
 #How far apart, vertically, the menu entries are (in pixels)
@@ -29,7 +31,7 @@ def menu_text(text):
 
 class SettingsMenu(gamestate.GameState):    
     def __init__(self):
-        self.group_list = [HUD, MENU]
+        self.group_list = [bg.STARS_GROUP, BG, HUD, MENU]
         
         self.hud_title = hudobject.HudObject(menu_text("Settings"),
                                              (config.SCREEN_RECT.centerx - 64, 32)
@@ -83,16 +85,15 @@ class SettingsMenu(gamestate.GameState):
         
         HUD.add(self.hud_title, self.hud_selection, self.hud_fullscreen_status, self.hud_colorblindmode_status, self.hud_difficulty_status)
         MENU.add(self.hud_fullscreen, self.hud_colorblindmode, self.hud_difficulty, self.hud_mainmenu)
+        BG.add(bg.EARTH, bg.GRID)
         
     def __del__(self):
-        pygame.display.get_surface().blit(config.BG, (0, 0))
         for g in self.group_list:
         #For all groups of sprites...
             g.empty()
         
         self.group_list = []
-        
-    
+
 
     def events(self, events):
         for e in events:
@@ -103,18 +104,19 @@ class SettingsMenu(gamestate.GameState):
                 self.selection %= len(self.menu_entries)
             
     def logic(self):
-        pass
+        for g in self.group_list:
+        #For all Sprite groups...
+            g.update()
     
     def render(self):
         pygame.display.get_surface().fill((0, 0, 0))
-        pygame.display.get_surface().blit(config.EARTH, (16, 16))
-        pygame.display.get_surface().blit(config.BG, (0, 0))
         
         self.hud_selection.rect.midright = self.menu_entries[self.selection].rect.midleft
         
+        bg.STARS.emit()
         for g in self.group_list:
         #For all Sprite groups...
-            pygame.display.update(g.draw(pygame.display.get_surface()))
+            g.draw(pygame.display.get_surface())
             
         pygame.display.flip()
         pygame.display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))

@@ -60,7 +60,7 @@ def update():
     global blocks
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     
-    for b in (x for x in ingame.BLOCKS if x.state == block.Block.STATES.ACTIVE):
+    for b in (x for x in ingame.BLOCKS if isinstance(x, block.Block) and x.state == block.Block.STATES.ACTIVE):
     #For all blocks that are on the grid and not moving...
         blocks[b.gridcell[0]][b.gridcell[1]] = b
 

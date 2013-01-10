@@ -33,6 +33,7 @@ EARTH.set_colorkey(pygame.Color(0, 0, 0))
 
 BG = pygame.image.load("./gfx/bg.png").convert(DEPTH, FLAGS)
 BG.set_colorkey(pygame.Color(0, 0, 0))
+BG.set_alpha(128)
 #The background
 
 FONT = pygame.font.Font("./gfx/font.ttf", 18)
@@ -44,7 +45,7 @@ pause = False
 limit_frame = True
 #True if we're restricting framerate to 60FPS
 
-debug = True
+debug = False
 #True if we're in debug mode
 
 class Enum(object):

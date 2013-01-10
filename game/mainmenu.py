@@ -8,6 +8,7 @@ from core import color
 from core import config
 from core import gamestate
 
+import bg
 import ingame
 import highscore
 import hudobject
@@ -24,6 +25,7 @@ def menu_text(text):
 
 HUD  = pygame.sprite.RenderUpdates()
 MENU = pygame.sprite.RenderUpdates()
+BG   = pygame.sprite.LayeredUpdates()
 
 DIST_APART = 64
 #How far apart, vertically, the menu entries are (in pixels)
@@ -33,7 +35,7 @@ MENU_CORNER = (config.SCREEN_RECT.centerx - 112, config.SCREEN_RECT.centery - 64
 
 class MainMenu(gamestate.GameState):    
     def __init__(self):
-        self.group_list = [HUD, MENU]
+        self.group_list = [bg.STARS_GROUP, BG, HUD, MENU]
         
         self.hud_title = hudobject.HudObject(menu_text("Invasodado"),
                                              (config.SCREEN_RECT.centerx - 96, 32)
@@ -80,9 +82,9 @@ class MainMenu(gamestate.GameState):
         
         HUD.add(self.hud_title, self.hud_selection)
         MENU.add(self.hud_normalmode, self.hud_highscore, self.hud_quit, self.hud_settings)
+        BG.add(bg.EARTH, bg.GRID)
         
     def __del__(self):
-        pygame.display.get_surface().blit(config.BG, (0, 0))
         for g in self.group_list:
         #For all groups of sprites...
             g.empty()
@@ -100,22 +102,19 @@ class MainMenu(gamestate.GameState):
                 self.selection %= len(self.menu_entries)
             
     def logic(self):
-        '''
-        There will probably be logic here later if we add any
-        animation to the main menu.
-        '''
-        pass
-    
-    def render(self):
-        pygame.display.get_surface().fill((0, 0, 0))
-        pygame.display.get_surface().blit(config.EARTH, (16, 16))
-        pygame.display.get_surface().blit(config.BG, (0, 0))
-        
-        self.hud_selection.rect.midright = self.menu_entries[self.selection].rect.midleft
-        
         for g in self.group_list:
         #For all Sprite groups...
-            pygame.display.update(g.draw(pygame.display.get_surface()))
+            g.update()
+    
+    def render(self):
+        
+        
+        self.hud_selection.rect.midright = self.menu_entries[self.selection].rect.midleft
+        pygame.display.get_surface().fill((0, 0, 0))
+        bg.STARS.emit()
+        for g in self.group_list:
+        #For all Sprite groups...
+            g.draw(pygame.display.get_surface())
             
         pygame.display.flip()
         pygame.display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))

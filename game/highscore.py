@@ -2,12 +2,14 @@ import pygame
 
 import core.config as config
 import core.color  as color
+import bg
 import gameobject
 import hudobject
 import mainmenu
 import core.highscoretable as highscoretable
 
 MENU = pygame.sprite.RenderUpdates()
+BG   = pygame.sprite.LayeredUpdates()
 
 ROW_WIDTH      = 32
 V_SPACE        = 24
@@ -62,9 +64,10 @@ class HighScoreState(gameobject.GameObject):
         
         self.next_state   = None
         
-        self.group_list   = [MENU]
+        self.group_list   = [bg.STARS_GROUP, BG, MENU]
         
         MENU.add(self.hud_scores, self.hud_titles)
+        BG.add(bg.EARTH, bg.GRID)
         
         if self.args:
         #If we were passed in any arguments...
@@ -78,8 +81,10 @@ class HighScoreState(gameobject.GameObject):
                 MENU.add(self.hud_name)
                     
     def __del__(self):
-        MENU.empty()
-        pygame.display.get_surface().blit(config.BG, (0, 0))
+        for g in self.group_list:
+        #For all groups of sprites...
+            g.empty()
+        
     
     def events(self, events):
         for e in events:
@@ -89,16 +94,18 @@ class HighScoreState(gameobject.GameObject):
                 self.key_actions[e.key]()
     
     def logic(self):
-        pass
+        for g in self.group_list:
+        #For all Sprite groups...
+            g.update()
     
     def render(self):
-        pygame.display.get_surface().fill((0, 0, 0))
-        pygame.display.get_surface().blit(config.EARTH, (16, 16))
-        pygame.display.get_surface().blit(config.BG, (0, 0))
         if self.enteringname:
             self.hud_name.image = hudobject.HudObject.make_text(self.entryname, surfaces = True)
+        
+        pygame.display.get_surface().fill((0, 0, 0))
+        bg.STARS.emit()
         for g in self.group_list:
-            pygame.display.update(g.draw(pygame.display.get_surface()))
+            g.draw(pygame.display.get_surface())
             
         pygame.display.flip()
         
