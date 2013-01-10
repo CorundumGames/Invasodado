@@ -68,9 +68,7 @@ class HighScoreState(gameobject.GameObject):
         
         if self.args:
         #If we were passed in any arguments...
-            print(score_tables[0].lowest_score())
             if self.args[0] > score_tables[0].lowest_score():
-                print(args[0])
                 self.enteringname = True
                 self.charLimit = 9
                 self.entryname = 'A'

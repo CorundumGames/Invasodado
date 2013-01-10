@@ -12,6 +12,7 @@ import core.gamestate  as gamestate
 import core.highscoretable as highscoretable
 
 import balloflight
+import bg
 import block
 import blockgrid
 import enemy
@@ -28,6 +29,7 @@ PLAYER  = pygame.sprite.RenderUpdates()
 ENEMIES = pygame.sprite.RenderUpdates()
 BLOCKS  = pygame.sprite.RenderUpdates()
 HUD     = pygame.sprite.RenderUpdates()
+BG      = pygame.sprite.LayeredUpdates()
 
 DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
@@ -49,7 +51,7 @@ class InGameState(gamestate.GameState):
         self.collision_grid = collisions.CollisionGrid(4, 4, 1)
         #The collision-handling system
         
-        self.group_list     = [BLOCKS, ENEMIES, PLAYER, HUD]
+        self.group_list     = [bg.STARS_GROUP, BG, BLOCKS, ENEMIES, PLAYER, HUD]
         #The groups of sprites to process
         
         self.ship           = player.Ship()
@@ -61,9 +63,10 @@ class InGameState(gamestate.GameState):
         
         self.hud_score     = hudobject.HudObject(pygame.Surface((0, 0)), (16, 16))
         self.hud_lives     = hudobject.HudObject(pygame.Surface((0, 0)), (config.SCREEN_WIDTH-160, 16))
-        self.gameovertext  = hudobject.HudObject.make_text("GAME OVER", config.SCREEN_RECT.center)
+        self.gameovertext  = hudobject.HudObject.make_text("GAME OVER", (config.SCREEN_RECT.centerx - 64, config.SCREEN_RECT.centery - 64))
+        self.gameovertext2 = hudobject.HudObject.make_text("Press fire to continue", (config.SCREEN_RECT.centerx - 192,config.SCREEN_RECT.centery))
         #The components of our HUD; let the player know how he's doing!
-    
+        
         self.game_running = True
         #False if we've gotten a game over
         
@@ -88,17 +91,17 @@ class InGameState(gamestate.GameState):
         
         PLAYER.add(self.ship)
         HUD.add(self.hud_score, self.hud_lives)
+        BG.add(bg.EARTH, bg.GRID)
         enemysquadron.reset()
+        block.Block.block_full = False
         
     def __del__(self):
         global score, prev_score
         global lives, prev_lives
         global multiplier
-        
         for g in self.group_list:
             g.empty()
-             
-        pygame.display.get_surface().blit(config.BG, (0, 0))
+        
         balloflight.clean_up()
         blockgrid.clean_up()
         block.clean_up()
@@ -128,7 +131,8 @@ class InGameState(gamestate.GameState):
                 #If we haven't gotten a game over...
                     self.key_actions[e.key]()
                 else:
-                    self.next_state = highscore.HighScoreState(int(score))
+                    if e.key == pygame.K_SPACE:
+                        self.next_state = highscore.HighScoreState(int(score))
     
     def logic(self):
         self.collision_grid.update()
@@ -163,9 +167,7 @@ class InGameState(gamestate.GameState):
         global lives
         global prev_score
         global prev_lives
-        pygame.display.get_surface().fill((0, 0, 0))
-        pygame.display.get_surface().blit(config.EARTH, (160, 160))
-        pygame.display.get_surface().blit(config.BG, (0, 0))
+        
         
         if score != prev_score:
         #If our score has changed since the last frame...
@@ -177,9 +179,11 @@ class InGameState(gamestate.GameState):
             self.hud_lives.image = hudobject.HudObject.make_text("Lives: %i" % lives, surfaces = True)
             prev_lives = lives
         
+        pygame.display.get_surface().fill((0, 0, 0))
+        bg.STARS.emit()
         for g in self.group_list:
         #For all Sprite groups...
-            pygame.display.update(g.draw(pygame.display.get_surface()))
+            g.draw(pygame.display.get_surface())
             
         pygame.display.flip()
         pygame.display.set_caption("Score: %i    FPS: %f" % (score, round(self.fps_timer.get_fps(), 3)))
@@ -210,4 +214,5 @@ class InGameState(gamestate.GameState):
         self.ship.kill()
         self.ship.state      = player.STATES.IDLE
         
-        HUD.add(self.gameovertext)
+        HUD.add(self.gameovertext )
+        HUD.add(self.gameovertext2)
