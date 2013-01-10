@@ -5,6 +5,7 @@ import pygame.rect
 
 import core.color  as color
 import core.config as config
+import core.particles as particles
 
 import balloflight
 import gameobject
@@ -33,6 +34,7 @@ class Enemy(gameobject.GameObject):
     count        = 0
     should_flip  = False
     velocity     = [0.5, 0.0]
+    particles    = particles.ParticlePool(particles.Particle)
     
     def __init__(self, form_position):
         gameobject.GameObject.__init__(self)
@@ -45,6 +47,9 @@ class Enemy(gameobject.GameObject):
         self.state         = self.__class__.STATES.IDLE 
         self.shootRange    = 10
         
+        self.emitter       = particles.ParticleEmitter(self.__class__.particles, self.rect, 4, ingame.ENEMIES)
+        
+        
     def appear(self):
         self.add(ingame.ENEMIES)
         self.position     = [START_POS[0] * (self.form_position[0]+1)* 1.5,
@@ -56,10 +61,11 @@ class Enemy(gameobject.GameObject):
         self.state = self.__class__.STATES.ACTIVE
         
     def move(self):
-        self.anim += 1.0/3.0
-        self.image = enemy_frames[id(self.color)][int(-abs(self.anim - 3) + 3) % 4]
+        self.anim        += 1.0/3.0
+        self.image        = enemy_frames[id(self.color)][int(-abs(self.anim - 3) + 3) % 4]
         self.position[0] += Enemy.velocity[0]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
+        self.emitter.rect = self.rect
         if random.uniform(1, 5000) < self.shootRange:
             self.state = self.__class__.STATES.SHOOTING
     
@@ -88,11 +94,8 @@ class Enemy(gameobject.GameObject):
         
         self.state = self.__class__.STATES.IDLE
         #increase the velocity of the squadron
-        if Enemy.velocity[0] > 0:
-            Enemy.velocity[0] += .1
-        else:
-            Enemy.velocity[0] -= .1
-        
+        Enemy.velocity[0] += .1 if Enemy.velocity[0] > 0 else -.1
+
     def cheer(self):
         pass
         
