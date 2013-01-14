@@ -9,21 +9,19 @@ import hudobject
 
 STARS_GROUP = pygame.sprite.RenderUpdates()
 
-class Star(particles.Particle):
-    image     = config.SPRITES.subsurface(4, 170, 2, 2)
-    
-    def appear(self):
-        self.velocity[0] = random.randint(1, 5)
-        self.state       = self.__class__.STATES.ACTIVE
-        
-    def move_func(self):
-        self.position[0] += self.velocity[0]
-        self.rect.left    = self.position[0]
+def star_appear(self):
+    self.velocity[0] = random.randint(1, 5)
+
+def star_move(self):
+    self.position[0] += self.velocity[0]
+    self.rect.left    = self.position[0]
+
+star_image = config.SPRITES.subsurface(4, 170, 2, 2)
 
 EARTH = hudobject.HudObject(config.EARTH, [0, 0])
 GRID  = hudobject.HudObject(config.BG   , [0, 0])
-STARS = particles.ParticleEmitter(particles.ParticlePool(Star),
-                                  pygame.Rect([0, 0], config.SCREEN_RECT.bottomleft),
+STARS = particles.ParticleEmitter(particles.ParticlePool(star_image, star_move, star_appear),
+                                  pygame.Rect(0, 0, 0, config.SCREEN_HEIGHT),
                                   8,
                                   STARS_GROUP
                                   )

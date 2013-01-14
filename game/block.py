@@ -17,39 +17,36 @@ GRAVITY = 0.5
 blocks_set = set()
 bump = pygame.mixer.Sound("./sfx/bump.wav")
 
-block_frames = config.get_colored_objects(FRAMES)
+block_frames    = config.get_colored_objects(FRAMES)
+particle_colors = config.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
+
+
+def _block_particle_move(self):
+    self.velocity[1] += self.acceleration[1]
+    self.position[0] += self.velocity[0]
+    self.position[1] += self.velocity[1]
+    self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
+
+def _block_particle_appear(self):
+    self.acceleration[1] = GRAVITY
+    self.velocity        = [random.uniform(-5, 5), random.uniform(-1, -3)]
 
 def clean_up():
-    global blocks_set
     blocks_set.clear()
 
 def get_block(pos, newcolor = random.choice(color.LIST), special = False):
-    global blocks_set
     if len(blocks_set) == 0:
-        blocks_set.add(Block((pos[0],pos[1],newcolor)))
-    
+        blocks_set.add(Block(pos, newcolor))
+
     b          = blocks_set.pop()
     b.color    = newcolor
     b.position = pos
     b.special  = special
     b.state    = Block.STATES.APPEARING
-    
-    return b
-    
-class BlockParticle(particles.Particle):
-        image   = pygame.Surface([2, 2], config.FLAGS, config.DEPTH)
-        image.fill(color.WHITE)
 
-        def appear(self):
-            self.acceleration[1] = GRAVITY
-            self.velocity        = [random.uniform(-5, 5), random.uniform(-1, -3)]
-            self.state           = self.__class__.STATES.ACTIVE
-            
-        def move_func(self):
-            self.velocity[1] += self.acceleration[1]
-            self.position[0] += self.velocity[0]
-            self.position[1] += self.velocity[1]
-            self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
+    return b
+
+block_particles  = dict([(id(c), particles.ParticlePool(particle_colors[id(c)][0], _block_particle_move, _block_particle_appear)) for c in color.LIST])
 
 class Block(gameobject.GameObject):
     '''
@@ -61,7 +58,7 @@ class Block(gameobject.GameObject):
     GRAVITY    = 0.5
     MAX_SPEED  = 12.0
     STATES     = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
-    particles  = particles.ParticlePool(BlockParticle)
+
 
     def __init__(self, pos, newcolor = random.choice(color.LIST), specialblock = False):
         gameobject.GameObject.__init__(self)
@@ -69,7 +66,7 @@ class Block(gameobject.GameObject):
         self.color    = newcolor
         self.image    = block_frames[id(self.color)][0]
         self.position = pos
-        
+
         size = self.image.get_size()
         self.rect     = pygame.Rect(round(pos[0] / size[0]) * size[0],
                                     round(pos[1] / size[1]) * size[1],
@@ -78,26 +75,25 @@ class Block(gameobject.GameObject):
                                    )
         self.special  = specialblock
         self.state    = self.__class__.STATES.IDLE
-        self.emitter  = particles.ParticleEmitter(self.__class__.particles, self.rect, 5, ingame.BLOCKS)
+
 
     def __str__(self):
         return "Block of color %s at grid cell %s with target %i" % (self.color, self.gridcell, self.target)
 
     def appear(self):
-        self.image           = block_frames[id(self.color)][0]
-        
+        self.image    = block_frames[id(self.color)][0]
+
         size = self.image.get_size()
-        self.rect     = pygame.Rect(round(self.position[0] / size[0]) * size[0],
-                                    round(self.position[1] / size[1]) * size[1],
-                                    size[0],
-                                    size[1]
-                                     )
-        self.position = list(self.rect.topleft)
-        self.gridcell = [self.rect.centery / self.rect.height, #(row, column)
-                         self.rect.centerx / self.rect.width]
-        self.target   = blockgrid.DIMENSIONS[0] - 1
-        
-        self.state    = self.__class__.STATES.START_FALLING
+        self.position     = [round(self.position[0] / size[0]) * size[0],
+                             round(self.position[1] / size[1]) * size[1]
+                             ]
+        self.rect.topleft = self.position
+        self.position     = list(self.rect.topleft)
+        self.gridcell     = [self.rect.centery / self.rect.height, #(row, column)
+                             self.rect.centerx / self.rect.width]
+        self.target       = blockgrid.DIMENSIONS[0] - 1
+        self.emitter      = particles.ParticleEmitter(block_particles[id(self.color)], self.rect, 5, ingame.BLOCKS)
+        self.state        = self.__class__.STATES.START_FALLING
         self.add(ingame.BLOCKS)
 
     def start_falling(self):
@@ -141,13 +137,13 @@ class Block(gameobject.GameObject):
         of the collision detection system, since they're only going to move
         vertically, and only depend on other blocks for collisions.
         '''
-        
+
         self.velocity[1]  = min(self.__class__.MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
         self.rect.top     = self.position[1] + .5  #Round to the nearest integer
         self.gridcell[0]  = self.rect.centery / self.rect.height
         self.emitter.rect.topleft = self.rect.topleft
-        
+
         if self.anim < len(FRAMES) - 1:
             self.anim += 1
             self.image = block_frames[id(self.color)][self.anim]
@@ -159,7 +155,8 @@ class Block(gameobject.GameObject):
         while self.target >= 0 and isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
         #While the target is equal to a space a block currently occupies...
                 self.target -= 1
-        if self.target < 2:
+
+        if self.target < 1:
             self.__class__.block_full = True
 
 
@@ -173,7 +170,7 @@ class Block(gameobject.GameObject):
             else:
             #Otherwise it was another block.
                 self.rect.bottom = blockgrid.blocks[self.gridcell[0] + 1][self.gridcell[1]].rect.top
-                
+
             self.position = list(self.rect.topleft)
             self.state    = self.__class__.STATES.IMPACT
 
@@ -206,7 +203,6 @@ class Block(gameobject.GameObject):
                 blockgrid.clear_row(self.gridcell[0])
 
     def vanish(self):
-        global blocks_set
         self.emitter.burst(20)
         self.anim                                            = 0
         self.remove(ingame.BLOCKS)

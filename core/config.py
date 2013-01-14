@@ -56,13 +56,13 @@ class Enum(object):
 def toggle_fullscreen():
 #Toggles fullscreen.
     settings.fullscreen = not settings.fullscreen
-    screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen )
+    screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen)
 
 def toggle_pause():
 #Handles pausing of the game...
     global pause
     pause = not pause
-    
+
     while pause:
     #While the game is paused...
         for event in pygame.event.get():
@@ -71,18 +71,23 @@ def toggle_pause():
             #If the P key is pressed...
                 pause = not pause
                 break
-            
+
 def toggle_frame_limit():
     global limit_frame
     limit_frame = not limit_frame
-    
+
 def toggle_debug():
     global debug
     debug = not debug
-    
-def get_colored_objects(frames):
+
+def get_colored_objects(frames, has_alpha = True):
     a = dict([(id(c), [color.blend_color(SPRITES.subsurface(f).copy(), c) for f in frames]) for c in color.LIST])
-    for f in a:
-        for c in a[f]:
-            c.set_colorkey(c.get_at([0, 0]), FLAGS)
+
+    if has_alpha:
+        for f in a:
+        #For all given frames...
+            for c in a[f]:
+            #For all colors...
+                c.set_colorkey(c.get_at([0, 0]), FLAGS)
+
     return a
