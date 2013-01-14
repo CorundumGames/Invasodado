@@ -7,7 +7,7 @@ import shelve
 
 PATTERN = '%Y-%m-%d %H:%M:%S.%f'
 
-class HighScoreEntry:  
+class HighScoreEntry:
     def __init__(self, name, score, mode, entry = None):
 
         if entry == None:
@@ -18,7 +18,7 @@ class HighScoreEntry:
             self.country  = 'US' #Temporary; will use a utility to find later
             self.platform = platform.platform(aliased = True, terse = True).split('-')[0]
             self.time     = datetime.datetime.today()
-        
+
             if not re.match('\w+', self.name):
                 raise ValueError("Name must be alphanumeric!")
 
@@ -43,6 +43,7 @@ class HighScoreEntry:
         self.country  = base64.b64encode(self.country)
         self.platform = base64.b64encode(self.platform)
         self.time     = base64.b64encode(str(self.time))
+        return self
 
     def unscramble(self):
         '''
@@ -55,7 +56,8 @@ class HighScoreEntry:
         self.mode    ^= self.score
         self.score   ^= hash(self.name)
         self.name     = base64.b64decode(self.name)
-        
+        return self
+
     def __cmp__(self, other):
         '''Allows us to sort by score.'''
         return cmp(self.score, other.score)
@@ -73,7 +75,7 @@ class HighScoreEntry:
 
     def __repr__(self):
         return str(self)
-        
+
 ###############################################################################
 
 class HighScoreTable:
@@ -83,16 +85,17 @@ class HighScoreTable:
         self.size      = size
         self.title     = title
         self.scorefile = shelve.open(self.filename, db_flag)
-        
+
         if len(self.scorefile.keys()) < self.size:
         #If our high score table has missing entries...
             a = self.set_to_default(default)
             for i in a:
                 self.add_score(HighScoreEntry(i, a[i], self.mode))
-            
+
+
     def __del__(self):
         self.scorefile.close()
-       
+
     def add_score(self, scoreobject):
         if not isinstance(scoreobject, HighScoreEntry):
         #If we weren't given a high score entry...
@@ -100,39 +103,31 @@ class HighScoreTable:
         elif scoreobject.mode != self.mode:
         #If this score entry is for the wrong game mode...
             raise ValueError("HighScoreEntries must be the same mode as the table that holds them!")
-        
+
         if len(self.scorefile.keys()) < self.size or scoreobject.score > self.lowest_score():
         #If our score doesn't rank out...
-            scoreobject.scramble()
-            self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject
+            self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject.scramble()
 
     def add_scores(self, iterable):
-        for i in iterable:
-        #For every entry in the given list of scores...
-            self.add_score(i)
-        
+        map(self.add_score, iterable)
+
     def get_scores(self):
-        a = self.scorefile.values()
-        for i in a: i.unscramble()
+        a = map(HighScoreEntry.unscramble, self.scorefile.values())
         a.sort(reverse = True)
         return a
-    
+
     def highest_score(self):
-        a = self.scorefile.values()[0]
-        a.unscramble()
-        return a.score
-    
+        return self.get_scores()[0].score
+
     def lowest_score(self):
-        a = self.scorefile.values()[-1]
-        a.unscramble()
-        return a.score
-    
+        return self.get_scores()[-1].score
+
     def set_to_default(self, filename):
         '''
         Takes in a JSON file and loads default scores from there.
         This is meant to be used for default high score tables, and NOT for storage.
         '''
         return json.load(open(filename))
-       
+
     def __len__(self):
         return self.size
