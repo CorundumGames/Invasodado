@@ -24,7 +24,7 @@ def clean_up():
     global blockstocheck
     global blockstoclear
     global matchset
-    
+
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     blockstocheck.clear()
     blockstoclear.clear()
@@ -35,31 +35,31 @@ def clear():
     for i in (j for j in ingame.BLOCKS if j.state != block.Block.STATES.IDLE):
     #For all blocks on-screen...
         i.state = block.Block.STATES.DYING
-        
+
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     blockstocheck.clear()
     blockstoclear.clear()
-    
+
 def clear_color(targetcolor):
     global blocks
     for i in (x for x in ingame.BLOCKS if x.color == targetcolor):
     #For all blocks of the given color...
         i.state = block.Block.STATES.DYING
-        
+
 def clear_row(row):
     global blocks
     if not 0 <= row < DIMENSIONS[0]:
         #If we're not in the row range...
         raise ValueError("Wrong row value!  Should be between 0 and 19, inclusive, but got ", row)
-    
+
     for i in (x for x in blocks[row] if isinstance(x, block.Block)):
     #For all blocks in this row...
         i.state = block.Block.STATES.DYING
-            
+
 def update():
     global blocks
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
-    
+
     for b in (x for x in ingame.BLOCKS if isinstance(x, block.Block) and x.state == block.Block.STATES.ACTIVE):
     #For all blocks that are on the grid and not moving...
         blocks[b.gridcell[0]][b.gridcell[1]] = b
@@ -81,9 +81,9 @@ def update():
             if b.gridcell[0] - j >= 0 and b.gridcell[1] + j < len(blocks[0]):
             #If we're not out of bounds...
                 nextblocks[3].append(blocks[b.gridcell[0]-j][b.gridcell[1]+j])#add the block up and to the right
-        
+
         #TODO: Optimize this so the above chain of conditionals is done in one loop, if possible
-        
+
         for i in nextblocks:
         #For all the lists of blocks above...
             if len([id(b) for x in i if \
@@ -92,21 +92,21 @@ def update():
                     b.color == x.color]) >= 2:
             #If there are two blocks and they're both the same color as the first...
                 matchset.update(i) #Mark these blocks as matching
-                    
-            
+
+
         if len(matchset) >= 3:
         #If at least 3 blocks are aligned...
             blockstoclear.update(matchset) #Mark the blocks in question for removal
             ingame.score += (len(matchset)**2)*ingame.multiplier
             ingame.combo = True
             ingame.multiplier = ingame.DEFAULT_MULTIPLIER * 2
-            
+
         matchset.clear()
-            
+
     if len(blockstoclear) >= 3:
     #If we're clearing any blocks...
         blockclear.play()
         for b in blockstoclear:
         #For every block marked for clearing...
             b.state = block.Block.STATES.DYING
-        blockstoclear.clear()
+        blockstoclear.clear()
