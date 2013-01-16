@@ -76,7 +76,6 @@ class InGameState(gamestate.GameState):
                             pygame.K_SPACE : self.ship.on_fire_bullet ,
                             pygame.K_F1    : config.toggle_fullscreen ,
                             pygame.K_c     : self.__clear_blocks      ,
-                            pygame.K_d     : config.toggle_debug      ,
                             pygame.K_f     : config.toggle_frame_limit,
                             pygame.K_p     : config.toggle_pause      ,
                             pygame.K_u     : self.__add_ufo           ,

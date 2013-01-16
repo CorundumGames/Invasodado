@@ -1,3 +1,5 @@
+import sys
+
 import pygame.display
 import pygame.image
 
@@ -45,8 +47,11 @@ pause = False
 limit_frame = True
 #True if we're restricting framerate to 60FPS
 
-debug = False
+debug = 'debug' in sys.argv
 #True if we're in debug mode
+
+tracking = 'track' in sys.argv
+#True if we're outputting graphs of the player's statistics
 
 class Enum(object):
     def __init__(self, *keys):
@@ -75,10 +80,6 @@ def toggle_pause():
 def toggle_frame_limit():
     global limit_frame
     limit_frame = not limit_frame
-
-def toggle_debug():
-    global debug
-    debug = not debug
 
 def get_colored_objects(frames, has_alpha = True):
     a = dict([(id(c), [color.blend_color(SPRITES.subsurface(f).copy(), c) for f in frames]) for c in color.LIST])
