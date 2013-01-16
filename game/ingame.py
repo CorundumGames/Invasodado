@@ -33,6 +33,10 @@ BG      = pygame.sprite.OrderedUpdates()
 
 DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
+COMBOLENGTH        = 50
+
+combo        = False
+combocounter = 0
 
 score      = 0
 prev_score = None
@@ -131,6 +135,9 @@ class InGameState(gamestate.GameState):
                     self.next_state = highscore.HighScoreState(score = int(score))
 
     def logic(self):
+        global combo
+        global combocounter
+        global multiplier
         self.collision_grid.update()
         map(pygame.sprite.Group.update, self.group_list)
 
@@ -153,6 +160,13 @@ class InGameState(gamestate.GameState):
 
         if random.uniform(0, 1) < self.ufo_odds:
             self.__add_ufo()
+
+        if combo and combocounter < COMBOLENGTH:
+            combocounter += 1
+        else:
+            combo        = False
+            combocounter = 0
+            multiplier   = DEFAULT_MULTIPLIER
 
     def render(self):
         global prev_score, prev_lives

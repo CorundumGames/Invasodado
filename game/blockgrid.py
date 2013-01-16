@@ -5,10 +5,10 @@ import core.config as config
 import block
 import ingame
 
-CELL_SIZE  = (32, 32)
-DIMENSIONS = (12, 20) #(row, column)
-LOCATION   = (0, 0)
-RECT       = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))
+CELL_SIZE   = (32, 32)
+DIMENSIONS  = (12, 20) #(row, column)
+LOCATION    = (0, 0)
+RECT        = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))
 
 global blocks
 blocks        = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
@@ -98,6 +98,8 @@ def update():
         #If at least 3 blocks are aligned...
             blockstoclear.update(matchset) #Mark the blocks in question for removal
             ingame.score += (len(matchset)**2)*ingame.multiplier
+            ingame.combo = True
+            ingame.multiplier = ingame.DEFAULT_MULTIPLIER * 2
             
         matchset.clear()
             
