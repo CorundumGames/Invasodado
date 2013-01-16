@@ -106,13 +106,13 @@ class Particle(gameobject.GameObject):
 
     def appear(self):
         self.appear_func(self)
-        self.state = self.__class__.STATES.ACTIVE
+        self.state = Particle.STATES.ACTIVE
 
     def move(self):
         self.move_func(self)
 
         if not self.rect.colliderect(config.SCREEN_RECT):
-            self.state = self.__class__.STATES.LEAVING
+            self.state = Particle.STATES.LEAVING
 
     def leave(self):
         self.kill()

@@ -7,14 +7,14 @@ import gameobject
 class HudObject(gameobject.GameObject):
     '''
     HudObject is meant for displays like lives, score, etc.
-    
+
     It is its own type so it can be in collisions.do_not_check, because we
     don't intend for these to collide with anything.
     '''
     actions    = None
     collisions = None
     fonts      = [config.FONT]
-    
+
     def __init__(self, image, pos):
         pygame.sprite.Sprite.__init__(self)
         self.acceleration = None
@@ -23,10 +23,10 @@ class HudObject(gameobject.GameObject):
         self.rect         = pygame.Rect(pos, image.get_size())
         self.state        = None
         self.velocity     = None
-        
+
     def update(self):
         pass
-    
+
     @staticmethod
     def make_text(text, pos = (0, 0), color = color.WHITE, font = fonts[0], vspace = 8, surfaces = False):
         '''
@@ -37,22 +37,14 @@ class HudObject(gameobject.GameObject):
         @param vspace: Space between lines in pixels. Ignored if only one line.
         @param surfaces: True if we want Surfaces instead of HudObjects (pos is then ignored)
         '''
-        
-        if isinstance(text, str):
+
+        if isinstance(text, basestring):
         #If we were given a single string...
             a = font.render(text, False, color).convert(config.DEPTH, config.FLAGS)
-            if surfaces:
-                return a
-            else:
-                return HudObject(a, pos)
+            return a if surfaces else HudObject(a, pos)
         else:
-            b = []
-            for t in xrange(len(text)):
+            def d(t):
                 c = font.render(text[t], False, color).convert(config.DEPTH, config.FLAGS)
-                if surfaces:
-                #If we want to return surfaces...
-                    b.append(c)
-                else:
-                    b.append(HudObject(c, (pos[0], pos[1] + vspace*t)))
+                return c if surfaces else HudObject(c, (pos[0], pos[1] + vspace*t))
 
-            return b
+            return map(d, range(len(text)))

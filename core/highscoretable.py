@@ -12,11 +12,11 @@ class HighScoreEntry:
 
         if entry == None:
         #If we were not passed in a high score entry string...
-            self.name     = name
-            self.score    = int(score)
-            self.mode     = int(mode) #Can represent game modes or difficulty
             self.country  = 'US' #Temporary; will use a utility to find later
+            self.mode     = int(mode) #Can represent game modes or difficulty
+            self.name     = name
             self.platform = platform.platform(aliased = True, terse = True).split('-')[0]
+            self.score    = int(score)
             self.time     = datetime.datetime.today()
 
             if not re.match('\w+', self.name):
@@ -25,11 +25,11 @@ class HighScoreEntry:
         elif isinstance(entry, str):
         #Else if we were passed a string for entry...
             a = entry.split('|')
-            self.name     = a[0]
-            self.score    = int(a[1])
-            self.mode     = int(a[2])
             self.country  = a[3]
+            self.mode     = int(a[2])
+            self.name     = a[0]
             self.platform = a[4]
+            self.score    = int(a[1])
             self.time     = datetime.datetime.strptime(a[5], PATTERN)
 
     def scramble(self):
@@ -82,16 +82,14 @@ class HighScoreTable:
     def __init__(self, name, mode, size, title, default, db_flag = 'c'):
         self.filename  = name
         self.mode      = mode
+        self.scorefile = shelve.open(self.filename, db_flag)
         self.size      = size
         self.title     = title
-        self.scorefile = shelve.open(self.filename, db_flag)
 
-        if len(self.scorefile.keys()) < self.size:
+        if len(self.scorefile) < self.size:
         #If our high score table has missing entries...
             a = self.set_to_default(default)
-            for i in a:
-                self.add_score(HighScoreEntry(i, a[i], self.mode))
-
+            self.add_scores(map(HighScoreEntry, a, a.values(), [self.mode]*len(a)))
 
     def __del__(self):
         self.scorefile.close()
@@ -104,7 +102,7 @@ class HighScoreTable:
         #If this score entry is for the wrong game mode...
             raise ValueError("HighScoreEntries must be the same mode as the table that holds them!")
 
-        if len(self.scorefile.keys()) < self.size or scoreobject.score > self.lowest_score():
+        if len(self.scorefile) < self.size or scoreobject.score > self.lowest_score():
         #If our score doesn't rank out...
             self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject.scramble()
 
