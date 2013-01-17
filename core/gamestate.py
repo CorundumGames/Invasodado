@@ -1,7 +1,6 @@
 import pygame.time
 
 class GameState:
-    
     '''
     Consider GameState to be abstract; that is, do not instantiate it!
 
