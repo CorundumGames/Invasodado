@@ -109,4 +109,4 @@ def update():
         for b in blockstoclear:
         #For every block marked for clearing...
             b.state = block.Block.STATES.DYING
-        blockstoclear.clear()
+        blockstoclear.clear()
