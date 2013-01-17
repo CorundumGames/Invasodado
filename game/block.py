@@ -102,7 +102,8 @@ class Block(gameobject.GameObject):
         blockgrid.blockstocheck.discard(self)
         for i in xrange(self.gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
         #For all grid cells below this one...
-                if isinstance(bl[i][self.gridcell[1]], Block):
+                if isinstance(bl[i][self.gridcell[1]], Block) \
+                and not (blockgrid.blocks[i][self.gridcell[1]].state == self.__class__.STATES.FALLING):
                 #If this grid cell is occupied...
                     self.target = i - 1
                     break
@@ -152,11 +153,13 @@ class Block(gameobject.GameObject):
         #If this is a special block...
             self.image = random.choice(block_frames.values())[self.anim]
 
-        while self.target >= 0 and isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block):
+        while self.target >= 0 and isinstance(blockgrid.blocks[self.target][self.gridcell[1]], Block) \
+        and not (blockgrid.blocks[self.target][self.gridcell[1]].state == self.__class__.STATES.FALLING):
         #While the target is equal to a space a block currently occupies...
                 self.target -= 1
 
-        if self.target < 1:
+        if self.target < 1 and not (self.target == None):
+            print(self.target)
             self.__class__.block_full = True
 
 
@@ -189,9 +192,8 @@ class Block(gameobject.GameObject):
         self.snap()
         self.state = self.__class__.STATES.ACTIVE
 
-        if len([id(b) for b in ingame.BLOCKS if b.state == self.__class__.STATES.ACTIVE]) == len(ingame.BLOCKS):
-        #If no blocks are moving...
-            blockgrid.update()
+        #Update the blockgrid
+        blockgrid.update()
 
         if self.special:
         #If this is a special block...
