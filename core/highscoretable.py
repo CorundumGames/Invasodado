@@ -5,6 +5,8 @@ import platform
 import re
 import shelve
 
+import geolocation
+
 PATTERN = '%Y-%m-%d %H:%M:%S.%f'
 
 class HighScoreEntry:
@@ -12,7 +14,7 @@ class HighScoreEntry:
 
         if entry == None:
         #If we were not passed in a high score entry string...
-            self.country  = 'US' #Temporary; will use a utility to find later
+            self.country  = str(geolocation.get_country('countryCode'))
             self.mode     = int(mode) #Can represent game modes or difficulty
             self.name     = name
             self.platform = platform.platform(aliased = True, terse = True).split('-')[0]
@@ -104,6 +106,9 @@ class HighScoreTable:
 
         if len(self.scorefile) < self.size or scoreobject.score > self.lowest_score():
         #If our score doesn't rank out...
+            if len(self.scorefile) >= self.size:
+                a = self.get_scores()[-1].scramble()
+                del self.scorefile[base64.b64encode(str(a))]
             self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject.scramble()
 
     def add_scores(self, iterable):

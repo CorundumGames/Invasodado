@@ -27,7 +27,7 @@ score_tables  = [
 def make_score_table(table, pos, vspace, width, surfaces = False):
     '''
     Creates a visual representation of a high score table.
-    Returns a list of HudObjects, or pygame.Surfaces if surfaces is True
+    @return: pygame.Surfaces if surfaces else HudObjects
 
     @param table: The HighScoreTable to take the scores from
     @param pos: The position of the top-left corner
@@ -72,7 +72,7 @@ class HighScoreState(gamestate.GameState):
         #If we were passed in any arguments...
             if self.kwargs['score'] > score_tables[0].lowest_score():
                 self.alphanum_index = 0
-                self.char_limit     = 9
+                self.char_limit     = 20
                 self.entering_name  = True
                 self.entry_name     = 'A'
                 self.hud_name       = hudobject.HudObject.make_text(self.entry_name, ENTRY_NAME_POS)
@@ -129,7 +129,7 @@ class HighScoreState(gamestate.GameState):
         #If we've finished entering our name...
             self.entering_name = False
             self.hud_name.kill()#Get rid of the name entry characters
-            score_tables[0].add_score(highscoretable.HighScoreEntry(self.entry_name, self.args[0], 1))#add the entry to the leaderboard
+            score_tables[0].add_score(highscoretable.HighScoreEntry(self.entry_name, self.kwargs['score'], 1))#add the entry to the leaderboard
             MENU.remove(self.hud_scores)#remove the menu from the screen
             self.hud_scores = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
             MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
