@@ -15,58 +15,60 @@ ufo_frames = config.get_colored_objects(FRAMES)
 
 class UFO(gameobject.GameObject):
     STATES = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING')
-    
+
     invade = pygame.mixer.Sound("./sfx/ufo.wav")
     #The sound the UFO makes as it flies across the screen
-    
+
     def __init__(self):
         gameobject.GameObject.__init__(self)
-        
+        self.add(ingame.UFO)
         self.anim     = 0.0
-        
         self.image    = config.SPRITES.subsurface(FRAMES[0]).copy()
-        #The UFO image; by default, the plain white one (it will be recolored)
-        
-        self.rect     = pygame.Rect(START_POS, self.image.get_size())
-        #The collision boundary of the UFO
-        
+        self.odds     = .0001
         self.position = list(START_POS)
-            
-        self.state = UFO.STATES.IDLE
-        
+        self.rect     = pygame.Rect(START_POS, self.image.get_size())
+        self.state    = UFO.STATES.IDLE
+
+        del self.acceleration
+
     def appear(self):
-        self.velocity[0]  = -1.1
-        self.rect.topleft = list(START_POS)
         self.position     = list(START_POS)
+        self.rect.topleft = list(START_POS)
         self.state        = UFO.STATES.ACTIVE
-    
+        self.velocity[0]  = -1.1
+
     def move(self):
+        p = self.position
+        r = self.rect
+
         #UFO.invade.play()
-        self.anim        += 1.0/2
+        self.anim        += 0.5
         self.image        = ufo_frames[id(random.choice(color.LIST))][int(self.anim) % len(FRAMES)]
-        self.position[0] += self.velocity[0]
-        self.position[1] += math.sin(self.anim/4)
-        self.rect.topleft    = (self.position[0] + .5, self.position[1] + .5)
-        
-        
-        if self.rect.right < 0:
+        p[0] += self.velocity[0]
+        p[1] += math.sin(self.anim/4)
+        r.topleft = (p[0] + .5, p[1] + .5)
+
+        if r.right < 0:
         #If we've gone past the left edge of the screen...
             self.state = UFO.STATES.LEAVING
-        
+
     def die(self):
         ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], special = True))
         self.state = UFO.STATES.LEAVING
-        
+
     def leave(self):
-        self.kill()
         UFO.invade.stop()
         self.velocity[0]  = 0
         self.position     = list(START_POS)
         self.rect.topleft = START_POS
         self.state        = UFO.STATES.IDLE
-        
+
+    def wait(self):
+        if random.uniform(0, 1) < self.odds:
+            self.state = self.__class__.STATES.APPEARING
+
     actions = {
-                STATES.IDLE     : None    ,
+                STATES.IDLE     : 'wait'  ,
                 STATES.APPEARING: 'appear',
                 STATES.ACTIVE   : 'move'  ,
                 STATES.DYING    : 'die'   ,
