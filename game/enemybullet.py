@@ -15,14 +15,12 @@ much time creating and destroying bullets).
 enemy_bullets = set()
 
 def clean_up():
-    global enemy_bullets
     enemy_bullets.clear()
 
 def get_enemy_bullet():
-    global enemy_bullets
     if len(enemy_bullets) == 0:
         enemy_bullets.add(EnemyBullet())
-    
+
     b       = enemy_bullets.pop()
     b.state = b.__class__.STATES.FIRED
     return b
@@ -32,33 +30,29 @@ class EnemyBullet(bullet.Bullet):
     SPEED     = 2
     START_POS = pygame.Rect(30, config.screen.get_height()*2, 5, 5)
     FRAME     = pygame.Rect(262, 6, 20, 18)
-    
+
     def __init__(self):
         super(self.__class__, self).__init__()
         self.image = config.SPRITES.subsurface(self.__class__.FRAME)
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
-        
+
     def move(self):
         '''Moves down the screen'''
         super(self.__class__, self).move()
-        
+
         if self.rect.top > config.SCREEN_HEIGHT:
         #If below the bottom of the screen...
             self.state = self.__class__.STATES.RESET
-            
+
     def reset(self):
-        global enemy_bullets
         super(self.__class__, self).reset()
         enemy_bullets.add(self)
-            
+
     def kill_player(self, other):
-        if not other.invincible and other.state == player.STATES.ACTIVE:
+        if not other.invincible and other.state is player.STATES.ACTIVE:
         #If the player is not invincible...
             ingame.lives -= 1
             other.state = player.STATES.DYING
-            other.image.set_alpha(128)
-            self.state = self.__class__.STATES.RESET  
-            
-    collisions = {
-                  player.Ship: kill_player
-                 }
+            self.state = self.__class__.STATES.RESET
+
+    collisions = {player.Ship: kill_player}

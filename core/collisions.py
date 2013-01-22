@@ -15,8 +15,12 @@ do_not_compare = { }
 #Contains 2-tuples of types.  Don't check for collisions between objects
 #with these type pairings.
 
-do_not_check = {block.Block, balloflight.BallOfLight, hudobject.HudObject,
-                particles.Particle, particles.ParticleEmitter}
+do_not_check = {block.Block,
+                balloflight.BallOfLight,
+                hudobject.HudObject,
+                particles.Particle,
+                particles.ParticleEmitter,
+                }
 #Contains types that are not to collide with anything.
 
 class CollisionGrid:
@@ -77,7 +81,7 @@ class CollisionGrid:
 
         collisions.sort()
 
-        for i in self.collisions:
+        for i in collisions:
         #For all collisions that have occurred...
             i.obj1.on_collide(i.obj2)
             i.obj2.on_collide(i.obj1)
@@ -97,23 +101,18 @@ class GridCell:
     '''
     def __init__(self, rect, grid):
         '''
-        GridCells take the rectangular area they occupy and
-        the grid they're part of as parameters.
+        @ivar grid: The CollisionGrid to report Collisions to
+        @ivar objects: Objects that this GridCell will check for collisions
+        @ivar objects_to_add: Objects that are entering this GridCell's rect
+        @ivar objects_to_remove: Objects that are leaving this GridCell's rect
+        @ivar rect: Rectangular area to check for collisions in
         '''
+
         self.grid              = grid
-        #The CollisionGrid that holds this GridCell
-
         self.objects           = set()
-        #The set of all objects in this cell
-
         self.objects_to_add    = set()
-        #The set of all objects that just entered this cell
-
         self.objects_to_remove = set()
-        #The set of all objects that just left this cell
-
         self.rect              = rect
-        #The rectangular area that this cell occupies, in pixels
 
     def remove_exiting(self):
         '''
@@ -123,9 +122,7 @@ class GridCell:
         objects           = self.objects
         objects_to_remove = self.objects_to_remove
 
-        for o in itertools.ifilterfalse(rect.colliderect, objects):
-        #For all objects no longer in this cell...
-            objects_to_remove.add(o)
+        map(objects_to_remove.add, itertools.ifilterfalse(rect.colliderect, objects))
 
         objects -= objects_to_remove
         objects_to_remove.clear()
@@ -154,9 +151,8 @@ class GridCell:
 
         for i, j in itertools.combinations(self.objects, 2):
         #For all possible combinations of objects that can touch...
-            if pygame.sprite.collide_rect(i, j):# or \
-            #i.rect.move(i.velocity[0], i.velocity[1]).colliderect(j.rect.move(j.velocity[0], j.velocity[1])):
-            #If these two objects touch or if they're about to touch...
+            if pygame.sprite.collide_rect(i, j):
+            #If these two objects touch...
                 if grid.spare_collisions == []:
                 #If we don't have any spare Collision objects...
                     grid.spare_collisions.append(Collision())
@@ -199,9 +195,7 @@ class Collision:
         Clears this Collision's fields (so we don't need to delete this
         and create another).
         '''
-        self.obj1 = None
-        self.obj2 = None
-        self.time = None
+        self.obj1, self.obj2, self.time = None, None, None
         return self
 
     def __cmp__(self, other):

@@ -14,7 +14,7 @@ import mainmenu
 BG   = pygame.sprite.OrderedUpdates()
 MENU = pygame.sprite.Group()
 
-ALPHANUMERIC   = ''.join([string.letters, string.digits, '_-\' <'])
+ALPHANUMERIC   = ''.join([string.uppercase, string.lowercase, string.digits, '_-\' <'])
 ENTRY_NAME_POS = (0, config.SCREEN_HEIGHT - 32)
 ROW_WIDTH      = 32
 TABLE_CORNER   = (16, 64)
@@ -27,7 +27,8 @@ score_tables  = [
 def make_score_table(table, pos, vspace, width, surfaces = False):
     '''
     Creates a visual representation of a high score table.
-    @return: pygame.Surfaces if surfaces else HudObjects
+    @rtype: pygame.Surfaces if surfaces else HudObjects
+    @return: Graphical represntations of high scores
 
     @param table: The HighScoreTable to take the scores from
     @param pos: The position of the top-left corner

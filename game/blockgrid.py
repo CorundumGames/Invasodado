@@ -10,7 +10,6 @@ DIMENSIONS  = (12, 20) #(row, column)
 LOCATION    = (0, 0)
 RECT        = pygame.rect.Rect(LOCATION, (config.screen.get_width(), DIMENSIONS[0]*CELL_SIZE[0]))
 
-global blocks
 blocks        = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
 blockstocheck = set()
 blockstoclear = set()
@@ -20,10 +19,7 @@ matchset = set()
 blockclear = pygame.mixer.Sound("./sfx/clear.wav")
 
 def clean_up():
-    global blocks
-    global blockstocheck
-    global blockstoclear
-    global matchset
+    global blocks, blockstocheck, blockstoclear, matchset
 
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
     blockstocheck.clear()
@@ -32,7 +28,7 @@ def clean_up():
 
 def clear():
     global blocks
-    for i in (j for j in ingame.BLOCKS if j.state != block.Block.STATES.IDLE):
+    for i in (j for j in ingame.BLOCKS if j.state is not block.Block.STATES.IDLE):
     #For all blocks on-screen...
         i.state = block.Block.STATES.DYING
 
@@ -41,16 +37,14 @@ def clear():
     blockstoclear.clear()
 
 def clear_color(targetcolor):
-    global blocks
-    for i in (x for x in ingame.BLOCKS if x.color == targetcolor):
+    for i in (x for x in ingame.BLOCKS if isinstance(x, block.Block) and x.color == targetcolor):
     #For all blocks of the given color...
         i.state = block.Block.STATES.DYING
 
 def clear_row(row):
-    global blocks
     if not 0 <= row < DIMENSIONS[0]:
         #If we're not in the row range...
-        raise ValueError("Wrong row value!  Should be between 0 and 19, inclusive, but got ", row)
+        raise ValueError("Expected row value in 0 <= x < 20, but got %i" % row)
 
     for i in (x for x in blocks[row] if isinstance(x, block.Block)):
     #For all blocks in this row...

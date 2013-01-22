@@ -11,20 +11,30 @@ PATTERN = '%Y-%m-%d %H:%M:%S.%f'
 
 class HighScoreEntry:
     def __init__(self, name, score, mode, entry = None):
+        '''
+        @ivar country: Two-letter country code for online high scores
+        @ivar mode: Game mode this score was achieved in
+        @ivar name: Name of the player
+        @ivar platform: Platform the game was played on
+        @ivar score: Score the player achieved
+        @ivar time: Date and time the score was achieved
+
+        @param entry: High score entry string to construct self from
+        '''
 
         if entry == None:
         #If we were not passed in a high score entry string...
             self.country  = str(geolocation.get_country('countryCode'))
             self.mode     = int(mode) #Can represent game modes or difficulty
             self.name     = name
-            self.platform = platform.platform(aliased = True, terse = True).split('-')[0]
+            self.platform = platform.platform(True, True).split('-')[0]
             self.score    = int(score)
             self.time     = datetime.datetime.today()
 
-            if not re.match('\w+', self.name):
+            if not re.match('\w+', name):
                 raise ValueError("Name must be alphanumeric!")
 
-        elif isinstance(entry, str):
+        elif isinstance(entry, basestring):
         #Else if we were passed a string for entry...
             a = entry.split('|')
             self.country  = a[3]
@@ -36,8 +46,10 @@ class HighScoreEntry:
 
     def scramble(self):
         '''
-        Scrambles the high score so users don't mess with the local
-        high score database.
+        @precondition: self is unscrambled and thus intelligible
+        @postcondition: self is scrambled and thus cannot be changed
+
+        @return: self
         '''
         self.name     = base64.b64encode(self.name)
         self.score   ^= hash(self.name)
@@ -49,8 +61,10 @@ class HighScoreEntry:
 
     def unscramble(self):
         '''
-        Unscrambles the high score so we can retrieve and print
-        the high score.
+        @precondition: self is scrambled and thus cannot be changed
+        @postcondition: self is unscrambled and thus can be displayed
+
+        @return: self
         '''
         self.time     = datetime.datetime.strptime(base64.b64decode(self.time), PATTERN)
         self.platform = base64.b64decode(self.platform)
@@ -61,19 +75,20 @@ class HighScoreEntry:
         return self
 
     def __cmp__(self, other):
-        '''Allows us to sort by score.'''
+        '''
+        @param other: The other HighScoreEntry to compare to
+
+        Allows us to sort all HighScoreEntrys in a table by score.
+        '''
         return cmp(self.score, other.score)
 
     def __str__(self):
-        ''''Returns this entry as a string for local storage.'''
-        return '|'.join([self.name      ,
-                         str(self.score),
-                         str(self.mode) ,
-                         self.country   ,
-                         self.platform  ,
-                         str(self.time)
-                        ]
-                     )
+        '''
+        Returns this entry as a string for local storage.
+
+        Example: Jesse|1492|1|US|Linux|1994-10-13 12:01:02.03
+        '''
+        return '{0.name}|{0.score}|{0.mode}|{0.country}|{0.platform}|{0.time}'.format(self)
 
     def __repr__(self):
         return str(self)
@@ -81,40 +96,64 @@ class HighScoreEntry:
 ###############################################################################
 
 class HighScoreTable:
-    def __init__(self, name, mode, size, title, default, db_flag = 'c'):
-        self.filename  = name
+    def __init__(self, filename, mode, size, title, default, db_flag = 'c'):
+        '''
+        @ivar filename: Name and/or path of the database relative to the pwd
+        @ivar mode: Game mode this HighScoreTable operates under
+        @ivar scorefile: The actual entity that records high scores
+        @ivar size: Number of entries this HighScoreTable must hold
+        @ivar title: User-visible name of this high score table
+
+        @param db_flag: Flags for the shelve module
+        @param default: Location of default high scores if filename is new
+        '''
+
+        self.filename  = filename
         self.mode      = mode
-        self.scorefile = shelve.open(self.filename, db_flag)
+        self.scorefile = shelve.open(filename, db_flag)
         self.size      = size
         self.title     = title
 
-        if len(self.scorefile) < self.size:
+        if len(self.scorefile) < size:
         #If our high score table has missing entries...
             a = self.set_to_default(default)
-            self.add_scores(map(HighScoreEntry, a, a.values(), [self.mode]*len(a)))
+            self.add_scores(map(HighScoreEntry, a, a.values(), [mode]*len(a)))
 
     def __del__(self):
         self.scorefile.close()
 
-    def add_score(self, scoreobject):
-        if not isinstance(scoreobject, HighScoreEntry):
-        #If we weren't given a high score entry...
-            raise TypeError("HighScoreTables may only hold HighScoreEntry objects!")
-        elif scoreobject.mode != self.mode:
-        #If this score entry is for the wrong game mode...
-            raise ValueError("HighScoreEntries must be the same mode as the table that holds them!")
+    def add_score(self, score_object):
+        '''
+        @param score_object: The score entry to add
+        '''
 
-        if len(self.scorefile) < self.size or scoreobject.score > self.lowest_score():
+        if not isinstance(score_object, HighScoreEntry):
+        #If we weren't given a high score entry...
+            raise TypeError("Expected HighScoreEntry, got {}".format(type(score_object)))
+        elif score_object.mode != self.mode:
+        #If this score entry is for the wrong game mode...
+            raise ValueError("Expected mode {}, got mode {}".format(self.mode, score_object.mode))
+
+        #TODO: This is kinda messy, I should fix it
+        if len(self.scorefile) < self.size or score_object.score > self.lowest_score():
         #If our score doesn't rank out...
             if len(self.scorefile) >= self.size:
                 a = self.get_scores()[-1].scramble()
                 del self.scorefile[base64.b64encode(str(a))]
-            self.scorefile[base64.b64encode(str(scoreobject))] = scoreobject.scramble()
+            self.scorefile[base64.b64encode(str(score_object))] = score_object.scramble()
 
     def add_scores(self, iterable):
+        '''
+        @param iterable: An iterable holding a bunch of HighScoreEntrys
+
+        Adds all scores in iterable to self.scorefile, or at least tries
+        '''
         map(self.add_score, iterable)
 
     def get_scores(self):
+        '''
+        @return: sorted list of all HighScoreEntrys
+        '''
         a = map(HighScoreEntry.unscramble, self.scorefile.values())
         a.sort(reverse = True)
         return a
@@ -127,6 +166,8 @@ class HighScoreTable:
 
     def set_to_default(self, filename):
         '''
+        @param filename: name/location of the default scores to load
+
         Takes in a JSON file and loads default scores from there.
         This is meant to be used for default high score tables, and NOT for storage.
         '''

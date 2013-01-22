@@ -22,10 +22,12 @@ particle_colors = config.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
 
 
 def _block_particle_move(self):
+    p = self.position
+
     self.velocity[1] += self.acceleration[1]
-    self.position[0] += self.velocity[0]
-    self.position[1] += self.velocity[1]
-    self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
+    p[0] += self.velocity[0]
+    p[1] += self.velocity[1]
+    self.rect.topleft = (p[0] + .5, p[1] + .5)
 
 def _block_particle_appear(self):
     self.acceleration[1] = GRAVITY
@@ -43,7 +45,6 @@ def get_block(pos, newcolor = random.choice(color.LIST), special = False):
     b.position = pos
     b.special  = special
     b.state    = Block.STATES.APPEARING
-
     return b
 
 block_particles  = dict([(id(c), particles.ParticlePool(particle_colors[id(c)][0], _block_particle_move, _block_particle_appear)) for c in color.LIST])
@@ -103,7 +104,7 @@ class Block(gameobject.GameObject):
         for i in xrange(self.gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
         #For all grid cells below this one...
                 if isinstance(bl[i][self.gridcell[1]], Block) \
-                and not (blockgrid.blocks[i][self.gridcell[1]].state == self.__class__.STATES.FALLING):
+                and (blockgrid.blocks[i][self.gridcell[1]].state is not self.__class__.STATES.FALLING):
                 #If this grid cell is occupied...
                     self.target = i - 1
                     break
@@ -123,9 +124,10 @@ class Block(gameobject.GameObject):
         Constantly checks to see if this block can fall.
         '''
         bl = blockgrid.blocks
+        gc = self.gridcell
         if self.rect.bottom < blockgrid.RECT.bottom \
-        and (bl[self.gridcell[0] + 1][self.gridcell[1]] == None or \
-             bl[self.gridcell[0] + 1][self.gridcell[1]].state == self.__class__.STATES.FALLING):
+        and (bl[gc[0] + 1][gc[1]] == None or \
+             bl[gc[0] + 1][gc[1]].state == self.__class__.STATES.FALLING):
         #If we're not at the bottom and there's no block directly below...
             blockgrid.blockstocheck.discard(self)
             self.target = blockgrid.DIMENSIONS[0] - 1

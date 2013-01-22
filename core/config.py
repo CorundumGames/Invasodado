@@ -82,6 +82,12 @@ def toggle_frame_limit():
     limit_frame = not limit_frame
 
 def get_colored_objects(frames, has_alpha = True):
+    '''
+    @param frames: List of sprites we want to create colored versions of
+    @param has_alpha: True if we want transparency
+
+    @rtype: dict of {color: [frames_list]}
+    '''
     a = dict([(id(c), [color.blend_color(SPRITES.subsurface(f).copy(), c) for f in frames]) for c in color.LIST])
 
     if has_alpha:

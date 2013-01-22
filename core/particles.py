@@ -38,10 +38,8 @@ class ParticleEmitter:
 
         @param p: The particle to release
         '''
-        p.position = [
-                      random.uniform(self.rect.left, self.rect.right ),
-                      random.uniform(self.rect.top , self.rect.bottom)
-                     ]
+        r = self.rect
+        p.position = [random.uniform(r.left, r.right), random.uniform(r.top , r.bottom)]
         p.rect.topleft = p.position
         p.state        = p.__class__.STATES.APPEARING
         p.add(self.group)
