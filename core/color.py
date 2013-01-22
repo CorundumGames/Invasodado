@@ -4,7 +4,7 @@ import pygame.image
 
 import config
 
-COLOR_KEY  = config.SPRITES.get_at((0, 0))
+COLOR_KEY  = config.SPRITES.get_at((0, config.SPRITES.get_height()-1))
 #The color that will be transparent.
 
 COLOR_MODE = "RGBA"
@@ -18,7 +18,7 @@ YELLOW = pygame.Color(255, 255,   0)
 PURPLE = pygame.Color(153,   0, 153)
 WHITE  = pygame.Color(255, 255, 255)
 ###############################################################################
-    
+
 LIST = [RED, BLUE, GREEN, YELLOW, PURPLE]
 #THESE are all used by blocks.
 
@@ -32,5 +32,5 @@ def blend_color(surface, color):
                                     size,
                                     pygame.image.tostring(surface, COLOR_MODE))
     temp         = Image.blend(temp, colorsurface, 0.5)
-    
+
     return pygame.image.fromstring(temp.tostring(), size, COLOR_MODE).convert(config.DEPTH, config.FLAGS)

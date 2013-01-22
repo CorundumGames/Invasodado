@@ -1,3 +1,6 @@
+import itertools
+import math
+
 import pygame.key
 
 import core.color  as color
@@ -15,95 +18,108 @@ Python singleton.
 
 #Constants/magic numbers#
 STATES    = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
-FRAMES    = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)).copy() for i in range(5)]
-START_POS = pygame.Rect(config.screen.get_width() /  2,
-                        config.screen.get_height()* .8,
-                        32        ,
-                        32)
+
+START_POS = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
 SPEED     = 4
 #########################
 
-class Ship(gameobject.GameObject):
+class FlameTrail(gameobject.GameObject):
+    FRAMES = [config.SPRITES.subsurface(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
+
     def __init__(self):
         gameobject.GameObject.__init__(self)
-        
-        self.anim            = 0.0
-        self.mybullet        = shipbullet.ShipBullet()
-        self.image           = FRAMES[0] #@UndefinedVariable
-        self.rect            = START_POS.copy()
-        self.position        = list(self.rect.topleft)
-        self.state           = STATES.ACTIVE
-        self.invincible      = False
-        self.invincible_count = 0
-        
-        for i in FRAMES:
-            i.set_colorkey(color.COLOR_KEY, config.FLAGS)
-        
+        self.anim  = 0.0
+        self.image = FlameTrail.FRAMES[0]
+        self.rect  = pygame.Rect([0, 0], self.image.get_size())
+        self.state = 1
+        self.add(ingame.PLAYER)
+
+        for i in self.__class__.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
+
+    def animate(self):
+        self.anim += 1/3.0
+        self.image = FlameTrail.FRAMES[int(3*math.sin(self.anim/2)) + 3]
+
+    actions = {1 : 'animate'}
+
+class Ship(gameobject.GameObject):
+    FRAMES = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
+
+    def __init__(self):
+        '''
+        @ivar anim: A counter for ship animation
+        @ivar image: The graphic
+        @ivar invincible: How many frames of invincibility the player has if any
+        @ivar my_bullet: The single bullet this ship may fire
+        '''
+        gameobject.GameObject.__init__(self)
+
+        self.anim             = 0.0
+        self.flames           = FlameTrail()
+        self.image            = Ship.FRAMES[0] #@UndefinedVariable
+        self.invincible       = 0
+        self.my_bullet        = shipbullet.ShipBullet()
+        self.position         = list(START_POS.topleft)
+        self.rect             = START_POS.copy()
+        self.state            = STATES.RESPAWN
+
+        for i in Ship.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
+
     def on_fire_bullet(self):
-        bul = self.mybullet
+        bul = self.my_bullet
         if bul.state == bul.__class__.STATES.IDLE and self.state == STATES.ACTIVE:
         #If our bullet is not already on-screen...
-            self.anim = 1
-            self.image = FRAMES[self.anim]
+            self.anim  = 1
+            self.image = Ship.FRAMES[self.anim]
             bul.add(ingame.PLAYER)
-            #bul.rect.midbottom = self.rect.midtop
-            bul.rect.center = self.rect.center
-            bul.position       = list(self.rect.midbottom)
+            bul.rect.center    = self.rect.center
+            bul.position       = list(self.rect.topleft)
             bul.state          = bul.__class__.STATES.FIRED
-            
+
     def respawn(self):
-        self.image.set_alpha(128)
-        self.rect             = START_POS.copy()
-        self.position         = list(self.rect.topleft)
-        self.invincible_count = 250
-        self.invincible       = True
-        self.state            = STATES.ACTIVE
-        
+        for i in itertools.chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(128)
+        self.invincible = 250
+        self.position   = list(START_POS.topleft)
+        self.rect       = START_POS.copy()
+        self.state      = STATES.ACTIVE
+
     def move(self):
         #Shorthand for which keys have been pressed
         keys = pygame.key.get_pressed()
-        
-        if self.state not in (STATES.DYING, STATES.DEAD, STATES.IDLE):
-            if keys[pygame.K_LEFT] and self.rect.left > 0:
+        r    = self.rect
+
+        if self.state not in {STATES.DYING, STATES.DEAD, STATES.IDLE}:
+            if keys[pygame.K_LEFT] and r.left > 0:
             #If we're pressing left and not at the left edge of the screen...
-                self.velocity[0] = -SPEED
-            elif keys[pygame.K_RIGHT] and self.rect.right < config.SCREEN_RECT.right:
+                self.position[0] -= SPEED
+            elif keys[pygame.K_RIGHT] and r.right < config.SCREEN_RECT.right:
             #If we're pressing right and not at the right edge of the screen...
-                self.velocity[0] = SPEED
-            else:
-                self.velocity[0] = 0
-            
-        self.velocity[0] += self.acceleration[0]
-        self.position[0] += self.velocity[0]
-        self.rect.x       = self.position[0] + .5
-        
-        if self.invincible_count == 0:
-        #If we're no longer invincible...
-            self.invincible = False
-            self.image.set_alpha(255)    
+                self.position[0] += SPEED
+
+        r.left = self.position[0] + .5
+        self.flames.rect.midtop = self.rect.midbottom
+
+        if self.invincible > 0:
+        #If we're invincible...
+            self.invincible -= 1
         else:
-            self.invincible_count -= 1
-            
-        if 0 < self.anim < len(FRAMES) - 1:
-            self.anim += 1.0/3.0
-        else:
-            self.anim  = 0
-        self.image = FRAMES[int(self.anim)]
-            
-            
+            for i in itertools.chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
+
+        self.anim  = self.anim + 1.0/3 if (0 < self.anim < len(Ship.FRAMES)-1) else 0
+        self.image = Ship.FRAMES[int(self.anim)]
+
     def die(self):
         self.visible = False
         self.state   = STATES.RESPAWN
-        
+
     actions = {
-               STATES.IDLE      : None            ,
-               STATES.SPAWNING  : 'respawn'       ,
-               STATES.INVINCIBLE: None,
-               STATES.ACTIVE    : 'move'          ,
-               STATES.DYING     : 'die'           ,
+               STATES.IDLE      : None          ,
+               STATES.SPAWNING  : 'respawn'     ,
+               STATES.INVINCIBLE: None          ,
+               STATES.ACTIVE    : 'move'        ,
+               STATES.DYING     : 'die'         ,
                STATES.DEAD      : NotImplemented,
-               STATES.RESPAWN   : 'respawn'
+               STATES.RESPAWN   : 'respawn'     ,
               }
-    
-class FlameTrail(gameobject.GameObject):
-    pass
+
+
