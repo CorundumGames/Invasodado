@@ -1,7 +1,7 @@
 import itertools
 import random
 
-import enemy
+from enemy import Enemy
 import ingame
 
 ROW_SIZE = 7
@@ -11,15 +11,15 @@ enemies = None
 
 def clean_up():
     global enemies
-    enemies              = None
-    enemy.Enemy.velocity = [.5, 0.0]
+    enemies        = None
+    Enemy.velocity = [.5, 0.0]
 
 def reset():
     global enemies
     ingame.ENEMIES.empty()
-    enemies = [[enemy.Enemy((i, j)) for i in xrange(ROW_SIZE)] for j in xrange(COL_SIZE)]
-    enemy.Enemy.velocity = [.5, 0.0]
-    a = enemy.Enemy.STATES.APPEARING
+    enemies        = [[Enemy((i, j)) for i in xrange(ROW_SIZE)] for j in xrange(COL_SIZE)]
+    Enemy.velocity = [.5, 0.0]
+    a              = Enemy.STATES.APPEARING
 
     for i in enemies:
     #For all rows of enemies...
@@ -33,12 +33,11 @@ def reset():
 
 def move_down():
     for e in ingame.ENEMIES:
-    #For all enemies...
-        e.position[1] += 8
-        e.rect.topleft = list(e.position)
+    #For all enemies on-screen...
+        e.state = Enemy.STATES.LOWERING
 
 def celebrate():
     for e in ingame.ENEMIES:
     #For all enemies...
         if e.state is not e.__class__.STATES.IDLE:
-            e.state = enemy.Enemy.STATES.CHEERING
+            e.state = Enemy.STATES.CHEERING
