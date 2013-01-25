@@ -17,7 +17,7 @@ Python singleton.
 '''
 
 #Constants/magic numbers#
-STATES    = config.Enum('IDLE', 'SPAWNING', 'INVINCIBLE', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
+
 
 START_POS = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
 SPEED     = 4
@@ -44,6 +44,7 @@ class FlameTrail(gameobject.GameObject):
 
 class Ship(gameobject.GameObject):
     FRAMES = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
+    STATES = config.Enum('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
 
     def __init__(self):
         '''
@@ -61,13 +62,13 @@ class Ship(gameobject.GameObject):
         self.my_bullet        = shipbullet.ShipBullet()
         self.position         = list(START_POS.topleft)
         self.rect             = START_POS.copy()
-        self.state            = STATES.RESPAWN
+        self.state            = Ship.STATES.RESPAWN
 
         for i in Ship.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
     def on_fire_bullet(self):
         bul = self.my_bullet
-        if bul.state == bul.__class__.STATES.IDLE and self.state == STATES.ACTIVE:
+        if bul.state == bul.__class__.STATES.IDLE and self.state == Ship.STATES.ACTIVE:
         #If our bullet is not already on-screen...
             self.anim  = 1
             self.image = Ship.FRAMES[self.anim]
@@ -81,14 +82,14 @@ class Ship(gameobject.GameObject):
         self.invincible = 250
         self.position   = list(START_POS.topleft)
         self.rect       = START_POS.copy()
-        self.state      = STATES.ACTIVE
+        self.state      = Ship.STATES.ACTIVE
 
     def move(self):
         #Shorthand for which keys have been pressed
         keys = pygame.key.get_pressed()
         r    = self.rect
 
-        if self.state not in {STATES.DYING, STATES.DEAD, STATES.IDLE}:
+        if self.state not in {Ship.STATES.DYING, Ship.STATES.DEAD, Ship.STATES.IDLE}:
             if keys[pygame.K_LEFT] and r.left > 0:
             #If we're pressing left and not at the left edge of the screen...
                 self.position[0] -= SPEED
@@ -97,7 +98,7 @@ class Ship(gameobject.GameObject):
                 self.position[0] += SPEED
 
         r.left = self.position[0] + .5
-        self.flames.rect.midtop = self.rect.midbottom
+        self.flames.rect.midtop = (r.midbottom[0], r.midbottom[1] - 1)
 
         if self.invincible > 0:
         #If we're invincible...
@@ -110,12 +111,11 @@ class Ship(gameobject.GameObject):
 
     def die(self):
         self.visible = False
-        self.state   = STATES.RESPAWN
+        self.state   = Ship.STATES.RESPAWN
 
     actions = {
                STATES.IDLE      : None          ,
                STATES.SPAWNING  : 'respawn'     ,
-               STATES.INVINCIBLE: None          ,
                STATES.ACTIVE    : 'move'        ,
                STATES.DYING     : 'die'         ,
                STATES.DEAD      : NotImplemented,

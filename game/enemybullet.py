@@ -49,10 +49,10 @@ class EnemyBullet(bullet.Bullet):
         enemy_bullets.add(self)
 
     def kill_player(self, other):
-        if not other.invincible and other.state is player.STATES.ACTIVE:
+        if not other.invincible and other.state is other.__class__.STATES.ACTIVE:
         #If the player is not invincible...
             ingame.lives -= 1
-            other.state = player.STATES.DYING
+            other.state = other.__class__.STATES.DYING
             self.state = self.__class__.STATES.RESET
 
     collisions = {player.Ship: kill_player}
