@@ -1,3 +1,4 @@
+from functools import partial
 import random
 
 import pygame.event
@@ -9,10 +10,10 @@ from core import config
 from core import gamestate
 
 import bg
-import ingame
-import highscore
-import hudobject
-import settingsmenu
+from ingame import InGameState
+from highscore import HighScoreState
+from hudobject import HudObject
+from settingsmenu import SettingsMenu
 
 '''
 This is where the user makes his decisions about what to do in the game.
@@ -23,7 +24,7 @@ HUD  = pygame.sprite.Group()
 MENU = pygame.sprite.Group()
 BG   = pygame.sprite.OrderedUpdates()
 
-DIST_APART = 64
+DIST_APART = 48
 #How far apart, vertically, the menu entries are (in pixels)
 
 MENU_CORNER = (config.SCREEN_RECT.centerx - 112, config.SCREEN_RECT.centery - 64)
@@ -38,30 +39,34 @@ class MainMenu(gamestate.GameState):
 
         self.group_list = [bg.STARS_GROUP, BG, HUD, MENU]
 
-        self.hud_title = hudobject.HudObject.make_text("Invasodado", [config.SCREEN_RECT.centerx - 96, 32])
+        self.hud_title = HudObject.make_text("Invasodado", [config.SCREEN_RECT.centerx - 96, 32])
 
         #Will be replaced with a logo (aka an actual image) later.
-        self.hud_selection  = hudobject.HudObject.make_text("->", (0, 0))
+        self.hud_selection  = HudObject.make_text("->", (0, 0))
 
-        self.menu = hudobject.HudObject.make_text(["Normal Mode",
-                                                   "High Scores",
-                                                   "Settings"   ,
-                                                   "Quit"       ,],
-                                                  pos = MENU_CORNER,
-                                                  vspace = DIST_APART)
+        self.menu = HudObject.make_text(["Normal Mode",
+                                         "2 Minutes",
+                                         "5 Minutes",
+                                         "High Scores",
+                                         "Settings"   ,
+                                         "Quit"       ,],
+                                         pos = MENU_CORNER,
+                                         vspace = DIST_APART)
 
         self.menu_actions = [
-                             self.__start_game      ,
-                             self.__view_high_scores,
-                             self.__settings_menu   ,
-                             quit                   ,
-                             ]
+                             partial(self.change_state, InGameState,   0),
+                             partial(self.change_state, InGameState, 120),
+                             partial(self.change_state, InGameState, 300),
+                             partial(self.change_state, HighScoreState  ),
+                             partial(self.change_state, SettingsMenu    ),
+                             quit                                        ,
+                            ]
 
         self.key_actions  = {
-                             pygame.K_RETURN : self.__enter_selection,
-                             pygame.K_UP     : self.__move_up        ,
-                             pygame.K_DOWN   : self.__move_down      ,
-                             pygame.K_ESCAPE : quit                  ,
+                             pygame.K_RETURN : self.__enter_selection         ,
+                             pygame.K_UP     : partial(self.__move_cursor, -1),
+                             pygame.K_DOWN   : partial(self.__move_cursor,  1),
+                             pygame.K_ESCAPE : quit                           ,
                              }
 
 
@@ -76,24 +81,28 @@ class MainMenu(gamestate.GameState):
         self.group_list = []
 
     def events(self, events):
+        ka = self.key_actions
         for e in events:
         #For all input we've received...
-            if e.type == pygame.KEYDOWN and e.key in self.key_actions:
+            if e.type == pygame.KEYDOWN and e.key in ka:
             #If a key was pressed...
-                self.key_actions[e.key]()
+                ka[e.key]()
                 self.selection %= len(self.menu_actions)
 
     def logic(self):
         map(pygame.sprite.Group.update, self.group_list)
 
     def render(self):
-        self.hud_selection.rect.midright = self.menu[self.selection].rect.midleft
-        pygame.display.get_surface().fill((0, 0, 0))
-        bg.STARS.emit()
-        map(pygame.sprite.Group.draw, self.group_list, [pygame.display.get_surface()]*len(self.group_list))
+        pd = pygame.display
+        g = self.group_list
 
-        pygame.display.flip()
-        pygame.display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        self.hud_selection.rect.midright = self.menu[self.selection].rect.midleft
+        pd.get_surface().fill((0, 0, 0))
+        bg.STARS.emit()
+        map(pygame.sprite.Group.draw, g, [config.screen]*len(g))
+
+        pd.flip()
+        pd.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
 
         self.fps_timer.tick(60 * self.frame_limit)
 
@@ -101,23 +110,7 @@ class MainMenu(gamestate.GameState):
         '''Go with the selection the player made.'''
         self.menu_actions[self.selection]()
 
-    def __start_game(self):
-        '''Begin the game.'''
-        self.next_state = ingame.InGameState()
-
-    def __view_high_scores(self):
-        '''Bring the player to the high score table.'''
-        self.next_state = highscore.HighScoreState()
-
-    def __move_up(self):
-        '''Move the cursor up.'''
+    def __move_cursor(self, index):
+        '''Move the cursor.'''
         #There should probably be some animation here later.
-        self.selection -= 1
-
-    def __move_down(self):
-        '''Move the cursor down.'''
-        #Likewise here.
-        self.selection += 1
-
-    def __settings_menu(self):
-        self.next_state = settingsmenu.SettingsMenu()
+        self.selection += index

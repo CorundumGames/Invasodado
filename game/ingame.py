@@ -1,3 +1,4 @@
+from functools import partial
 import math
 import random
 
@@ -18,7 +19,7 @@ import blockgrid
 import enemy
 import enemybullet
 import enemysquadron
-import highscore
+from highscore import HighScoreState
 import hudobject
 import mainmenu
 import player
@@ -36,7 +37,7 @@ DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
 COMBO_LENGTH        = 50
 
-combo        = False
+combo         = False
 combo_counter = 0
 
 score      = 0
@@ -75,10 +76,10 @@ class InGameState(gamestate.GameState):
                                'time'      : f('', (r.centerx, 32))
                               }
         self.key_actions    = {
-                               pygame.K_ESCAPE: self.__return_to_menu    ,
+                               pygame.K_ESCAPE: partial(self.change_state, mainmenu.MainMenu),
                                pygame.K_F1    : config.toggle_fullscreen ,
                                pygame.K_SPACE : self.__ship_fire         ,
-                               pygame.K_c     : self.__clear_blocks      ,
+                               pygame.K_c     : blockgrid.clear          ,
                                pygame.K_f     : config.toggle_frame_limit,
                                pygame.K_p     : config.toggle_pause      ,
                                pygame.K_u     : self.__add_ufo           ,
@@ -107,15 +108,15 @@ class InGameState(gamestate.GameState):
         global multiplier
         map(pygame.sprite.Group.empty, self.group_list)
 
-        clean_up = [balloflight, blockgrid, block, enemybullet, enemysquadron]
-        for m in clean_up: m.clean_up()
+        for m in [balloflight, blockgrid, block, enemybullet, enemysquadron]:
+            m.clean_up()
 
         del self.hud_text, self.ufo, self.group_list
 
-        score, prev_score   = 0, None
-        lives, prev_lives   = 3, None
+        score, prev_score    = 0, None
+        lives, prev_lives    = 3, None
         combo, combo_counter = False, 0
-        multiplier          = DEFAULT_MULTIPLIER
+        multiplier           = DEFAULT_MULTIPLIER
 
     def events(self, events):
         ka = self.key_actions
@@ -156,13 +157,14 @@ class InGameState(gamestate.GameState):
         if combo and combo_counter < COMBO_LENGTH:
             combo_counter += 1
         else:
-            combo        = False
+            combo         = False
             combo_counter = 0
-            multiplier   = DEFAULT_MULTIPLIER
+            multiplier    = DEFAULT_MULTIPLIER
 
     def render(self):
         global prev_score, prev_lives
         pd = pygame.display
+        g = self.group_list
 
         if score != prev_score:
         #If our score has changed since the last frame...
@@ -177,7 +179,6 @@ class InGameState(gamestate.GameState):
         pd.get_surface().fill((0, 0, 0))
         bg.STARS.emit()
 
-        g = self.group_list
         map(pygame.sprite.Group.draw, g, [config.screen]*len(g))
 
         pd.flip()
@@ -193,15 +194,6 @@ class InGameState(gamestate.GameState):
         '''
         BLOCKS.add(block.get_block([pos, 0], c))
 
-    def __clear_blocks(self):
-        blockgrid.clear()
-
-    def __return_to_menu(self):
-        self.next_state = mainmenu.MainMenu()
-
-    def __goto_high_scores(self):
-        self.next_state = highscore.HighScoreState(score = int(score))
-
     def __add_ufo(self):
         if self.ufo.state == ufo.UFO.STATES.IDLE:
         #If the UFO is not currently on-screen...
@@ -213,8 +205,9 @@ class InGameState(gamestate.GameState):
 
     def __game_over(self):
         enemy.Enemy.velocity = [0, 0]
-        self.key_actions[pygame.K_SPACE] = self.__goto_high_scores
+        self.key_actions[pygame.K_SPACE] = partial(self.change_state, HighScoreState, score=int(score))
         self.ship.kill()
-        self.ship.state      = player.STATES.IDLE
+        self.ship.flames.kill()
+        self.ship.state      = player.Ship.STATES.IDLE
 
         HUD.add(self.hud_text['game_over'], self.hud_text['press_fire'])

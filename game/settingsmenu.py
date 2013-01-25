@@ -1,3 +1,5 @@
+from functools import partial
+
 import pygame.display
 import pygame.sprite
 
@@ -8,7 +10,7 @@ from core import settings
 
 import bg
 import mainmenu
-import hudobject
+from hudobject import HudObject
 
 '''
 This is a menu that lets the user change settings within the game.
@@ -28,55 +30,55 @@ MENU_CORNER = (32, 64)
 
 class SettingsMenu(gamestate.GameState):
     def __init__(self):
+        f = HudObject.make_text
         self.group_list = [bg.STARS_GROUP, BG, HUD, MENU]
 
-        self.hud_title = hudobject.HudObject.make_text("Settings",
-                                             (config.SCREEN_RECT.centerx - 64, 32)
-                                             )
+        self.hud_title     = f("Settings", (config.SCREEN_RECT.centerx - 64, 32))
+        self.hud_selection = f("->", (0, 0))
 
-        self.hud_selection              = hudobject.HudObject.make_text("->", (0, 0))
 
-        self.menu = hudobject.HudObject.make_text(["Full-Screen"    ,
-                                                   "Colorblind Mode",
-                                                   "Difficulty"     ,
-                                                   "Back"           ,],
-                                                  pos = MENU_CORNER,
-                                                  vspace = DIST_APART)
+        self.menu_keys = ['fullscreen', 'colorblind', 'difficulty', 'back']
 
-        self.menu_settings = hudobject.HudObject.make_text(["On" if config.settings.fullscreen else "Off",
-                                                            "Off",
-                                                            "Easy"],
-                                                           pos = [MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]],
-                                                           vspace = DIST_APART)
+        a = f(["Full-Screen", "Colorblind Mode", "Difficulty", "Back",],
+              pos = MENU_CORNER,
+              vspace = DIST_APART
+              )
+
+        b = f(["On" if settings.fullscreen else "Off", "Off", "Easy"],
+               pos = [MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]],
+               vspace = DIST_APART
+               )
+
+        self.menu          = dict(zip(self.menu_keys, a))
+        self.menu_settings = dict(zip(self.menu_keys, b))
 
         self.frame_limit = True
         #True if we're limiting the frame rate to 60 FPS
 
 
         self.menu_actions = [
-                             self.__toggle_fullscreen      ,
-                             self.__toggle_color_blind_mode,
-                             self.__toggle_difficulty      ,
-                             self.__return_to_main_menu    ,
+                             self.__toggle_fullscreen            ,
+                             self.__toggle_color_blind_mode      ,
+                             self.__toggle_difficulty            ,
+                             partial(self.change_state, mainmenu.MainMenu),
                              ]
 
         self.key_actions  = {
-                             pygame.K_RETURN : self.__enter_selection    ,
-                             pygame.K_UP     : self.__move_up            ,
-                             pygame.K_DOWN   : self.__move_down          ,
-                             pygame.K_ESCAPE : self.__return_to_main_menu,
+                             pygame.K_RETURN : self.__enter_selection              ,
+                             pygame.K_UP     : partial(self.__move_cursor, -1)     ,
+                             pygame.K_DOWN   : partial(self.__move_cursor,  1)     ,
+                             pygame.K_ESCAPE : partial(self.change_state, mainmenu.MainMenu),
                              }
 
         self.selection    = 0
 
         HUD.add(self.hud_selection, self.hud_title)
-        MENU.add(self.menu, self.menu_settings)
+        MENU.add(self.menu.values(), self.menu_settings.values())
         BG.add(bg.EARTH, bg.GRID)
 
     def __del__(self):
         map(pygame.sprite.Group.empty, self.group_list)
-
-        self.group_list = []
+        del self.group_list
 
     def events(self, events):
         for e in events:
@@ -92,7 +94,7 @@ class SettingsMenu(gamestate.GameState):
     def render(self):
         pygame.display.get_surface().fill((0, 0, 0))
 
-        self.hud_selection.rect.midright = self.menu[self.selection].rect.midleft
+        self.hud_selection.rect.midright = self.menu[self.menu_keys[self.selection]].rect.midleft
 
         bg.STARS.emit()
         map(pygame.sprite.Group.draw, self.group_list, [pygame.display.get_surface()]*len(self.group_list))
@@ -106,25 +108,17 @@ class SettingsMenu(gamestate.GameState):
         '''Go with the selection the player made.'''
         self.menu_actions[self.selection]()
 
-    def __move_up(self):
-        '''Move the cursor up.'''
+    def __move_cursor(self, index):
+        '''Move the cursor.'''
         #There should probably be some animation here later.
-        self.selection -= 1
-
-    def __move_down(self):
-        '''Move the cursor down.'''
-        #Likewise here.
-        self.selection += 1
+        self.selection += index
 
     def __toggle_fullscreen(self):
         config.toggle_fullscreen()
-        self.menu_settings[0].image = hudobject.HudObject.make_text("On" if settings.fullscreen else "Off", surfaces = True)
+        self.menu_settings['fullscreen'].image = HudObject.make_text("On" if settings.fullscreen else "Off", surfaces = True)
 
     def __toggle_color_blind_mode(self):
         pass
 
     def __toggle_difficulty(self):
         pass
-
-    def __return_to_main_menu(self):
-        self.next_state = mainmenu.MainMenu()

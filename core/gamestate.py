@@ -41,3 +41,6 @@ class GameState:
         assign Sprites to groups by layer, then call Group.blit() sequentially.
         '''
         pass
+
+    def change_state(self, state_type, *args, **kwargs):
+        self.next_state = state_type(*args, **kwargs)
