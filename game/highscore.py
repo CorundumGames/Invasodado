@@ -1,3 +1,4 @@
+from os.path import join
 from functools import partial
 import string
 
@@ -6,10 +7,10 @@ import pygame
 import bg
 import core.color          as color
 import core.config         as config
-import core.gamestate      as gamestate
-import core.highscoretable as highscoretable
+from core.gamestate import GameState
+from core.highscoretable import HighScoreTable, HighScoreEntry
 import gameobject
-import hudobject
+from hudobject import HudObject
 import mainmenu
 
 BG   = pygame.sprite.OrderedUpdates()
@@ -21,9 +22,13 @@ ROW_WIDTH      = 32
 TABLE_CORNER   = (16, 64)
 V_SPACE        = 24
 
+f = partial(join, 'save')
 score_tables  = [
-                 highscoretable.HighScoreTable("./save/normal.wtf", 1, 10, "Scores", "./save/norm_default.json")
-                 ]
+                 HighScoreTable(f('0.wtf'),  -1, 10, "Normal Mode", f('norm_default.json')),
+                 HighScoreTable(f('2.wtf'), 120, 10, "2 Minutes"  , f('2_default.json'   )),
+                 HighScoreTable(f('5.wtf'), 300, 10, "5 Minutes"  , f('5_default.json'   )),
+                ]
+del f
 
 def make_score_table(table, pos, vspace, width, surfaces = False):
     '''
@@ -38,48 +43,47 @@ def make_score_table(table, pos, vspace, width, surfaces = False):
     '''
 
     b = ["{:.<24}.{:.>7}".format(i.name, i.score) for i in table.get_scores()]
-    return hudobject.HudObject.make_text(b, TABLE_CORNER, color.WHITE, config.FONT, V_SPACE, surfaces)
+    return HudObject.make_text(b, TABLE_CORNER, color.WHITE, config.FONT, V_SPACE, surfaces)
 
-class HighScoreState(gamestate.GameState):
+class HighScoreState(GameState):
     def __init__(self, *args, **kwargs):
 
-        self.args   = args
-        self.kwargs = kwargs
+        self.args          = args
+        self.current_table = 0
 
         self.entering_name = False
 
         self.key_actions = {
-                            pygame.K_LEFT   : NotImplemented       ,
-                            pygame.K_RIGHT  : NotImplemented       ,
-                            pygame.K_UP     : partial(self.__char_move,  1),
-                            pygame.K_DOWN   : partial(self.__char_move, -1),
-                            pygame.K_RETURN : self.__enter_char    ,
-                            pygame.K_ESCAPE : self.__return_to_menu,
+                            pygame.K_LEFT   : partial(self.__switch_table, -1),
+                            pygame.K_RIGHT  : partial(self.__switch_table,  1),
+                            pygame.K_UP     : partial(self.__char_move   ,  1),
+                            pygame.K_DOWN   : partial(self.__char_move   , -1),
+                            pygame.K_RETURN : self.__enter_char               ,
+                            pygame.K_ESCAPE : partial(self.change_state, mainmenu.MainMenu),
                            }
 
-        self.hud_titles   = [hudobject.HudObject.make_text(score_tables[0].title, (config.SCREEN_RECT.midtop[0] - 64, 16))]
+        self.hud_titles   = [HudObject.make_text(score_tables[i].title, (config.SCREEN_RECT.midtop[0] - 64, 16)) for i in range(3)]
         #The list of the titles of high score tables
 
-        self.hud_scores   = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)
+        self.hud_scores   = [make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3)]
         #The graphical display of the scores
 
-        self.next_state   = None
-
         self.group_list   = [bg.STARS_GROUP, BG, MENU]
+        self.kwargs = kwargs
+        self.mode   = kwargs['mode'] if 'mode' in kwargs else 0
 
-        MENU.add(self.hud_scores, self.hud_titles)
+        MENU.add(self.hud_scores[self.mode], self.hud_titles[self.mode])
         BG.add(bg.EARTH, bg.GRID)
 
-        if 'score' in kwargs:
-        #If we were passed in any arguments...
-            if kwargs['score'] > score_tables[0].lowest_score():
-                self.alphanum_index = 0
-                self.char_limit     = 20
-                self.entering_name  = True
-                self.entry_name     = 'A'
-                self.hud_name       = hudobject.HudObject.make_text(self.entry_name, ENTRY_NAME_POS)
-                self.name_index     = 0
-                MENU.add(self.hud_name)
+        if 'score' in kwargs and kwargs['score'] > score_tables[self.mode].lowest_score():
+        #If we just got a high score...
+            self.alphanum_index = 0
+            self.char_limit     = 20
+            self.entering_name  = True
+            self.entry_name     = 'A'
+            self.hud_name       = HudObject.make_text(self.entry_name, ENTRY_NAME_POS)
+            self.name_index     = 0
+            MENU.add(self.hud_name)
 
 
     def __del__(self):
@@ -97,16 +101,15 @@ class HighScoreState(gamestate.GameState):
         map(pygame.sprite.Group.update, self.group_list)
 
     def render(self):
-        g = self.group_list
         pd = pygame.display
 
         if self.entering_name:
         #If we're entering our name for a high score...
-            self.hud_name.image = hudobject.HudObject.make_text(self.entry_name, surfaces = True)
+            self.hud_name.image = HudObject.make_text(self.entry_name, surfaces = True)
 
         pygame.display.get_surface().fill((0, 0, 0))
         bg.STARS.emit()
-        map(pygame.sprite.Group.draw, g, [config.screen]*len(g))
+        map(pygame.sprite.Group.draw, self.group_list, [config.screen]*len(self.group_list))
 
         pd.flip()
         pd.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
@@ -118,15 +121,26 @@ class HighScoreState(gamestate.GameState):
             self.alphanum_index %= len(ALPHANUMERIC)
             self.entry_name = ''.join([self.entry_name[:self.name_index], ALPHANUMERIC[self.alphanum_index], self.entry_name[self.name_index+1:]])
 
+    def __switch_table(self, index):
+        '''
+        Move between the three tables, but not if you're entering a high score.
+        '''
+        if not self.entering_name:
+            MENU.remove(self.hud_scores[self.current_table], self.hud_titles[self.current_table])
+            self.current_table += index
+            self.current_table %= len(self.hud_scores)
+            MENU.add(self.hud_scores[self.current_table], self.hud_titles[self.current_table])
+
+
     def __enter_char(self):
         self.name_index += 1
         if self.name_index > self.char_limit:
         #If we've finished entering our name...
             self.entering_name = False
             self.hud_name.kill()#Get rid of the name entry characters
-            score_tables[0].add_score(highscoretable.HighScoreEntry(self.entry_name, self.kwargs['score'], 1))#add the entry to the leaderboard
+            score_tables[self.current_table].add_score(HighScoreEntry(self.entry_name, self.kwargs['score'], self.mode))#add the entry to the leaderboard
             MENU.remove(self.hud_scores)#remove the menu from the screen
-            self.hud_scores = make_score_table(score_tables[0], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
+            self.hud_scores = make_score_table(score_tables[self.current_table], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
             MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
         else:
             self.alphanum_index = 0

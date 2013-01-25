@@ -22,7 +22,7 @@ class HighScoreEntry:
         @param entry: High score entry string to construct self from
         '''
 
-        if entry == None:
+        if entry is None:
         #If we were not passed in a high score entry string...
             self.country  = str(geolocation.get_country('countryCode'))
             self.mode     = int(mode) #Can represent game modes or difficulty

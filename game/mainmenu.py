@@ -5,14 +5,15 @@ import pygame.event
 import pygame.display
 import pygame.sprite
 
+
 from core import color
 from core import config
-from core import gamestate
+from core.gamestate import GameState
 
 import bg
-from ingame import InGameState
-from highscore import HighScoreState
-from hudobject import HudObject
+from ingame       import InGameState
+from highscore    import HighScoreState
+from hudobject    import HudObject
 from settingsmenu import SettingsMenu
 
 '''
@@ -30,12 +31,12 @@ DIST_APART = 48
 MENU_CORNER = (config.SCREEN_RECT.centerx - 112, config.SCREEN_RECT.centery - 64)
 #The location of the top-left corner of the menu
 
-class MainMenu(gamestate.GameState):
+class MainMenu(GameState):
     def __init__(self):
         self.frame_limit = True
         #True if we're limiting the frame rate to 60 FPS
 
-        self.selection    = 0
+
 
         self.group_list = [bg.STARS_GROUP, BG, HUD, MENU]
 
@@ -45,8 +46,8 @@ class MainMenu(gamestate.GameState):
         self.hud_selection  = HudObject.make_text("->", (0, 0))
 
         self.menu = HudObject.make_text(["Normal Mode",
-                                         "2 Minutes",
-                                         "5 Minutes",
+                                         "2 Minutes"  ,
+                                         "5 Minutes"  ,
                                          "High Scores",
                                          "Settings"   ,
                                          "Quit"       ,],
@@ -54,12 +55,12 @@ class MainMenu(gamestate.GameState):
                                          vspace = DIST_APART)
 
         self.menu_actions = [
-                             partial(self.change_state, InGameState,   0),
-                             partial(self.change_state, InGameState, 120),
-                             partial(self.change_state, InGameState, 300),
-                             partial(self.change_state, HighScoreState  ),
-                             partial(self.change_state, SettingsMenu    ),
-                             quit                                        ,
+                             partial(self.change_state, InGameState            ),
+                             partial(self.change_state, InGameState, time = 120),
+                             partial(self.change_state, InGameState, time = 300),
+                             partial(self.change_state, HighScoreState  )       ,
+                             partial(self.change_state, SettingsMenu    )       ,
+                             quit                                               ,
                             ]
 
         self.key_actions  = {
@@ -68,6 +69,7 @@ class MainMenu(gamestate.GameState):
                              pygame.K_DOWN   : partial(self.__move_cursor,  1),
                              pygame.K_ESCAPE : quit                           ,
                              }
+        self.selection    = 0
 
 
 
@@ -94,7 +96,7 @@ class MainMenu(gamestate.GameState):
 
     def render(self):
         pd = pygame.display
-        g = self.group_list
+        g  = self.group_list
 
         self.hud_selection.rect.midright = self.menu[self.selection].rect.midleft
         pd.get_surface().fill((0, 0, 0))
