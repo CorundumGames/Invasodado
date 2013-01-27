@@ -4,7 +4,7 @@ import random
 import pygame.time
 
 import config
-import game.gameobject as gameobject
+from game.gameobject import GameObject
 
 class ParticleEmitter:
     '''
@@ -29,17 +29,14 @@ class ParticleEmitter:
         self.rate      = 0
         self.rect      = rect
 
-    def __del__(self):
-        pass
-
     def __release(self, p):
         '''
         Actually releases a particle
 
         @param p: The particle to release
         '''
-        r = self.rect
-        p.position = [random.uniform(r.left, r.right), random.uniform(r.top , r.bottom)]
+        r              = self.rect
+        p.position     = [random.uniform(r.left, r.right), random.uniform(r.top , r.bottom)]
         p.rect.topleft = p.position
         p.state        = p.__class__.STATES.APPEARING
         p.add(self.group)
@@ -62,8 +59,9 @@ class ParticleEmitter:
 
         @param amount: No. of particles to release, max is self.pool.amount
         '''
+        p = self.pool
         for i in xrange(amount):
-            self.__release(self.pool.get_particle())
+            self.__release(p.get_particle())
 
     actions    = None
     collisions = None
@@ -71,7 +69,7 @@ class ParticleEmitter:
 
 ###############################################################################
 
-class Particle(gameobject.GameObject):
+class Particle(GameObject):
     '''
     Tiny bits and pieces used for graphical effects.  Meant for things like
     explosions, sparkles, impacts, etc.
@@ -91,16 +89,13 @@ class Particle(gameobject.GameObject):
         @ivar move_func: The function that defines motion; called each update()
                          Takes one parameter
         '''
-        gameobject.GameObject.__init__(self)
+        GameObject.__init__(self)
         self.appear_func = appear_func
         self.image       = image
         self.move_func   = move_func
-        self.position    = list(self.__class__.START_POS)
+        self.position    = list(Particle.START_POS)
         self.rect        = pygame.Rect(self.position, self.image.get_size())
-        self.state       = self.__class__.STATES.IDLE
-
-    def __del__(self):
-        pass
+        self.state       = Particle.STATES.IDLE
 
     def appear(self):
         self.appear_func(self)
@@ -116,9 +111,9 @@ class Particle(gameobject.GameObject):
         self.kill()
         self.acceleration = [0.0, 0.0]
         self.velocity     = [0.0, 0.0]
-        self.position     = list(self.__class__.START_POS)
+        self.position     = list(Particle.START_POS)
         self.rect.topleft = self.position
-        self.state        = self.__class__.STATES.IDLE
+        self.state        = Particle.STATES.IDLE
 
     actions = {
                STATES.IDLE     : None    ,
@@ -155,8 +150,8 @@ class ParticlePool:
 
     def clean(self):
         particles_to_remove = set()
-        for i in itertools.ifilterfalse(config.SCREEN_RECT.colliderect, self.particles_out):
-            particles_to_remove.add(i)
+        po = self.particles_out
+        map(particles_to_remove.add, itertools.ifilterfalse(config.SCREEN_RECT.colliderect, po))
 
         self.particles_in.update(particles_to_remove)
-        self.particles_out -= particles_to_remove
+        po -= particles_to_remove

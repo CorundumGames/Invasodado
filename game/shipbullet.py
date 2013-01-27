@@ -2,10 +2,10 @@ import pygame.rect
 
 import core.config as config
 
-import bullet
-import enemy
+from bullet import Bullet
+from enemy  import Enemy
+from ufo    import UFO
 import ingame
-import ufo
 
 '''
 This is the bullet the ship has available.  It is not meant to be created
@@ -13,7 +13,7 @@ and deleted over and over, but to be reused by the ship (so we don't take as
 much time creating and destroying bullets).
 '''
 
-class ShipBullet(bullet.Bullet):
+class ShipBullet(Bullet):
     SPEED     = -8
     START_POS = pygame.Rect(30, config.screen.get_height()*2, 26, 19)
 
@@ -36,6 +36,6 @@ class ShipBullet(bullet.Bullet):
             other.state = other.__class__.STATES.DYING
 
     collisions = {
-                  enemy.Enemy: kill_enemy,
-                  ufo.UFO    : kill_enemy
+                  Enemy: kill_enemy,
+                  UFO  : kill_enemy,
                   }

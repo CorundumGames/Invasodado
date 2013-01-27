@@ -6,7 +6,7 @@ import pygame.key
 import core.color  as color
 import core.config as config
 
-import gameobject
+from gameobject import GameObject
 import ingame
 import shipbullet
 
@@ -23,11 +23,11 @@ START_POS = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
 SPEED     = 4
 #########################
 
-class FlameTrail(gameobject.GameObject):
+class FlameTrail(GameObject):
     FRAMES = [config.SPRITES.subsurface(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
 
     def __init__(self):
-        gameobject.GameObject.__init__(self)
+        GameObject.__init__(self)
         self.anim  = 0.0
         self.image = FlameTrail.FRAMES[0]
         self.rect  = pygame.Rect([0, 0], self.image.get_size())
@@ -42,7 +42,7 @@ class FlameTrail(gameobject.GameObject):
 
     actions = {1 : 'animate'}
 
-class Ship(gameobject.GameObject):
+class Ship(GameObject):
     FRAMES = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
     STATES = config.Enum('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
 
@@ -53,7 +53,7 @@ class Ship(gameobject.GameObject):
         @ivar invincible: How many frames of invincibility the player has if any
         @ivar my_bullet: The single bullet this ship may fire
         '''
-        gameobject.GameObject.__init__(self)
+        GameObject.__init__(self)
 
         self.anim             = 0.0
         self.flames           = FlameTrail()
@@ -110,7 +110,6 @@ class Ship(gameobject.GameObject):
         self.image = Ship.FRAMES[int(self.anim)]
 
     def die(self):
-        self.visible = False
         self.state   = Ship.STATES.RESPAWN
 
     actions = {
@@ -121,5 +120,3 @@ class Ship(gameobject.GameObject):
                STATES.DEAD      : NotImplemented,
                STATES.RESPAWN   : 'respawn'     ,
               }
-
-

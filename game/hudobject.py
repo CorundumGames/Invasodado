@@ -36,6 +36,8 @@ class HudObject(gameobject.GameObject):
         @param font: The font used; it defaults to the first font entry
         @param vspace: Space between lines in pixels. Ignored if only one line.
         @param surfaces: True if we want Surfaces instead of HudObjects (pos is then ignored)
+
+        @return: list(pygame.Surface) if surfaces else list(HudObject)
         '''
 
         if isinstance(text, basestring):

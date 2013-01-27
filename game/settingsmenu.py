@@ -5,11 +5,11 @@ import pygame.sprite
 
 from core import color
 from core import config
-from core import gamestate
+from core.gamestate import GameState
 from core import settings
 
 import bg
-import mainmenu
+import mainmenu  #Circular dependency; need to fix this
 from hudobject import HudObject
 
 '''
@@ -28,7 +28,7 @@ DIST_APART_STATUS = 320
 MENU_CORNER = (32, 64)
 #The location of the top-left corner of the menu
 
-class SettingsMenu(gamestate.GameState):
+class SettingsMenu(GameState):
     def __init__(self):
         f = HudObject.make_text
         self.group_list = [bg.STARS_GROUP, BG, HUD, MENU]

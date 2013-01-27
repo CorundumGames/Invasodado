@@ -7,20 +7,16 @@ import config
 import gsm
 import particles
 
-import game.balloflight as balloflight
-import game.block       as block
-import game.hudobject   as hudobject
+from game.balloflight import BallOfLight
+from game.block       import Block
+from game.hudobject   import HudObject
+from particles        import Particle, ParticleEmitter
 
-do_not_compare = { }
+do_not_compare = {}
 #Contains 2-tuples of types.  Don't check for collisions between objects
 #with these type pairings.
 
-do_not_check = {block.Block,
-                balloflight.BallOfLight,
-                hudobject.HudObject,
-                particles.Particle,
-                particles.ParticleEmitter,
-                }
+do_not_check = {Block, BallOfLight, HudObject, Particle, ParticleEmitter}
 #Contains types that are not to collide with anything.
 
 class CollisionGrid:
