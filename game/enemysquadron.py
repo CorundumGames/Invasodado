@@ -1,6 +1,8 @@
 import itertools
 import random
 
+import pygame
+
 from enemy import Enemy
 import ingame
 
@@ -11,8 +13,20 @@ enemies = None
 
 def clean_up():
     global enemies
-    enemies        = None
+    enemies              = None
     Enemy.velocity = [.5, 0.0]
+
+def celebrate():
+    for e in ingame.ENEMIES:
+    #For all enemies...
+        if e.state is not Enemy.STATES.IDLE:
+            e.state = Enemy.STATES.CHEERING
+
+def move_down():
+    for e in ingame.ENEMIES:
+    #For all enemies on-screen...
+        e.state = Enemy.STATES.LOWERING
+    Enemy.should_flip  = False
 
 def reset():
     global enemies
@@ -31,13 +45,18 @@ def reset():
                 i[j].state            = a
                 i[ROW_SIZE-1-j].state = a
 
-def move_down():
-    for e in ingame.ENEMIES:
-    #For all enemies on-screen...
-        e.state = Enemy.STATES.LOWERING
+def start():
+    Enemy.start_time = pygame.time.get_ticks()
 
-def celebrate():
-    for e in ingame.ENEMIES:
-    #For all enemies...
-        if e.state is not e.__class__.STATES.IDLE:
-            e.state = Enemy.STATES.CHEERING
+def update():
+    Enemy.anim += 1.0/3.0
+
+    if Enemy.should_flip:
+    #If at least one enemy has touched the side of the screen...
+        Enemy.velocity[0] *= -1
+        move_down()
+
+    if len(ingame.ENEMIES) == 0:
+    #If all enemies have been killed...
+        reset()
+        Enemy.velocity[0] = abs(Enemy.velocity[0]) + 0.05

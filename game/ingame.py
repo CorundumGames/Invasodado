@@ -14,7 +14,7 @@ import balloflight
 import bg
 import block
 import blockgrid
-from enemy import Enemy, update as enemy_update
+from enemy import Enemy, increase_difficulty
 import enemybullet
 import enemysquadron
 from highscore import HighScoreState
@@ -23,16 +23,17 @@ import mainmenu
 from player import Ship
 import ufo
 
-BG      = pygame.sprite.OrderedUpdates()
-BLOCKS  = pygame.sprite.Group()
-ENEMIES = pygame.sprite.Group()
-HUD     = pygame.sprite.Group()
-PLAYER  = pygame.sprite.Group()
-UFO     = pygame.sprite.Group()
+BG            = pygame.sprite.OrderedUpdates()
+BLOCKS        = pygame.sprite.Group()
+ENEMIES       = pygame.sprite.Group()
+ENEMY_BULLETS = pygame.sprite.Group()
+HUD           = pygame.sprite.Group()
+PLAYER        = pygame.sprite.Group()
+UFO           = pygame.sprite.Group()
 
 DEFAULT_MULTIPLIER = 10
 multiplier         = DEFAULT_MULTIPLIER
-COMBO_LENGTH        = 50
+COMBO_LENGTH       = 50
 
 combo         = False
 combo_counter = 0
@@ -43,7 +44,7 @@ prev_score = None
 lives      = 3
 prev_lives = None
 
-mode_vals = {-1: 0, 120: 1, 300: 2}
+mode_vals = {-1: 0, -2: 0, 120: 1, 300: 2}  #Quick hack
 
 class InGameState(GameState):
     def __init__(self, *args, **kwargs):
@@ -66,7 +67,7 @@ class InGameState(GameState):
         self.args           = args
         self.collision_grid = CollisionGrid(4, 4, 1)
         self.game_running   = True
-        self.group_list     = [bg.STARS_GROUP, BG, BLOCKS, UFO, ENEMIES, PLAYER, HUD]
+        self.group_list     = [bg.STARS_GROUP, BG, BLOCKS, UFO, ENEMIES, ENEMY_BULLETS, PLAYER, HUD]
         self.hud_text       = {
                                'score'     : f('', (16, 16)),
                                'lives'     : f('', (r.width - 160, 16)),
@@ -100,15 +101,16 @@ class InGameState(GameState):
             lives = 1
         else:
             del self.hud_text['time']
-        BG.add(bg.EARTH, bg.GRID)
-        enemysquadron.reset()
-        block.Block.block_full = False
 
-        if not config.debug:
+        if not __debug__:
             for i in [pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1]:
                 del self.key_actions[i]
             del self.mouse_actions
 
+        BG.add(bg.EARTH, bg.GRID)
+        enemysquadron.reset()
+        block.Block.block_full = False
+        enemysquadron.start()
 
     def __del__(self):
         global score, prev_score
@@ -126,13 +128,15 @@ class InGameState(GameState):
         lives, prev_lives    = 3, None
         combo, combo_counter = False, 0
         multiplier           = DEFAULT_MULTIPLIER
+        Enemy.start_time     = None
+        Enemy.shoot_odds     = .002
 
     def events(self, events):
         ka = self.key_actions
 
         for e in events:
         #For all events passed in...
-            if e.type == pygame.MOUSEBUTTONDOWN and config.debug:
+            if e.type == pygame.MOUSEBUTTONDOWN and __debug__:
             #If a mouse button is clicked...
                 self.__make_block(e.pos[0], self.mouse_actions[e.button])
             elif e.type == pygame.KEYDOWN and e.key in ka:
@@ -143,24 +147,25 @@ class InGameState(GameState):
 
     def logic(self):
         global combo, combo_counter, multiplier
-        enemy_update()
+        enemysquadron.update()
         self.collision_grid.update()
         map(pygame.sprite.Group.update, self.group_list)
 
-        if len(ENEMIES) == 0:
-        #If all enemies have been killed...
-            enemysquadron.reset()
-            Enemy.velocity[0] = abs(Enemy.velocity[0]) + 0.05
+        if self.time > -1 and self.game_running:
+        #If this is a timed game...
+            if pygame.time.get_ticks() >= self.end_time:
+            #If we run out of time...
+                global lives
+                lives = 0
+            increase_difficulty()
 
-        if Enemy.should_flip:
-        #If at least one enemy has touched the side of the screen...
-            Enemy.velocity[0] *= -1
-            enemysquadron.move_down()
-            Enemy.should_flip = False
-
-        if self.time > -1 and self.game_running and pygame.time.get_ticks() >= self.end_time:
-            global lives
-            lives = 0
+        if combo and combo_counter < COMBO_LENGTH:
+        #If we made a combo...
+            combo_counter += 1
+        else:
+            combo         = False
+            combo_counter = 0
+            multiplier    = DEFAULT_MULTIPLIER
 
         if self.game_running and (lives == 0 or block.Block.block_full):
         #If we run out of lives or the blocks go past the top of the screen...
@@ -168,12 +173,7 @@ class InGameState(GameState):
             enemysquadron.celebrate()
             self.game_running = False
 
-        if combo and combo_counter < COMBO_LENGTH:
-            combo_counter += 1
-        else:
-            combo         = False
-            combo_counter = 0
-            multiplier    = DEFAULT_MULTIPLIER
+
 
     def render(self):
         global prev_score, prev_lives
@@ -190,8 +190,9 @@ class InGameState(GameState):
             self.hud_text['lives'].image = f("Lives: %i" % lives)
             prev_lives = lives
 
-        a = self.end_time - pygame.time.get_ticks()
-        if a >= 0:
+
+        if self.time >= 0:
+            a = self.end_time - pygame.time.get_ticks()
             b = [a/1000/60, (a/1000) % 60]
             self.hud_text['time'].image = f("{}:{:0>2}".format(*b))
 

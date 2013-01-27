@@ -2,7 +2,7 @@ import pygame.rect
 
 import core.color  as color
 import core.config as config
-import bullet
+from bullet import Bullet
 import ingame
 import player
 
@@ -26,7 +26,7 @@ def get_enemy_bullet():
     return b
 
 
-class EnemyBullet(bullet.Bullet):
+class EnemyBullet(Bullet):
     SPEED     = 2
     START_POS = pygame.Rect(30, config.screen.get_height()*2, 5, 5)
     FRAME     = pygame.Rect(262, 6, 20, 18)
@@ -52,7 +52,7 @@ class EnemyBullet(bullet.Bullet):
         if not other.invincible and other.state is other.__class__.STATES.ACTIVE:
         #If the player is not invincible...
             ingame.lives -= 1
-            other.state = other.__class__.STATES.DYING
-            self.state = self.__class__.STATES.RESET
+            other.state   = other.__class__.STATES.DYING
+            self.state    = self.__class__.STATES.RESET
 
     collisions = {player.Ship: kill_player}

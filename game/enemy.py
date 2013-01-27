@@ -1,3 +1,6 @@
+from math import log1p
+import os.path
+from operator import iadd
 import random
 
 import pygame.mixer
@@ -11,21 +14,30 @@ import balloflight
 from gameobject import GameObject
 import ingame
 
-FRAMES    = [pygame.Rect(32*i, 32, 32, 32) for i in range(4)]
+FRAMES    = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4)]
 START_POS = (32, 32)
 
 enemy_frames = config.get_colored_objects(FRAMES)
-hurt = pygame.mixer.Sound("./sfx/enemyhurt.wav")
+hurt         = pygame.mixer.Sound(os.path.join('sfx', 'enemyhurt.wav'))
 
-def update():
-    Enemy.anim += 1.0/3.0
+
+
+def increase_difficulty():
+    '''
+    Increases Enemy's fire rate and speed based on time elapsed
+    '''
+    Enemy.shoot_odds = log1p(pygame.time.get_ticks() - Enemy.start_time)/1000
+    assert 0.0 <= Enemy.shoot_odds < 1.0, \
+    "Expected a valid probability, got %f" % Enemy.shoot_odds
 
 class Enemy(GameObject):
     STATES       = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'CHEERING')
     acceleration = [0.0, 0.0]
     anim         = 0.0
-    shoot_odds   = .002
+    base_speed   = 0.5
+    shoot_odds   = 0.002
     should_flip  = False
+    start_time   = None
     velocity     = [0.5, 0.0]
     #particles    = particles.ParticlePool(particles.Particle)
 
@@ -60,7 +72,7 @@ class Enemy(GameObject):
             b             = enemybullet.get_enemy_bullet()
             b.rect.midtop = self.rect.midbottom
             b.position    = list(b.rect.topleft)
-            b.add(ingame.ENEMIES)
+            b.add(ingame.ENEMY_BULLETS)
 
         if not Enemy.should_flip:
         #If the squadron of enemies is marked to reverse direction...
