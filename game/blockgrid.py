@@ -1,3 +1,4 @@
+from os.path import join
 import pygame.rect
 import pygame.mixer
 
@@ -16,7 +17,7 @@ blockstoclear = set()
 
 matchset = set()
 
-blockclear = pygame.mixer.Sound("./sfx/clear.wav")
+blockclear = pygame.mixer.Sound(join('sfx', 'clear.wav'))
 
 def clean_up():
     global blocks, blockstocheck, blockstoclear, matchset
@@ -37,7 +38,7 @@ def clear():
     blockstoclear.clear()
 
 def clear_color(targetcolor):
-    for i in (x for x in ingame.BLOCKS if isinstance(x, block.Block) and x.color == targetcolor):
+    for i in (x for x in ingame.BLOCKS if isinstance(x, block.Block) and x.color is targetcolor):
     #For all blocks of the given color...
         i.state = block.Block.STATES.DYING
 
@@ -54,7 +55,7 @@ def update():
     global blocks
     blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
 
-    for b in (x for x in ingame.BLOCKS if isinstance(x, block.Block) and x.state == block.Block.STATES.ACTIVE):
+    for b in (x for x in ingame.BLOCKS if x is not None and x.state is block.Block.STATES.ACTIVE):
     #For all blocks that are on the grid and not moving...
         blocks[b.gridcell[0]][b.gridcell[1]] = b
 
@@ -80,10 +81,7 @@ def update():
 
         for i in nextblocks:
         #For all the lists of blocks above...
-            if len([id(b) for x in i if \
-                    id(i) != id(x) and \
-                    isinstance(x, block.Block) and \
-                    b.color == x.color]) >= 2:
+            if len([id(b) for x in i if i is not x and x is not None and b.color is x.color]) >= 2:
             #If there are two blocks and they're both the same color as the first...
                 matchset.update(i) #Mark these blocks as matching
 
@@ -91,8 +89,8 @@ def update():
         if len(matchset) >= 3:
         #If at least 3 blocks are aligned...
             blockstoclear.update(matchset) #Mark the blocks in question for removal
-            ingame.score += (len(matchset)**2)*ingame.multiplier
-            ingame.combo = True
+            ingame.score     += (len(matchset)**2)*ingame.multiplier
+            ingame.combo      = True
             ingame.multiplier = ingame.DEFAULT_MULTIPLIER * 2
 
         matchset.clear()

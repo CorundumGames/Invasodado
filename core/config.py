@@ -1,3 +1,4 @@
+from os.path import join
 import sys
 
 import pygame.display
@@ -27,18 +28,18 @@ SCREEN_WIDTH  = screen.get_width()  #640 20 cells 32
 SCREEN_HEIGHT = screen.get_height() #480 15 cells 32
 #Screen width and height, in pixels
 
-SPRITES = pygame.image.load("./gfx/sprites.png").convert(DEPTH, FLAGS)
+SPRITES = pygame.image.load(join('gfx', 'sprites.png')).convert(DEPTH, FLAGS)
 #The main spritesheet for this game.
 
-EARTH   = pygame.image.load("./gfx/earth.png").convert(DEPTH, FLAGS)
-EARTH.set_colorkey(pygame.Color(0, 0, 0))
+EARTH   = pygame.image.load(join('gfx', 'earth.png'  )).convert(DEPTH, FLAGS)
+EARTH.set_colorkey(pygame.Color('#000000'))
 
-BG = pygame.image.load("./gfx/bg.png").convert(DEPTH, FLAGS)
-BG.set_colorkey(pygame.Color(0, 0, 0))
+BG      = pygame.image.load(join('gfx', 'bg.png'     )).convert(DEPTH, FLAGS)
+BG.set_colorkey(pygame.Color('#000000'))
 BG.set_alpha(128)
 #The background
 
-FONT = pygame.font.Font("./gfx/font.ttf", 18)
+FONT    = pygame.font.Font(join('gfx', 'font.ttf'), 18)
 #The main typeface we will use; we might use more.
 
 pause = False
@@ -46,9 +47,6 @@ pause = False
 
 limit_frame = True
 #True if we're restricting framerate to 60FPS
-
-debug = 'debug' in sys.argv
-#True if we're in debug mode
 
 tracking = 'track' in sys.argv
 #True if we're outputting graphs of the player's statistics
