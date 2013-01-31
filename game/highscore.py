@@ -15,7 +15,7 @@ from game.hudobject import HudObject
 BG   = pygame.sprite.OrderedUpdates()
 MENU = pygame.sprite.Group()
 
-ALPHANUMERIC   = ''.join([string.uppercase, string.lowercase, string.digits, '_-\' <'])
+ALPHANUMERIC   = ''.join([string.uppercase, string.lowercase, string.digits, '_-\'#<'])
 ENTRY_NAME_POS = (0, config.SCREEN_HEIGHT - 32)
 ROW_WIDTH      = 32
 TABLE_CORNER   = (16, 64)
@@ -23,7 +23,7 @@ V_SPACE        = 24
 
 f = partial(join, 'save')
 score_tables  = [
-                 HighScoreTable(f('0.wtf'),  -1, 10, "Normal Mode", f('norm_default.json')),
+                 HighScoreTable(f('0.wtf'),   0, 10, "Normal Mode", f('norm_default.json')),
                  HighScoreTable(f('2.wtf'), 120, 10, "2 Minutes"  , f('2_default.json'   )),
                  HighScoreTable(f('5.wtf'), 300, 10, "5 Minutes"  , f('5_default.json'   )),
                 ]
@@ -73,8 +73,7 @@ class HighScoreState(GameState):
 
         MENU.add(self.hud_scores[self.mode], self.hud_titles[self.mode])
         BG.add(bg.EARTH, bg.GRID)
-
-        if 'score' in kwargs and kwargs['score'] > score_tables[self.mode].lowest_score():
+        if 'score' in args[0] and args[0]['score'] > score_tables[self.mode].lowest_score():
         #If we just got a high score...
             self.alphanum_index = 0
             self.char_limit     = 20
@@ -132,15 +131,32 @@ class HighScoreState(GameState):
 
 
     def __enter_char(self):
-        self.name_index += 1
-        if self.name_index > self.char_limit:
-        #If we've finished entering our name...
-            self.entering_name = False
-            self.hud_name.kill()#Get rid of the name entry characters
-            score_tables[self.current_table].add_score(HighScoreEntry(self.entry_name, self.kwargs['score'], self.mode))#add the entry to the leaderboard
-            MENU.remove(self.hud_scores)#remove the menu from the screen
-            self.hud_scores = make_score_table(score_tables[self.current_table], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
-            MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
-        else:
+        if self.name_index <= self.char_limit:
+            if(ALPHANUMERIC[self.alphanum_index] == '<'):
+                if(self.name_index > 0):               
+                    self.entry_name     = self.entry_name[:self.name_index-1]
+                    self.name_index    -= 1
+                else:
+                    return#This prevents the alphanum index from resetting
+            elif(ALPHANUMERIC[self.alphanum_index] == '_'):
+                self.entry_name     = ''.join([self.entry_name[:self.name_index], ' ', self.entry_name[self.name_index+1:]])
+                self.name_index   += 1
+            elif(ALPHANUMERIC[self.alphanum_index] == '#'):
+                if(len(self.entry_name) > 1):
+                    self.entry_name = self.entry_name[:self.name_index]
+                    self.__enter_score()
+                return
+            else:
+                self.name_index     += 1
             self.alphanum_index = 0
-            self.entry_name += 'A'
+            self.entry_name    += 'A'
+        else:
+        #If we've finished entering our name...
+            self.__enter_score()
+    def __enter_score(self):
+        self.entering_name = False
+        self.hud_name.kill()#Get rid of the name entry characters
+        score_tables[self.current_table].add_score(HighScoreEntry(self.entry_name, self.args[0]['score'], self.mode))#add the entry to the leaderboard
+        MENU.remove(self.hud_scores)#remove the menu from the screen
+        self.hud_scores = make_score_table(score_tables[self.current_table], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
+        MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
