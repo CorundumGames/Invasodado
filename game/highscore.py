@@ -132,7 +132,6 @@ class HighScoreState(GameState):
 
 
     def __enter_char(self):
-        print(self.name_index) 
         if self.name_index <= self.char_limit:
             if(ALPHANUMERIC[self.alphanum_index] == '<'):
                 if(self.name_index > 0):               
