@@ -12,17 +12,17 @@ REQUEST = ''.join([URL, '?', PARAMS])
 
 #TODO: Figure something out for if the connection failed or the server's down
 def get_country(attribute = None):
-    b = None
+    geoip_info = None
 
     try:
-        b = json.load(open(FILE))
+        geoip_info = json.load(open(FILE))
     except IOError:
         pass
 
     try:
         urllib.urlretrieve(REQUEST, FILE)
-        b = json.load(open(FILE))
+        geoip_info = json.load(open(FILE))
     except IOError:
-        b = 'NA'
+        geoip_info = 'NA'
 
-    return b[attribute] if attribute in b else b
+    return geoip_info[attribute] if attribute in geoip_info else geoip_info

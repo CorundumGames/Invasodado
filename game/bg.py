@@ -2,10 +2,9 @@ import random
 
 import pygame
 
-import core.config as config
+from core           import config
 from core.particles import ParticleEmitter, ParticlePool
-
-from hudobject import HudObject
+from game.hudobject import HudObject
 
 STARS_GROUP = pygame.sprite.RenderUpdates()
 
@@ -20,7 +19,8 @@ star_image = config.SPRITES.subsurface(4, 170, 2, 2)
 
 EARTH = HudObject(config.EARTH, [0, 0])
 GRID  = HudObject(config.BG   , [0, 0])
-STARS = ParticleEmitter(ParticlePool(star_image, star_move, star_appear),
+STARS = ParticleEmitter(
+                        ParticlePool(star_image, star_move, star_appear),
                         pygame.Rect(0, 0, 0, config.SCREEN_HEIGHT),
                         8,
                         STARS_GROUP

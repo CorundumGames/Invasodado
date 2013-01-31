@@ -43,4 +43,8 @@ class GameState:
         pass
 
     def change_state(self, state_type, *args, **kwargs):
+        '''
+        Changes the game screen to the given type, with the given arguments.
+        Primarily meant to be used with functools.partial.
+        '''
         self.next_state = state_type(*args, **kwargs)

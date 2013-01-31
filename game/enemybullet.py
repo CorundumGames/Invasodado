@@ -1,10 +1,9 @@
 import pygame.rect
 
-import core.color  as color
-import core.config as config
-from bullet import Bullet
-import ingame
-import player
+from core import config
+from game.bullet import Bullet
+from game import player
+from game import gamedata
 
 '''
 This is the bullet the enemy has available.  It is not meant to be created
@@ -27,11 +26,13 @@ def get_enemy_bullet():
 
 
 class EnemyBullet(Bullet):
+
     SPEED     = 2
     START_POS = pygame.Rect(30, config.screen.get_height()*2, 5, 5)
     FRAME     = pygame.Rect(262, 6, 20, 18)
 
     def __init__(self):
+        from core import color
         super(self.__class__, self).__init__()
         self.image = config.SPRITES.subsurface(self.__class__.FRAME)
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
@@ -51,7 +52,7 @@ class EnemyBullet(Bullet):
     def kill_player(self, other):
         if not other.invincible and other.state is other.__class__.STATES.ACTIVE:
         #If the player is not invincible...
-            ingame.lives -= 1
+            gamedata.lives -= 1
             other.state   = other.__class__.STATES.DYING
             self.state    = self.__class__.STATES.RESET
 

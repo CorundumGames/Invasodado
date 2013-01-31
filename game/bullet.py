@@ -1,21 +1,20 @@
 import pygame
 
-import core.config as config
-import core.color  as color
-import gameobject
-
+from core import config
+from core import color
+from game.gameobject import GameObject
 '''
 Bullet is an abstract class which ShipBullet and EnemyBullet will inherit
 from.  Bullet should NOT be created in and of itself.
 '''
 
-class Bullet(gameobject.GameObject):
+class Bullet(GameObject):
     FRAME  = pygame.Rect(227, 6, 26, 19)
     STATES = config.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
     SPRITE = config.SPRITES.subsurface(FRAME)
 
     def __init__(self):
-        gameobject.GameObject.__init__(self)
+        GameObject.__init__(self)
         self.image    = self.__class__.SPRITE #@UndefinedVariable
         self.rect     = self.__class__.START_POS.copy()
         self.position = list(self.rect.topleft)

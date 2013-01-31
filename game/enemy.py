@@ -1,40 +1,31 @@
 from math import log1p
 import os.path
-from operator import iadd
 import random
 
 import pygame.mixer
 import pygame.rect
 
-import core.color  as color
-import core.config as config
-import core.particles as particles
+from core import color
+from core import config
+from core import particles
 
-import balloflight
-from gameobject import GameObject
-import ingame
+from game import balloflight
+from game.gameobject import GameObject
+
 
 FRAMES    = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4)]
 START_POS = (32, 32)
 
-enemy_frames = config.get_colored_objects(FRAMES)
+enemy_frames = color.get_colored_objects(FRAMES)
 hurt         = pygame.mixer.Sound(os.path.join('sfx', 'enemyhurt.wav'))
 
-
-
-def increase_difficulty():
-    '''
-    Increases Enemy's fire rate and speed based on time elapsed
-    '''
-    Enemy.shoot_odds = log1p(pygame.time.get_ticks() - Enemy.start_time)/1000
-    assert 0.0 <= Enemy.shoot_odds < 1.0, \
-    "Expected a valid probability, got %f" % Enemy.shoot_odds
 
 class Enemy(GameObject):
     STATES       = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'CHEERING')
     acceleration = [0.0, 0.0]
     anim         = 0.0
     base_speed   = 0.5
+    group        = None
     shoot_odds   = 0.002
     should_flip  = False
     start_time   = None
@@ -55,7 +46,7 @@ class Enemy(GameObject):
 
 
     def appear(self):
-        self.add(ingame.ENEMIES)
+        self.add(Enemy.group)
         self.position     = [START_POS[0] * (self.form_position[0]+1)* 1.5,
                              START_POS[1] * (self.form_position[1]+1)* 1.5]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
@@ -72,7 +63,7 @@ class Enemy(GameObject):
             b             = enemybullet.get_enemy_bullet()
             b.rect.midtop = self.rect.midbottom
             b.position    = list(b.rect.topleft)
-            b.add(ingame.ENEMY_BULLETS)
+            b.add(Enemy.group)
 
         if not Enemy.should_flip:
         #If the squadron of enemies is marked to reverse direction...
@@ -81,9 +72,9 @@ class Enemy(GameObject):
                 Enemy.should_flip = True
 
     def die(self):
-        balloflight.get_ball(self.position, self.color).add(ingame.ENEMIES)
+        balloflight.get_ball(self.position, self.color).add(Enemy.group)
         hurt.play()
-        self.remove(ingame.ENEMIES)
+        self.remove(Enemy.group)
 
         self.position     = [-300.0, -300.0]
         self.rect.topleft = self.position
@@ -108,4 +99,4 @@ class Enemy(GameObject):
                 STATES.CHEERING : 'cheer' ,
                }
 
-import enemybullet
+from game import enemybullet

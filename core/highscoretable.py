@@ -1,16 +1,15 @@
-import base64
-import datetime
+from base64   import b64encode, b64decode
+from datetime import datetime
+from platform import platform
 import json
-import platform
-import re
 import shelve
 
-import geolocation
+from core import geolocation
 
 PATTERN = '%Y-%m-%d %H:%M:%S.%f'
 
 class HighScoreEntry:
-    def __init__(self, name, score, mode, entry = None):
+    def __init__(self, name, score, mode, entry=None):
         '''
         @ivar country: Two-letter country code for online high scores
         @ivar mode: Game mode this score was achieved in
@@ -22,27 +21,23 @@ class HighScoreEntry:
         @param entry: High score entry string to construct self from
         '''
 
-        if entry is None:
-        #If we were not passed in a high score entry string...
+        if not entry:
+        #If we were not passed in fields high score entry string...
             self.country  = str(geolocation.get_country('countryCode'))
             self.mode     = int(mode) #Can represent game modes or difficulty
             self.name     = name
-            self.platform = platform.platform(True, True).split('-')[0]
+            self.platform = platform(True, True).split('-')[0]
             self.score    = int(score)
-            self.time     = datetime.datetime.today()
-
-            if not re.match('\w+', name):
-                raise ValueError("Name must be alphanumeric!")
-
+            self.time     = datetime.today()
         elif isinstance(entry, basestring):
-        #Else if we were passed a string for entry...
-            a = entry.split('|')
-            self.country  = a[3]
-            self.mode     = int(a[2])
-            self.name     = a[0]
-            self.platform = a[4]
-            self.score    = int(a[1])
-            self.time     = datetime.datetime.strptime(a[5], PATTERN)
+        #Else if we were passed fields string for entry...
+            fields        = entry.split('|')
+            self.country  = fields[3]
+            self.mode     = int(fields[2])
+            self.name     = fields[0]
+            self.platform = fields[4]
+            self.score    = int(fields[1])
+            self.time     = datetime.strptime(fields[5], PATTERN)
 
     def scramble(self):
         '''
@@ -51,12 +46,12 @@ class HighScoreEntry:
 
         @return: self
         '''
-        self.name     = base64.b64encode(self.name)
+        self.name     = b64encode(self.name)
         self.score   ^= hash(self.name)
         self.mode    ^= self.score
-        self.country  = base64.b64encode(self.country)
-        self.platform = base64.b64encode(self.platform)
-        self.time     = base64.b64encode(str(self.time))
+        self.country  = b64encode(self.country)
+        self.platform = b64encode(self.platform)
+        self.time     = b64encode(str(self.time))
         return self
 
     def unscramble(self):
@@ -66,12 +61,12 @@ class HighScoreEntry:
 
         @return: self
         '''
-        self.time     = datetime.datetime.strptime(base64.b64decode(self.time), PATTERN)
-        self.platform = base64.b64decode(self.platform)
-        self.country  = base64.b64decode(self.country)
+        self.time     = datetime.strptime(b64decode(self.time), PATTERN)
+        self.platform = b64decode(self.platform)
+        self.country  = b64decode(self.country)
         self.mode    ^= self.score
         self.score   ^= hash(self.name)
-        self.name     = base64.b64decode(self.name)
+        self.name     = b64decode(self.name)
         return self
 
     def __cmp__(self, other):
@@ -96,7 +91,7 @@ class HighScoreEntry:
 ###############################################################################
 
 class HighScoreTable:
-    def __init__(self, filename, mode, size, title, default, db_flag = 'c'):
+    def __init__(self, filename, mode, size, title, default, db_flag='c'):
         '''
         @ivar filename: Name and/or path of the database relative to the pwd
         @ivar mode: Game mode this HighScoreTable operates under
@@ -129,18 +124,20 @@ class HighScoreTable:
 
         if not isinstance(score_object, HighScoreEntry):
         #If we weren't given a high score entry...
-            raise TypeError("Expected HighScoreEntry, got {}".format(type(score_object)))
+            raise TypeError("Expected HighScoreEntry, got %s" % type(score_object))
         elif score_object.mode != self.mode:
         #If this score entry is for the wrong game mode...
-            raise ValueError("Expected mode {}, got mode {}".format(self.mode, score_object.mode))
+            raise ValueError("Expected mode %i, got mode %i" % (self.mode, score_object.mode))
 
         #TODO: This is kinda messy, I should fix it
         if len(self.scorefile) < self.size or score_object.score > self.lowest_score():
         #If our score doesn't rank out...
             if len(self.scorefile) >= self.size:
-                a = self.get_scores()[-1].scramble()
-                del self.scorefile[base64.b64encode(str(a))]
-            self.scorefile[base64.b64encode(str(score_object))] = score_object.scramble()
+            #If we have more scores than we're allowed...
+                lowest = self.get_scores()[-1].scramble()
+                del self.scorefile[b64encode(str(lowest))]
+
+            self.scorefile[b64encode(str(score_object))] = score_object.scramble()
 
     def add_scores(self, iterable):
         '''
@@ -154,14 +151,20 @@ class HighScoreTable:
         '''
         @return: sorted list of all HighScoreEntrys
         '''
-        a = map(HighScoreEntry.unscramble, self.scorefile.values())
-        a.sort(reverse = True)
-        return a
+        scores = map(HighScoreEntry.unscramble, self.scorefile.values())
+        scores.sort(reverse = True)
+        return scores
 
     def highest_score(self):
+        '''
+        Returns the highest-valued score on this table.
+        '''
         return self.get_scores()[0].score
 
     def lowest_score(self):
+        '''
+        Returns the lowest-valued score on this table.
+        '''
         return self.get_scores()[-1].score
 
     def set_to_default(self, filename):

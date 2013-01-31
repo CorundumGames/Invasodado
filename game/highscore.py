@@ -4,14 +4,13 @@ import string
 
 import pygame
 
-import bg
-import core.color          as color
-import core.config         as config
+from game import bg
+from core import color
+from core import config
 from core.gamestate import GameState
 from core.highscoretable import HighScoreTable, HighScoreEntry
-import gameobject
-from hudobject import HudObject
-import mainmenu
+from game import gameobject
+from game.hudobject import HudObject
 
 BG   = pygame.sprite.OrderedUpdates()
 MENU = pygame.sprite.Group()
@@ -59,7 +58,7 @@ class HighScoreState(GameState):
                             pygame.K_UP     : partial(self.__char_move   ,  1),
                             pygame.K_DOWN   : partial(self.__char_move   , -1),
                             pygame.K_RETURN : self.__enter_char               ,
-                            pygame.K_ESCAPE : partial(self.change_state, mainmenu.MainMenu),
+                            pygame.K_ESCAPE : partial(self.change_state, kwargs['next']),
                            }
 
         self.hud_titles   = [HudObject.make_text(score_tables[i].title, (config.SCREEN_RECT.midtop[0] - 64, 16)) for i in range(3)]

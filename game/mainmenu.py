@@ -10,11 +10,11 @@ from core import color
 from core import config
 from core.gamestate import GameState
 
-import bg
-from ingame       import InGameState
-from highscore    import HighScoreState
-from hudobject    import HudObject
-from settingsmenu import SettingsMenu
+from game              import bg
+from game.ingame       import InGameState
+from game.highscore    import HighScoreState
+from game.hudobject    import HudObject
+from game.settingsmenu import SettingsMenu
 
 '''
 This is where the user makes his decisions about what to do in the game.
@@ -58,7 +58,7 @@ class MainMenu(GameState):
                              partial(self.change_state, InGameState            ),
                              partial(self.change_state, InGameState, time = 120),
                              partial(self.change_state, InGameState, time = 300),
-                             partial(self.change_state, HighScoreState  )       ,
+                             partial(self.change_state, HighScoreState, next = self.__class__),
                              partial(self.change_state, SettingsMenu    )       ,
                              quit                                               ,
                             ]
@@ -83,12 +83,12 @@ class MainMenu(GameState):
         self.group_list = []
 
     def events(self, events):
-        ka = self.key_actions
+        key_actions = self.key_actions
         for e in events:
         #For all input we've received...
-            if e.type == pygame.KEYDOWN and e.key in ka:
+            if e.type == pygame.KEYDOWN and e.key in key_actions:
             #If a key was pressed...
-                ka[e.key]()
+                key_actions[e.key]()
                 self.selection %= len(self.menu_actions)
 
     def logic(self):

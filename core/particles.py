@@ -1,9 +1,9 @@
-import itertools
-import random
+from itertools import ifilterfalse
+from random    import uniform
 
 import pygame.time
 
-import config
+from core            import config
 from game.gameobject import GameObject
 
 class ParticleEmitter:
@@ -35,8 +35,8 @@ class ParticleEmitter:
 
         @param p: The particle to release
         '''
-        r              = self.rect
-        p.position     = [random.uniform(r.left, r.right), random.uniform(r.top , r.bottom)]
+        rect           = self.rect
+        p.position     = [uniform(rect.left, rect.right), uniform(rect.top , rect.bottom)]
         p.rect.topleft = p.position
         p.state        = p.__class__.STATES.APPEARING
         p.add(self.group)
@@ -141,7 +141,8 @@ class ParticlePool:
         self.particles_out = set()
 
     def get_particle(self):
-        if len(self.particles_in) == 0:
+        if not self.particles_in:
+        #If we don't have any particles to spare...
             self.particles_in.add(Particle(self.image, self.move_func, self.appear_func))
 
         p = self.particles_in.pop()
@@ -151,7 +152,7 @@ class ParticlePool:
     def clean(self):
         particles_to_remove = set()
         po = self.particles_out
-        map(particles_to_remove.add, itertools.ifilterfalse(config.SCREEN_RECT.colliderect, po))
+        map(particles_to_remove.add, ifilterfalse(config.SCREEN_RECT.colliderect, po))
 
         self.particles_in.update(particles_to_remove)
         po -= particles_to_remove

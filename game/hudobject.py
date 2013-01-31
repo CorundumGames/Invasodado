@@ -1,8 +1,8 @@
 import pygame.sprite
 
-import core.config as config
-import core.color  as color
-import gameobject
+from core import config
+from core import color
+from game import gameobject
 
 class HudObject(gameobject.GameObject):
     '''

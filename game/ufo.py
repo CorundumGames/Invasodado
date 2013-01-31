@@ -4,25 +4,25 @@ import random
 
 import pygame
 
-from gameobject import GameObject
-import block
 from core import color
 from core import config
-import ingame
+from game import block
+
+from game.gameobject import GameObject
 
 FRAMES    = [pygame.Rect(64 * (i % 4), 192 + 32*(i/4), 64, 32) for i in range(10, -1, -1)]
 START_POS = (640, 16)
-ufo_frames = config.get_colored_objects(FRAMES)
+ufo_frames = color.get_colored_objects(FRAMES)
 
 class UFO(GameObject):
     STATES = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING')
-
     invade = pygame.mixer.Sound(os.path.join('sfx', 'ufo.wav'))
+    ufo_group = None
+    block_group = None
     #The sound the UFO makes as it flies across the screen
 
     def __init__(self):
         GameObject.__init__(self)
-        self.add(ingame.UFO)
         self.anim     = 0.0
         self.image    = config.SPRITES.subsurface(FRAMES[0]).copy()
         self.odds     = .0001
@@ -54,7 +54,7 @@ class UFO(GameObject):
             self.state = UFO.STATES.LEAVING
 
     def die(self):
-        ingame.BLOCKS.add(block.get_block([self.rect.centerx, 0], special = True))
+        UFO.block_group.add(block.get_block([self.rect.centerx, 0], special = True))
         self.state = UFO.STATES.LEAVING
 
     def leave(self):

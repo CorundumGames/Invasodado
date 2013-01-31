@@ -1,16 +1,15 @@
 import random
 import string
-import sys
 import unittest
 
-import highscoretable
+from core import highscoretable
 
 TABLE_SIZE = 10
 MODE       = random.choice(xrange(1, 6))
 
 class HighScoreTest(unittest.TestCase):
     scores = highscoretable.HighScoreTable("scores.cg", MODE, TABLE_SIZE, "Scores", 'n')
-    
+
     def setUp(self):
         print "Start test!"
 
@@ -22,7 +21,7 @@ class HighScoreTest(unittest.TestCase):
                                MODE
                                )
                 )
-            
+
         self.assertEqual(TABLE_SIZE,
                          len(self.scores),
                          "The score entries were not added successfully!  The score table size does not hold the same amount oentries as its length!"

@@ -1,7 +1,6 @@
 import pygame.color
-import pygame.image
 
-import config
+from core import config
 
 COLOR_KEY  = config.SPRITES.get_at((0, config.SPRITES.get_height()-1))
 #The color that will be transparent.
@@ -22,5 +21,23 @@ def blend_color(surface, color):
     '''
     Returns a new Surface blended with the given color.
     '''
-    surface.fill(color, special_flags = pygame.BLEND_RGBA_MULT)
+    surface.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
     return surface
+
+def get_colored_objects(frames, has_alpha=True):
+    '''
+    @param frames: List of sprites we want to create colored versions of
+    @param has_alpha: True if we want transparency
+
+    @rtype: dict of {color: [frames_list]}
+    '''
+    colored = dict([(id(c), [blend_color(config.SPRITES.subsurface(f).copy(), c) for f in frames]) for c in LIST])
+
+    if has_alpha:
+    #If we want these frames to have transparency...
+        for f in colored.values():
+        #For all given frames...
+            for g in f:
+                g.set_colorkey(g.get_at([0, 0]), config.FLAGS)
+
+    return colored

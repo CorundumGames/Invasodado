@@ -4,8 +4,7 @@ import sys
 import pygame.display
 import pygame.image
 
-import color
-import settings
+from core import settings
 
 screen = pygame.display.set_mode(settings.resolution, pygame.DOUBLEBUF)
 #The window we blit graphics onto.
@@ -15,11 +14,10 @@ SCREEN_DIMS = tuple(pygame.display.list_modes())
 
 SCREEN_RECT = pygame.Rect((0, 0), screen.get_size())
 
-NUM_COLORS = 5
-#How many colors we'll use for the blocks
-
 FLAGS = pygame.HWSURFACE | pygame.HWACCEL | pygame.ASYNCBLIT | pygame.RLEACCEL
 #The flags used to create all Surfaces; these are best for performance.
+
+NUM_COLORS = 5
 
 DEPTH = screen.get_bitsize()
 #The color depth used, in bits
@@ -51,13 +49,14 @@ limit_frame = True
 tracking = 'track' in sys.argv
 #True if we're outputting graphs of the player's statistics
 
-class Enum(object):
+class Enum:
     def __init__(self, *keys):
         self.__dict__.update(zip(keys, range(len(keys))))
 
 
 def toggle_fullscreen():
 #Toggles fullscreen.
+    global screen
     settings.fullscreen = not settings.fullscreen
     screen = pygame.display.set_mode(settings.resolution, (pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF) * settings.fullscreen)
 
@@ -79,20 +78,3 @@ def toggle_frame_limit():
     global limit_frame
     limit_frame = not limit_frame
 
-def get_colored_objects(frames, has_alpha = True):
-    '''
-    @param frames: List of sprites we want to create colored versions of
-    @param has_alpha: True if we want transparency
-
-    @rtype: dict of {color: [frames_list]}
-    '''
-    a = dict([(id(c), [color.blend_color(SPRITES.subsurface(f).copy(), c) for f in frames]) for c in color.LIST])
-
-    if has_alpha:
-        for f in a:
-        #For all given frames...
-            for c in a[f]:
-            #For all colors...
-                c.set_colorkey(c.get_at([0, 0]), FLAGS)
-
-    return a

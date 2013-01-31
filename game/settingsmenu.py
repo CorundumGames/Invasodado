@@ -44,7 +44,7 @@ class SettingsMenu(GameState):
               vspace = DIST_APART
               )
 
-        b = f(["On" if settings.fullscreen else "Off", "Off", "Easy"],
+        b = f([self.__on_off(settings.fullscreen), "Off", "Easy"],
                pos = [MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]],
                vspace = DIST_APART
                )
@@ -104,6 +104,9 @@ class SettingsMenu(GameState):
 
         self.fps_timer.tick(60 * self.frame_limit)
 
+    def __on_off(self, condition):
+        return "On" if condition else "Off"
+
     def __enter_selection(self):
         '''Go with the selection the player made.'''
         self.menu_actions[self.selection]()
@@ -115,7 +118,7 @@ class SettingsMenu(GameState):
 
     def __toggle_fullscreen(self):
         config.toggle_fullscreen()
-        self.menu_settings['fullscreen'].image = HudObject.make_text("On" if settings.fullscreen else "Off", surfaces = True)
+        self.menu_settings['fullscreen'].image = HudObject.make_text(self.__on_off(settings.fullscreen), surfaces = True)
 
     def __toggle_color_blind_mode(self):
         pass

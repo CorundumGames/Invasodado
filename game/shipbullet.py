@@ -1,11 +1,9 @@
 import pygame.rect
 
-import core.config as config
+from core import config
 
-from bullet import Bullet
-from enemy  import Enemy
-from ufo    import UFO
-import ingame
+from game.bullet import Bullet
+from game.enemy  import Enemy
 
 '''
 This is the bullet the ship has available.  It is not meant to be created
@@ -16,10 +14,10 @@ much time creating and destroying bullets).
 class ShipBullet(Bullet):
     SPEED     = -8
     START_POS = pygame.Rect(30, config.screen.get_height()*2, 26, 19)
+    group     = None
 
     def __init__(self):
         super(self.__class__, self).__init__()
-        self.add(ingame.PLAYER)
 
     def move(self):
         '''Moves up the screen, seeing if it's hit an enemy or exited.'''
@@ -35,6 +33,7 @@ class ShipBullet(Bullet):
             self.state  = self.__class__.STATES.RESET
             other.state = other.__class__.STATES.DYING
 
+    from game.ufo import UFO
     collisions = {
                   Enemy: kill_enemy,
                   UFO  : kill_enemy,

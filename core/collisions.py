@@ -1,23 +1,24 @@
-import itertools
+from itertools import chain, combinations, ifilterfalse
 
+import pygame.display
 import pygame.sprite
 import pygame.time
 
-import config
-import gsm
-import particles
-
-from game.balloflight import BallOfLight
-from game.block       import Block
-from game.hudobject   import HudObject
-from particles        import Particle, ParticleEmitter
-
-do_not_compare = {}
+do_not_compare = set()
 #Contains 2-tuples of types.  Don't check for collisions between objects
 #with these type pairings.
 
-do_not_check = {Block, BallOfLight, HudObject, Particle, ParticleEmitter}
+_do_not_check = set()
 #Contains types that are not to collide with anything.
+
+def dont_check_type(*types):
+    '''
+    Prevents the given types of objects from colliding with other objects.
+
+    @param types: Arbitrary number of types not to check for collisions.
+    @postcondition: The classes in types are no longer capable of collisions.
+    '''
+    _do_not_check.update(types)
 
 class CollisionGrid:
     '''
@@ -25,14 +26,15 @@ class CollisionGrid:
     not objects within are colliding; only objects within the same cell are
     compared against each other.
     '''
-    def __init__(self, width, height, newlayer):
+    def __init__(self, width, height, layer, group_list):
         '''
         width is the width of this grid in cells, *not* pixels
         height is the height of this grid in cells, *not* pixels
         layer is this grid's layer; only objects on the same layer may touch
         '''
-        cell_width  = config.screen.get_width()/width
-        cell_height = config.screen.get_height()/height
+        size = pygame.display.get_surface().get_size()
+        cell_width  = size[0]/width
+        cell_height = size[1]/height
 
         self.collisions = []
         #Holds all collisions that have occurred in the last frame
@@ -48,8 +50,10 @@ class CollisionGrid:
                                   ]
         #The cells of this grid; each cell handles its own collisions
 
-        self.layer = newlayer
+        self.layer = layer
         #Only objects of the same layer may collide
+
+        self.group_list = group_list
 
         self.spare_collisions = []
         #Holds all unused collisions
@@ -60,12 +64,10 @@ class CollisionGrid:
         Removes objects no longer in this cell, and adds ones that just
         entered.  Called every frame.
         '''
-        def f(cell):
-            cell.remove_exiting()
-            cell.add_entering()
-            cell.check_collisions()
-
-        map(f, itertools.chain.from_iterable(self.grid))
+        for i in chain.from_iterable(self.grid):
+            i.remove_exiting()
+            i.add_entering()
+            i.check_collisions()
 
         self.handle_collisions()
 
@@ -118,7 +120,7 @@ class GridCell:
         objects           = self.objects
         objects_to_remove = self.objects_to_remove
 
-        map(objects_to_remove.add, itertools.ifilterfalse(rect.colliderect, objects))
+        map(objects_to_remove.add, ifilterfalse(rect.colliderect, objects))
 
         objects -= objects_to_remove
         objects_to_remove.clear()
@@ -130,11 +132,11 @@ class GridCell:
         objects_to_add = self.objects_to_add
         rect           = self.rect
 
-        for s in (x for x in itertools.chain.from_iterable(gsm.current_state.group_list) \
-                  if x.__class__ not in do_not_check and x.rect.colliderect(rect)):
+        for i in (j for j in chain.from_iterable(self.grid.group_list)
+                  if j.__class__ not in _do_not_check and j.rect.colliderect(rect)):
         #For all sprites in this group that aren't excluded from collisions
         #and have just entered this cell...
-            objects_to_add.add(s)
+            objects_to_add.add(i)
 
         self.objects |= objects_to_add
         objects_to_add.clear()
@@ -145,11 +147,11 @@ class GridCell:
         '''
         grid = self.grid
 
-        for i, j in itertools.combinations(self.objects, 2):
+        for i, j in combinations(self.objects, 2):
         #For all possible combinations of objects that can touch...
             if pygame.sprite.collide_rect(i, j):
             #If these two objects touch...
-                if grid.spare_collisions == []:
+                if not grid.spare_collisions:
                 #If we don't have any spare Collision objects...
                     grid.spare_collisions.append(Collision())
                 grid.collisions.append(grid.spare_collisions.pop().update(i, j))
