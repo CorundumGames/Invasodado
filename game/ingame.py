@@ -83,6 +83,7 @@ class InGameState(GameState):
                                pygame.K_f     : config.toggle_frame_limit,
                                pygame.K_p     : config.toggle_pause      ,
                                pygame.K_u     : self.__add_ufo           ,
+                               pygame.K_e     : self.__game_over         ,
                               }
         self.kwargs         = kwargs
         self.mouse_actions  = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
@@ -103,7 +104,7 @@ class InGameState(GameState):
             del self.hud_text['time']
 
         if not __debug__:
-            for i in [pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1]:
+            for i in [pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1, pygame.K_e]:
                 del self.key_actions[i]
             del self.mouse_actions
 
