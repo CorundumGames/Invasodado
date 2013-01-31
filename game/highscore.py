@@ -16,7 +16,7 @@ import mainmenu
 BG   = pygame.sprite.OrderedUpdates()
 MENU = pygame.sprite.Group()
 
-ALPHANUMERIC   = ''.join([string.uppercase, string.lowercase, string.digits, '_-\' <'])
+ALPHANUMERIC   = ''.join([string.uppercase, string.lowercase, string.digits, '_-\'#<'])
 ENTRY_NAME_POS = (0, config.SCREEN_HEIGHT - 32)
 ROW_WIDTH      = 32
 TABLE_CORNER   = (16, 64)
@@ -132,24 +132,33 @@ class HighScoreState(GameState):
 
 
     def __enter_char(self):
+        print(self.name_index) 
         if self.name_index <= self.char_limit:
             if(ALPHANUMERIC[self.alphanum_index] == '<'):
-                if(self.name_index > 0):                
+                if(self.name_index > 0):               
                     self.entry_name     = self.entry_name[:self.name_index-1]
                     self.name_index    -= 1
-                    self.alphanum_index = 0
-                    self.entry_name     = ''.join([self.entry_name[:self.name_index], ALPHANUMERIC[self.alphanum_index], self.entry_name[self.name_index+1:]])
+                else:
+                    return#This prevents the alphanum index from resetting
+            elif(ALPHANUMERIC[self.alphanum_index] == '_'):
+                self.entry_name     = ''.join([self.entry_name[:self.name_index], ' ', self.entry_name[self.name_index+1:]])
+                self.name_index   += 1
+            elif(ALPHANUMERIC[self.alphanum_index] == '#'):
+                if(len(self.entry_name) > 1):
+                    self.entry_name = self.entry_name[:self.name_index]
+                    self.__enter_score()
+                return
             else:
-                self.entry_name     += 'A'
                 self.name_index     += 1
-                self.alphanum_index  = 0
-            
+            self.alphanum_index = 0
+            self.entry_name    += 'A'
         else:
         #If we've finished entering our name...
-            self.entering_name = False
-            self.hud_name.kill()#Get rid of the name entry characters
-            score_tables[self.current_table].add_score(HighScoreEntry(self.entry_name, self.args[0]['score'], self.mode))#add the entry to the leaderboard
-            MENU.remove(self.hud_scores)#remove the menu from the screen
-            self.hud_scores = make_score_table(score_tables[self.current_table], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
-            MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
-            
+            self.__enter_score()
+    def __enter_score(self):
+        self.entering_name = False
+        self.hud_name.kill()#Get rid of the name entry characters
+        score_tables[self.current_table].add_score(HighScoreEntry(self.entry_name, self.args[0]['score'], self.mode))#add the entry to the leaderboard
+        MENU.remove(self.hud_scores)#remove the menu from the screen
+        self.hud_scores = make_score_table(score_tables[self.current_table], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
+        MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
