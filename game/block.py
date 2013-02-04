@@ -63,12 +63,13 @@ class Block(GameObject):
     Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
-    block_full = False
-    collisions = None
-    group      = None
-    GRAVITY    = 0.5
-    MAX_SPEED  = 12.0
-    STATES     = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
+    block_full     = False
+    collisions     = None
+    group          = None
+    particle_group = None
+    GRAVITY        = 0.5
+    MAX_SPEED      = 12.0
+    STATES         = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
 
     def __init__(self, position, newcolor=choice(color.LIST), special=False):
         GameObject.__init__(self)
@@ -108,7 +109,7 @@ class Block(GameObject):
                              self.rect.centerx / self.rect.width
                             ]  #(row, column)
         self._target      = blockgrid.DIMENSIONS[0] - 1
-        self.emitter      = ParticleEmitter(_block_particles[id(self.color)], self.rect, 5, Block.group)
+        self.emitter      = ParticleEmitter(_block_particles[id(self.color)], self.rect, 5, Block.particle_group)
         self.state        = Block.STATES.START_FALLING
         self.add(Block.group)
 

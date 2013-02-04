@@ -104,6 +104,7 @@ class InGameState(GameState):
         balloflight.BallOfLight.enemy_group = ENEMIES
         balloflight.BallOfLight.block_mod   = block
         block.Block.group                   = BLOCKS
+        block.Block.particle_group          = PARTICLES  
         blockgrid.block_type                = block.Block
         collisions.dont_check_type(block.Block, balloflight.BallOfLight, HudObject, Particle, ParticleEmitter)
         enemysquadron.enemy_group           = ENEMIES
@@ -217,7 +218,7 @@ class InGameState(GameState):
         self.ship.on_fire_bullet()
 
     def __game_over(self):
-        from game import HighScoreState
+        from game.highscore import HighScoreState
 
         self.key_actions[pygame.K_SPACE] = partial(self.change_state,
                                                    HighScoreState,
