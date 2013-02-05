@@ -17,11 +17,11 @@ from game import enemysquadron
 from game import balloflight
 from game import bg
 from game import block
-#from game import blockgrid
 
 from game           import gamedata
 from game.hudobject import HudObject
 from game           import enemy
+from game import enemybullet
 from game           import player
 from game           import shipbullet
 from game           import blockgrid
@@ -104,11 +104,13 @@ class InGameState(GameState):
         balloflight.BallOfLight.enemy_group = ENEMIES
         balloflight.BallOfLight.block_mod   = block
         block.Block.group                   = BLOCKS
-        block.Block.particle_group          = PARTICLES  
+        Particle.group                      = PARTICLES
         blockgrid.block_type                = block.Block
+        block.Block.particle_group          = PARTICLES
         collisions.dont_check_type(block.Block, balloflight.BallOfLight, HudObject, Particle, ParticleEmitter)
         enemysquadron.enemy_group           = ENEMIES
         enemy.Enemy.group                   = ENEMIES
+        enemybullet.EnemyBullet.group       = ENEMY_BULLETS
         player.Ship.group                   = PLAYER
         shipbullet.ShipBullet.group = PLAYER
         ufo.UFO.ufo_group           = UFO
@@ -119,7 +121,7 @@ class InGameState(GameState):
         enemysquadron.start()
 
     def __del__(self):
-        from game import blockgrid, enemybullet
+        
         map(pygame.sprite.Group.empty, self.group_list)
 
         for m in [balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata]:
@@ -169,8 +171,6 @@ class InGameState(GameState):
             enemysquadron.celebrate()
             self.game_running = False
 
-
-
     def render(self):
         hud = partial(HudObject.make_text, surfaces=True)
 
@@ -196,10 +196,9 @@ class InGameState(GameState):
         map(pygame.sprite.Group.draw, self.group_list, [config.screen]*len(self.group_list))
 
         display.flip()
-        display.set_caption("FPS: %hud" % round(self.fps_timer.get_fps(), 3))
+        display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
 
         self.fps_timer.tick_busy_loop(60 * config.limit_frame)
-
 
     def __make_block(self, position, color):
         '''

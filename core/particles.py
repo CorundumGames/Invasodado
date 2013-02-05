@@ -1,3 +1,4 @@
+from functools import partial
 from itertools import ifilterfalse
 from random    import uniform
 
@@ -6,83 +7,19 @@ import pygame.time
 from core            import config
 from game.gameobject import GameObject
 
-class ParticleEmitter:
-    '''
-    ParticleEmitters...emit particles.  They are not to act independently;
-    ParticleEmitters are to emit particles only when called by whatever
-    object holds them.
-
-    ParticleEmitters should not be in Pygame Groups; the objects that hold them
-    should call emit().
-    '''
-
-    def __init__(self, pool, rect, period, group):
-        '''
-        @ivar period: Frames between emits, e.g. 4 = 1 Particle per 4 frames
-        @ivar pool: The ParticlePool where Particles are drawn from
-        @ivar rate: Used to count to emits
-        @ivar rect: The area that will emit Particles
-        '''
-        self.group     = group
-        self.period    = period
-        self.pool      = pool
-        self.rate      = 0
-        self.rect      = rect
-
-    def __release(self, p):
-        '''
-        Actually releases a particle
-
-        @param p: The particle to release
-        '''
-        rect           = self.rect
-        p.position     = [uniform(rect.left, rect.right), uniform(rect.top , rect.bottom)]
-        p.rect.topleft = p.position
-        p.state        = p.__class__.STATES.APPEARING
-        p.add(self.group)
-
-    def emit(self):
-        '''
-        Takes one step to release  particle.
-        '''
-
-        self.rate += 1
-        self.rate %= self.period
-
-        if self.rate == 0:
-            self.__release(self.pool.get_particle())
-            self.pool.clean()
-
-    def burst(self, amount):
-        '''
-        Releases a one-shot burst of particles.
-
-        @param amount: No. of particles to release, max is self.pool.amount
-        '''
-        p = self.pool
-        for i in xrange(amount):
-            self.__release(p.get_particle())
-
-    actions    = None
-    collisions = None
-
-
-###############################################################################
-
 class Particle(GameObject):
     '''
     Tiny bits and pieces used for graphical effects.  Meant for things like
     explosions, sparkles, impacts, etc.
 
     Not meant to be instantiated alone; should only be held by ParticleEmitters.
-    And Particle is meant to be a base class; you should make subclasses with
-    their own images and move functions.
 
-    Particles should have some randomization to them, particularly in initial direction.
+    Particles should have some randomization, particularly in initial direction.
     '''
 
     START_POS = [-100.0, -100.0]
     STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'LEAVING')
+    group     = None
 
     def __init__(self, image, move_func, appear_func):
         '''
@@ -90,21 +27,22 @@ class Particle(GameObject):
                          Takes one parameter
         '''
         GameObject.__init__(self)
-        self.appear_func = appear_func
+        self.appear_func = partial(appear_func, self)
         self.image       = image
-        self.move_func   = move_func
+        self.move_func   = partial(move_func, self)
         self.position    = list(Particle.START_POS)
         self.rect        = pygame.Rect(self.position, self.image.get_size())
         self.state       = Particle.STATES.IDLE
 
     def appear(self):
-        self.appear_func(self)
+        self.appear_func()
         self.state = Particle.STATES.ACTIVE
 
     def move(self):
-        self.move_func(self)
+        self.move_func()
 
         if not self.rect.colliderect(config.SCREEN_RECT):
+        #If we're no longer on-screen...
             self.state = Particle.STATES.LEAVING
 
     def leave(self):
@@ -121,6 +59,72 @@ class Particle(GameObject):
                STATES.ACTIVE   : 'move'  ,
                STATES.LEAVING  : 'leave' ,
                }
+    
+################################################################################
+
+class ParticleEmitter:
+    '''
+    ParticleEmitters...emit particles.  They are not to act independently;
+    ParticleEmitters are to emit particles only when called by whatever
+    object holds them.
+
+    ParticleEmitters should not be in Pygame Groups; the objects that hold them
+    should call emit().
+    '''
+
+    def __init__(self, pool, rect, period, group=Particle.group):
+        '''
+        @ivar period: Frames between emits, e.g. 4 = 1 Particle per 4 frames
+        @ivar pool: The ParticlePool where Particles are drawn from
+        @ivar rate: Used to count to emits
+        @ivar rect: The area that will emit Particles
+        '''
+        self.group  = group
+        self.period = period
+        self.pool   = pool
+        self.rate   = 0
+        self.rect   = rect
+
+    def _release(self, particle):
+        '''
+        Actually releases a particle
+
+        @param particle: The particle to release
+        '''
+        rect                  = self.rect
+        particle.position     = [
+                                 uniform(rect.left, rect.right),
+                                 uniform(rect.top , rect.bottom)
+                                ]
+        particle.rect.topleft = particle.position
+        particle.state        = Particle.STATES.APPEARING
+        particle.add(self.group)
+
+    def emit(self):
+        '''
+        Takes one step to release  particle.
+        '''
+
+        self.rate += 1
+        self.rate %= self.period
+
+        if not self.rate:
+        #If we've gone a particle release cycle...
+            self._release(self.pool.get_particle())
+            self.pool.clean()
+
+    def burst(self, amount):
+        '''
+        Releases a one-shot burst of particles.
+
+        @param amount: No. of particles to release, max is self.pool.amount
+        '''
+        pool = self.pool
+        for i in xrange(amount):
+            self._release(pool.get_particle())
+
+    actions    = None
+    collisions = None
 
 ###############################################################################
 
@@ -145,14 +149,14 @@ class ParticlePool:
         #If we don't have any particles to spare...
             self.particles_in.add(Particle(self.image, self.move_func, self.appear_func))
 
-        p = self.particles_in.pop()
-        self.particles_out.add(p)
-        return p
+        particle = self.particles_in.pop()
+        self.particles_out.add(particle)
+        return particle
 
     def clean(self):
         particles_to_remove = set()
-        po = self.particles_out
-        map(particles_to_remove.add, ifilterfalse(config.SCREEN_RECT.colliderect, po))
+        map(particles_to_remove.add, 
+            ifilterfalse(config.SCREEN_RECT.colliderect, self.particles_out))
 
         self.particles_in.update(particles_to_remove)
-        po -= particles_to_remove
+        self.particles_out -= particles_to_remove

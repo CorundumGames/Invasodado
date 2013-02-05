@@ -168,7 +168,6 @@ class Block(GameObject):
         #If this is a special block...
             self.image = choice(block_frames.values())[self.anim]
 
-
         for i in xrange(gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
         #For all grid cells below this one...
             other = blocks[i][gridcell[1]]
@@ -177,7 +176,7 @@ class Block(GameObject):
                 self._target = i - 1
                 break
 
-        if self._target < 1:
+        if self._target is not None and self._target < 1:
         #If we go past the top of the screen...
             Block.block_full = True
         
@@ -188,14 +187,13 @@ class Block(GameObject):
             self.state    = Block.STATES.IMPACT
         elif blocks[gridcell[0] + 1][gridcell[1]]:
         #Else if it was another block...
-            rect.bottom   = blocks[gridcell[0] + 1][gridcell[1]].rect.top
+            below         = blocks[gridcell[0] + 1][gridcell[1]]
+            rect.bottom   = below.rect.top
             self.position = list(rect.topleft)
             self.state    = Block.STATES.IMPACT
-            assert isinstance(blocks[gridcell[0] + 1][gridcell[1]], Block) or blocks[gridcell[0] + 1][gridcell[1]] is None, \
-            "A %s is trying to collide with a stray %s!" % \
-            (self, blocks[gridcell[0] + 1][gridcell[1]])
+            assert isinstance(below, Block) or below is None, \
+            "A %s is trying to collide with a stray %s!" % (self, below)
         
-        print self.position, self.rect
         assert rect.colliderect(blockgrid.RECT) and blockgrid.RECT.collidepoint(self.position), \
         "An active %s has somehow left the field!" % self
 

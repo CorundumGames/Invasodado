@@ -30,6 +30,7 @@ class EnemyBullet(Bullet):
     SPEED     = 2
     START_POS = pygame.Rect(30, config.screen.get_height()*2, 5, 5)
     FRAME     = pygame.Rect(262, 6, 20, 18)
+    group     = None
 
     def __init__(self):
         from core import color

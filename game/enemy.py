@@ -1,6 +1,6 @@
-from math import log1p
 import os.path
-import random
+from math import copysign
+from random import choice, uniform
 
 import pygame.mixer
 import pygame.rect
@@ -34,7 +34,7 @@ class Enemy(GameObject):
 
     def __init__(self, form_position):
         GameObject.__init__(self)
-        self.color         = random.choice(color.LIST[:config.NUM_COLORS])
+        self.color         = choice(color.LIST[:config.NUM_COLORS])
         self.form_position = form_position
         self.image         = enemy_frames[id(self.color)][0]
         self.position      = list(START_POS)
@@ -50,7 +50,7 @@ class Enemy(GameObject):
         self.position     = [START_POS[0] * (self.form_position[0]+1)* 1.5,
                              START_POS[1] * (self.form_position[1]+1)* 1.5]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
-        self.color        = random.choice(color.LIST[0:config.NUM_COLORS])
+        self.color        = choice(color.LIST[0:config.NUM_COLORS])
         self.image        = enemy_frames[id(self.color)][0]
         self.state        = Enemy.STATES.ACTIVE
 
@@ -59,14 +59,16 @@ class Enemy(GameObject):
         self.position[0] += Enemy.velocity[0]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         #self.emitter.rect = self.rect
-        if random.uniform(0, 1) < Enemy.shoot_odds:
+        
+        if uniform(0, 1) < Enemy.shoot_odds:
+        #With Enemy.shoot_odds% of firing...
             b             = enemybullet.get_enemy_bullet()
             b.rect.midtop = self.rect.midbottom
             b.position    = list(b.rect.topleft)
-            b.add(Enemy.group)
+            b.add(enemybullet.EnemyBullet.group)
 
         if not Enemy.should_flip:
-        #If the squadron of enemies is marked to reverse direction...
+        #If the squadron of enemies is not marked to reverse direction...
             if self.rect.right > config.SCREEN_RECT.width or self.rect.left < 0:
             #If this enemy touches either end of the screen...
                 Enemy.should_flip = True
@@ -79,8 +81,8 @@ class Enemy(GameObject):
         self.position     = [-300.0, -300.0]
         self.rect.topleft = self.position
         self.state        = Enemy.STATES.IDLE
-        #increase the velocity of the squadron
-        Enemy.velocity[0] += .1 if Enemy.velocity[0] > 0 else -.1
+        Enemy.velocity[0] += copysign(.1, Enemy.velocity[0])
+        #^ Increase the enemy squadron's speed (copysign accounts for direction)
 
     def lower(self):  #Later we'll make this smoother.
         self.position[1] += 8
