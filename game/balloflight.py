@@ -4,12 +4,14 @@ import pygame
 
 from core import color
 from core import config
+from core import settings
 from game.gameobject import GameObject
 
 FRAMES       = [pygame.Rect(32 * i, 96, 32, 32) for i in range(5)]
 TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
 
 ball_frames = color.get_colored_objects(FRAMES)
+ball_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
 
 balls = set()
 
@@ -48,21 +50,22 @@ class BallOfLight(GameObject):
     def __init__(self, startpos=(-300.0, -300.0), newcolor=choice(color.LIST)):
         GameObject.__init__(self)
 
-        self._anim     = 0
-        self.color    = newcolor
-        self.image    = ball_frames[id(newcolor)][0]
-        size = self.image.get_size()
-        self.rect     = pygame.Rect(startpos, size)
-        self.position = list(startpos)
-        self.progress = 0.0
-        self._target  = [round(startpos[0] / size[0]) * size[1], 8.0]
-        self.startpos = startpos
-        self.state    = BallOfLight.STATES.IDLE
+        self._anim              = 0
+        self.color              = newcolor
+        self.current_frame_list = ball_frames_color_blind if settings.color_blind else ball_frames
+        self.image              = self.current_frame_list[id(newcolor)][0]
+        size                    = self.image.get_size()
+        self.rect               = pygame.Rect(startpos, size)
+        self.position           = list(startpos)
+        self.progress           = 0.0
+        self._target            = [round(startpos[0] / size[0]) * size[1], 8.0]
+        self.startpos           = startpos
+        self.state              = BallOfLight.STATES.IDLE
 
         del self.acceleration, self.velocity
 
     def appear(self):
-        self.image        = ball_frames[id(self.color)][0]
+        self.image        = self.current_frame_list[id(self.color)][0]
         self.position     = list(self.startpos)
         self.progress     = 0.0
         self.rect.topleft = self.startpos
@@ -83,7 +86,7 @@ class BallOfLight(GameObject):
         if self._anim < len(FRAMES) - 1:
         #If we haven't finished animating...
             self._anim += 1
-            self.image = ball_frames[id(self.color)][self._anim]
+            self.image = self.current_frame_list[id(self.color)][self._anim]
 
         dx                = (percent**2)*(3-2*percent)
         ddx               = 1 - dx

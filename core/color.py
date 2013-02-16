@@ -44,7 +44,7 @@ def blend_color(surface, color):
     surface.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
     return surface
 
-def get_colored_objects(frames, has_alpha=True):
+def get_colored_objects(frames, has_alpha=True, color_blind=False):
     '''
     @param frames: List of sprites we want to create colored versions of
     @param has_alpha: True if we want transparency
@@ -70,7 +70,7 @@ def get_colored_objects(frames, has_alpha=True):
             for j in i:
                 j.set_colorkey(j.get_at([0, 0]), config.FLAGS)
                 
-    if settings.color_blind:
+    if color_blind:
         for c in LIST:
             COLOR_BLIND_SYMBOLS[id(c)].set_colorkey(COLOR_KEY)
         for c in LIST:

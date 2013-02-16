@@ -5,6 +5,7 @@ import pygame.mixer
 
 from core            import config
 from core            import color
+from core            import settings
 from core.particles  import ParticlePool, ParticleEmitter
 from game.gameobject import GameObject
 from game            import blockgrid
@@ -18,6 +19,7 @@ _blocks_set = set()
 _bump       = pygame.mixer.Sound(os.path.join('sfx', '_bump.wav'))
 
 _block_frames    = color.get_colored_objects(FRAMES)
+_block_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
 _color_particles = color.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
 
 
@@ -85,10 +87,11 @@ class Block(GameObject):
 
     def __init__(self, position, newcolor=choice(color.LIST), special=False):
         GameObject.__init__(self)
-        self._anim    = 0
-        self.color    = newcolor
-        self.image    = _block_frames[id(self.color)][0]
-        self.position = position
+        self._anim              = 0
+        self.color              = newcolor
+        self.current_frame_list = _block_frames_color_blind if settings.color_blind else _block_frames
+        self.image              = self.current_frame_list[id(self.color)][0]
+        self.position           = position
 
         size = self.image.get_size()
         self.rect     = pygame.Rect(
@@ -107,7 +110,7 @@ class Block(GameObject):
                (self.color, self.gridcell, self.position, self._target))
 
     def appear(self):
-        self.image    = _block_frames[id(self.color)][0]
+        self.image    = self.current_frame_list[id(self.color)][0]
 
         size = self.image.get_size()
         self.position     = [
@@ -172,11 +175,11 @@ class Block(GameObject):
         if self._anim < len(FRAMES) - 1:
         #If we haven't hit the last frame of animation...
             self._anim += 1
-            self.image  = _block_frames[id(self.color)][self._anim]
+            self.image  = self.current_frame_list[id(self.color)][self._anim]
 
         if self._special:
         #If this is a _special block...
-            self.image = choice(_block_frames.values())[self._anim]
+            self.image = choice(self.current_frame_list.values())[self._anim]
 
         for i in xrange(gridcell[0] + 1, blockgrid.SIZE[0]):
         #For all grid cells below this one...
