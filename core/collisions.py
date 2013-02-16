@@ -1,15 +1,23 @@
+'''
+This module is a system for collision between Axis-Aligned Bounding Boxes.
+It's meant to be reused in other games, so I tried to keep this as general as
+possible.
+
+@var _do_not_check: Game object types that don't collide (for performance)
+@var _do_not_compare: Object type pairings that don't collide with each other
+'''
+
 from itertools import chain, combinations, ifilterfalse
 
 import pygame.display
 import pygame.sprite
 import pygame.time
 
-do_not_compare = set()
+_do_not_compare = set()
 #Contains 2-tuples of types.  Don't check for collisions between objects
 #with these type pairings.
 
 _do_not_check = set()
-#Contains types that are not to collide with anything.
 
 def dont_check_type(*types):
     '''
@@ -25,39 +33,38 @@ class CollisionGrid:
     CollisionGrid is a grid meant to be used to easily determine whether or
     not objects within are colliding; only objects within the same cell are
     compared against each other.
+    
+    CollisionsGrids themselves are not aware of the space they take up on-screen,
+    that's the job of the GridCells they hold.
     '''
     def __init__(self, width, height, layer, group_list):
         '''
-        width is the width of this grid in cells, *not* pixels
-        height is the height of this grid in cells, *not* pixels
-        layer is this grid's layer; only objects on the same layer may touch
+        @param width: Width of this CollisionGrid in cells
+        @param height: Height of this CollisionGrid, also in cells
+        @param layer: Only objects whose layer attribute == self.layer can touch
+        @param group_list: List of all Pygame groups to check for collisions in
+        
+        @ivar collisions: List of all collisions that occurred in the last frame
+        @ivar grid: The cells of this grid
+        @ivar group_list: List of all Pygame groups to check for collisions in
+        @ivar layer: Only objects of the same layer may collide
+        @ivar spare_collisions: Spare Collisions, so we don't keep creating them
         '''
         size = pygame.display.get_surface().get_size()
-        cell_width  = size[0]/width
-        cell_height = size[1]/height
+        cell_size = (size[0]/width, size[1]/height)
 
         self.collisions = []
-        #Holds all collisions that have occurred in the last frame
-
-        self.grid             = [[GridCell(pygame.Rect(i*cell_width ,
-                                                       j*cell_height,
-                                                       cell_width   ,
-                                                       cell_height
-                                                       ),
-                                           self)
-                                  for i in xrange(width)]
-                                  for j in xrange(height)
-                                  ]
-        #The cells of this grid; each cell handles its own collisions
-
-        self.layer = layer
-        #Only objects of the same layer may collide
-
+        self.grid       = [[GridCell(pygame.Rect((i*cell_size[0], j*cell_size[1]),
+                                                  cell_size
+                                                  ),
+                                                  self)
+                                    for i in xrange(width)
+                            ]
+                            for j in xrange(height)
+                          ]
         self.group_list = group_list
-
+        self.layer      = layer
         self.spare_collisions = []
-        #Holds all unused collisions
-
 
     def update(self):
         '''
@@ -133,7 +140,8 @@ class GridCell:
         rect           = self.rect
 
         for i in (j for j in chain.from_iterable(self.grid.group_list)
-                  if j.__class__ not in _do_not_check and j.rect.colliderect(rect)):
+                  if j.__class__ not in _do_not_check
+                  and j.rect.colliderect(rect)):
         #For all sprites in this group that aren't excluded from collisions
         #and have just entered this cell...
             objects_to_add.add(i)
@@ -172,30 +180,41 @@ class Collision:
     Reason is, creating new objects is expensive.  Reusing them isn't.
     '''
     def __init__(self):
-        self.obj1 = None
-        self.obj2 = None
-        #The two objects involved in this collision
-
-        self.time = None
-        #The time this collision happened (system time, of course)
+        '''
+        @ivar obj1, obj2: The two objects involved in this collision
+        @ivar time: The time this collision happened (system time, of course)
+        '''
+        self.obj1  = None
+        self.obj2  = None
+        self._time = None
 
     def update(self, obj1, obj2):
         '''
         Lets this Collision object know which two entities have collided, and
         record the time that it happened.
+        
+        @param obj1, obj2: The two objects that just collided
+        @return: self
         '''
         self.obj1, self.obj2 = obj1, obj2
-        self.time = pygame.time.get_ticks()
+        self._time           = pygame.time.get_ticks()
         return self
 
     def reset(self):
         '''
-        Clears this Collision's fields (so we don't need to delete this
-        and create another).
+        Clears this Collision's fields (so we don't need to delete this and
+        create another).
+        
+        @postcondition: This Collision's fields are all None
+        @return: self
         '''
-        self.obj1, self.obj2, self.time = None, None, None
+        self.obj1, self.obj2, self._time = None, None, None
         return self
 
     def __cmp__(self, other):
-        '''Lets us sort Collisions by time.'''
-        return cmp(self.time, other.time)
+        '''
+        Lets us sort Collisions by time.
+        
+        @param other: The other Collision being compared with this one
+        '''
+        return cmp(self._time, other._time)

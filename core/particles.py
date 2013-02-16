@@ -19,7 +19,7 @@ class Particle(GameObject):
 
     START_POS = [-100.0, -100.0]
     STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'LEAVING')
-    group     = None
+    GROUP     = None
 
     def __init__(self, image, move_func, appear_func):
         '''
@@ -72,7 +72,7 @@ class ParticleEmitter:
     should call emit().
     '''
 
-    def __init__(self, pool, rect, period, group=Particle.group):
+    def __init__(self, pool, rect, period, group=Particle.GROUP):
         '''
         @ivar period: Frames between emits, e.g. 4 = 1 Particle per 4 frames
         @ivar pool: The ParticlePool where Particles are drawn from
@@ -102,7 +102,7 @@ class ParticleEmitter:
 
     def emit(self):
         '''
-        Takes one step to release  particle.
+        Takes one step to release a particle.
         '''
 
         self.rate += 1
@@ -145,6 +145,9 @@ class ParticlePool:
         self.particles_out = set()
 
     def get_particle(self):
+        '''
+        Returns a spare Particle, or creates a new one if none exist.
+        '''
         if not self.particles_in:
         #If we don't have any particles to spare...
             self.particles_in.add(Particle(self.image, self.move_func, self.appear_func))
@@ -154,6 +157,10 @@ class ParticlePool:
         return particle
 
     def clean(self):
+        '''
+        Removes all particles that are off-screen from the game, but not from
+        memory.
+        '''
         particles_to_remove = set()
         map(particles_to_remove.add, 
             ifilterfalse(config.SCREEN_RECT.colliderect, self.particles_out))

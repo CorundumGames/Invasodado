@@ -1,3 +1,8 @@
+'''
+This is a simple module that's made to associate high scores by country.
+Lets us use any aspect of the returned JSON response.
+'''
+
 import json
 import os.path
 import urllib
@@ -11,15 +16,24 @@ FILE    = os.path.join('save', 'country.wtf')
 REQUEST = ''.join([URL, '?', PARAMS])
 
 #TODO: Figure something out for if the connection failed or the server's down
-def get_country(attribute = None):
+def get_country(attribute=None):
+    '''
+    Gets country info based on our IP address, then stores it for later.
+    
+    @param attribute: The attribute from the requested JSON file to return.
+                      If None, returns the whole JSON response.
+    '''
     geoip_info = None
 
     try:
+    #See if the country info is stored on the file system...
         geoip_info = json.load(open(FILE))
     except IOError:
+    #Well, apparently not.
         pass
 
     try:
+    #Let's try loading it online.
         urllib.urlretrieve(REQUEST, FILE)
         geoip_info = json.load(open(FILE))
     except IOError:
