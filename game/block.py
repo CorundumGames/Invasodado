@@ -3,24 +3,27 @@ from random import choice, uniform
 
 import pygame.mixer
 
-from core import config
-from core           import color
-from core.particles import ParticlePool, ParticleEmitter
+from core            import config
+from core            import color
+from core.particles  import ParticlePool, ParticleEmitter
 from game.gameobject import GameObject
-from game import blockgrid
+from game            import blockgrid
 
 
 FRAMES  = [pygame.Rect(32 * i, 160, 32, 32) for i in range(8)]
 GRAVITY = 0.5
 
-blocks_set = set()
-bump       = pygame.mixer.Sound(os.path.join('sfx', 'bump.wav'))
+_blocks_set = set()
+_bump       = pygame.mixer.Sound(os.path.join('sfx', '_bump.wav'))
 
-block_frames    = color.get_colored_objects(FRAMES)
-particle_colors = color.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
+_block_frames    = color.get_colored_objects(FRAMES)
+_color_particles = color.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
 
 
 def _bp_move(self):
+    '''
+    Moves this Particle a little bit this frame.
+    '''
     position = self.position
     velocity = self.velocity
 
@@ -30,33 +33,41 @@ def _bp_move(self):
     self.rect.topleft = (position[0] + .5, position[1] + .5)
 
 def _bp_appear(self):
+    '''
+    Initializes the location and velocity for this Particle.
+    '''
     self.acceleration[1] = GRAVITY
     self.velocity        = [uniform(-5, 5), uniform(-1, -3)]
 
 def clean_up():
-    blocks_set.clear()
+    '''
+    Removes every Block from memory.
+    
+    @postcondition: No more Blocks exist, on-screen and off.
+    '''
+    _blocks_set.clear()
     Block.block_full = False
 
 def get_block(position, newcolor=choice(color.LIST), special=False):
     '''
-    Gets a spare block to add on-screen, creating a new one if none are available.
+    Gets a spare Block to add on-screen, creating a new one if there are none.
 
     @param position: Where to add the new block
     @param newcolor: The color of the new block
-    @param special: True if it's a special block dropped by the UFO
+    @param _special: True if it's a special block dropped by the UFO
     '''
-    if not blocks_set:
+    if not _blocks_set:
     #If we've run out of unused Blocks...
-        blocks_set.add(Block(position, newcolor))
+        _blocks_set.add(Block(position, newcolor))
 
-    block          = blocks_set.pop()
+    block          = _blocks_set.pop()
     block.color    = newcolor
     block.position = position
-    block.special  = special
+    block._special = special
     block.state    = Block.STATES.APPEARING
     return block
 
-_block_particles  = dict([(id(c), ParticlePool(particle_colors[id(c)][0], _bp_move, _bp_appear)) for c in color.LIST])
+_block_particles  = dict([(id(c), ParticlePool(_color_particles[id(c)][0], _bp_move, _bp_appear)) for c in color.LIST])
 
 class Block(GameObject):
     '''
@@ -65,7 +76,7 @@ class Block(GameObject):
     '''
     block_full     = False
     collisions     = None
-    group          = None
+    GROUP          = None
     particle_group = None
     GRAVITY        = 0.5
     MAX_SPEED      = 12.0
@@ -73,9 +84,9 @@ class Block(GameObject):
 
     def __init__(self, position, newcolor=choice(color.LIST), special=False):
         GameObject.__init__(self)
-        self.anim     = 0
+        self._anim    = 0
         self.color    = newcolor
-        self.image    = block_frames[id(self.color)][0]
+        self.image    = _block_frames[id(self.color)][0]
         self.position = position
 
         size = self.image.get_size()
@@ -87,16 +98,15 @@ class Block(GameObject):
                                     size
                                    )
         self._target  = None
-        self.special  = special
+        self._special = special
         self.state    = Block.STATES.IDLE
 
     def __str__(self):
-        return ("Block of color %s at grid cell %s with _target %i" %
+        return ("Block of color %s at grid cell %s with _target %s" %
                (self.color, self.gridcell, self._target))
-        
 
     def appear(self):
-        self.image    = block_frames[id(self.color)][0]
+        self.image    = _block_frames[id(self.color)][0]
 
         size = self.image.get_size()
         self.position     = [
@@ -111,7 +121,7 @@ class Block(GameObject):
         self._target      = blockgrid.DIMENSIONS[0] - 1
         self.emitter      = ParticleEmitter(_block_particles[id(self.color)], self.rect, 5, Block.particle_group)
         self.state        = Block.STATES.START_FALLING
-        self.add(Block.group)
+        self.add(Block.GROUP)
 
     def start_falling(self):
         blocks   = blockgrid.blocks
@@ -133,11 +143,11 @@ class Block(GameObject):
             assert isinstance(block_above, Block), \
             "%s expected a Block, got a %s" % (self, block_above)
 
-            for i in xrange(gridcell[0], 0, -1):
+            for i in reversed(blocks):
             #For all grid cells above us...
-                if blocks[i][gridcell[1]]:
+                if i[gridcell[1]]:
                 #If this is actually a block...
-                    blocks[i][gridcell[1]].state = Block.STATES.START_FALLING
+                    i[gridcell[1]].state = Block.STATES.START_FALLING
                 else:
                     break
 
@@ -152,21 +162,20 @@ class Block(GameObject):
         blocks   = blockgrid.blocks
         gridcell = self.gridcell
         rect     = self.rect
-
         self.velocity[1]  = min(Block.MAX_SPEED, self.velocity[1] + self.acceleration[1])
         self.position[1] += self.velocity[1]
-        rect.top          = round(self.position[1])#self.position[1] + .5  #Round to the nearest integer
+        rect.top          = self.position[1] + .5 #Round to the nearest integer
         gridcell[0]       = rect.centery / rect.height
         self.emitter.rect.topleft = rect.topleft
 
-        if self.anim < len(FRAMES) - 1:
+        if self._anim < len(FRAMES) - 1:
         #If we haven't hit the last frame of animation...
-            self.anim += 1
-            self.image = block_frames[id(self.color)][self.anim]
+            self._anim += 1
+            self.image  = _block_frames[id(self.color)][self._anim]
 
-        if self.special:
-        #If this is a special block...
-            self.image = choice(block_frames.values())[self.anim]
+        if self._special:
+        #If this is a _special block...
+            self.image = choice(_block_frames.values())[self._anim]
 
         for i in xrange(gridcell[0] + 1, blockgrid.DIMENSIONS[0]):
         #For all grid cells below this one...
@@ -213,27 +222,25 @@ class Block(GameObject):
                 self.acceleration[1] = GRAVITY
                 self.state           = Block.STATES.START_FALLING
 
-
     def stop(self):
         gridcell = self.gridcell
 
         self.acceleration[1] = 0.0
         self.velocity[1]     = 0.0
-        gridcell[0]          = self.rect.centery / self.rect.height #(row, column)
+        gridcell[0]          = self.rect.centery / self.rect.height #(row, col)
         self._target         = None
-        
+        print blockgrid.blocks[gridcell[0]][gridcell[1]]
         blockgrid.blocks[gridcell[0]][gridcell[1]] = self
 
         blockgrid.blocks_to_check.add(self)
-        bump.play()
-        self.snap()
+        _bump.play()
         blockgrid.update()
 
-        if self.special:
+        if self._special:
         #If this is a special block...
             if gridcell[0] < blockgrid.DIMENSIONS[0] - 1:
             #If we're not at the bottom of the grid...
-                self.color = blockgrid.blocks[gridcell[0] + 1][gridcell[1]].color
+                self.color = blockgrid.blocks[gridcell[0]+1][gridcell[1]].color
                 blockgrid.clear_color(self.color)
             else:
                 blockgrid.clear_row(gridcell[0])
@@ -241,7 +248,7 @@ class Block(GameObject):
 
     def vanish(self):
         self.emitter.burst(20)
-        self.anim                                            = 0
+        self._anim                                           = 0
         self.kill()
         blockgrid.blocks_to_check.discard(self)
         self.position                                        = [-300, -300]
@@ -250,11 +257,7 @@ class Block(GameObject):
         self.gridcell                                        = None
         self._target                                         = None
         self.state                                           = Block.STATES.IDLE
-        blocks_set.add(self)
-
-    def snap(self):
-        self.rect.topleft = (round(self.position[0] / self.image.get_width()) * self.image.get_height(),
-                             round(self.position[1] / self.image.get_width()) * self.image.get_height())
+        _blocks_set.add(self)
 
     actions = {
                 STATES.IDLE         : None           ,

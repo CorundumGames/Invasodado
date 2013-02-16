@@ -125,7 +125,7 @@ class HighScoreTable:
         if not isinstance(score_object, HighScoreEntry):
         #If we weren't given a high score entry...
             raise TypeError("Expected HighScoreEntry, got %s" % type(score_object))
-        elif score_object.mode != self.mode:
+        elif score_object._mode != self.mode:
         #If this score entry is for the wrong game mode...
             raise ValueError("Expected mode %i, got mode %i" % (self.mode, score_object.mode))
 
