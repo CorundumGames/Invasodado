@@ -114,9 +114,11 @@ class SettingsMenu(GameState):
 
     def __toggle_fullscreen(self):
         config.toggle_fullscreen()
-        self.menu_settings['fullscreen'].image = HudObject.make_text(self.__on_off(settings.fullscreen), surfaces=True)
+        self.menu['fullscreen'][1].image = HudObject.make_text(self.__on_off(settings.fullscreen), surfaces=True)
 
     def __toggle_color_blind_mode(self):
+        config.toggle_color_blind_mode();
+        self.menu['colorblind'][1].image = HudObject.make_text(self.__on_off(settings.color_blind), surfaces=True)
         pass
 
     def __toggle_difficulty(self):
