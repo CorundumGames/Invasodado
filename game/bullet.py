@@ -1,12 +1,13 @@
+'''
+Bullet is an abstract class which ShipBullet and EnemyBullet will inherit from.
+Bullet should NOT be created in and of itself.
+'''
+
 import pygame
 
 from core import config
 from core import color
 from game.gameobject import GameObject
-'''
-Bullet is an abstract class which ShipBullet and EnemyBullet will inherit
-from.  Bullet should NOT be created in and of itself.
-'''
 
 class Bullet(GameObject):
     FRAME  = pygame.Rect(227, 6, 26, 19)
@@ -23,18 +24,25 @@ class Bullet(GameObject):
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
     def start_moving(self):
-        '''Plays a sound and begins moving.'''
-        #Play a sound here later
+        '''
+        Plays a sound and begins moving.
+        '''
+        #TODO: Play a sound here later
         self.position    = list(self.rect.topleft)
         self.velocity[1] = self.__class__.SPEED
         self.state       = self.__class__.STATES.MOVING
 
     def move(self):
+        '''
+        Bullets only move vertically in Invasodado.
+        '''
         self.position[1] += self.velocity[1]
         self.rect.top     = self.position[1] + .5
 
     def reset(self):
-        '''Resets the bullet back to its initial position.'''
+        '''
+        Resets the bullet back to its initial position.
+        '''
         self.kill()
         self.velocity[1] = 0
         self.rect        = self.__class__.START_POS.copy()

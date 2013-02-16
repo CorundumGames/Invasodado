@@ -1,11 +1,11 @@
-import pygame.sprite
+from pygame.sprite import Sprite
 
-class GameObject(pygame.sprite.Sprite):
-    actions    = dict()
-    collisions = dict()
+class GameObject(Sprite, object):
+    actions    = None
+    collisions = None
 
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+        Sprite.__init__(self)
         self.acceleration = [0.0, 0.0]
         self.position     = [0.0, 0.0]
         self.rect         = None
@@ -13,20 +13,25 @@ class GameObject(pygame.sprite.Sprite):
         self.velocity     = [0.0, 0.0]
 
     def on_collide(self, other):
-        x   = other.__class__
-        col = self.collisions
-        if isinstance(col, dict):
+        '''
+        Reacts based on the type of the other object.
+        
+        @param other: The object that we collided with.
+        '''
+        other_type = other.__class__
+        collisions = self.collisions
+        if isinstance(collisions, dict):
         #If this object can interact with more than one other type...
-            if x in col and callable(col[x]):
+            if other_type in collisions and callable(collisions[other_type]):
             #If we can interact with the other object...
-                col[x](self, other)
-        elif callable(col):
+                collisions[other_type](self, other)
+        elif callable(collisions):
         #Else if we have any collisions...
-            col(other)
+            collisions(other)
 
     def update(self):
         assert self.state in type(self).actions, \
-        "A {} tried to act on an invalid state {}!".format(type(self).__name__, self.state)
+        "A %s tried to act on an invalid state %i!" % (type(self), self.state)
 
         method_name = self.__class__.actions[self.state]
         if method_name and callable(getattr(self, method_name)):

@@ -1,13 +1,13 @@
-import itertools
-import math
+from itertools import chain
+from math      import sin
 
 import pygame.key
 
-import core.color  as color
-import core.config as config
+from core import color
+from core import config
 
 from game.gameobject import GameObject
-from game import shipbullet
+from game.shipbullet import ShipBullet
 
 '''
 The Ship is the player character.  There's only going to be one instance of
@@ -24,7 +24,7 @@ SPEED     = 4
 
 class FlameTrail(GameObject):
     FRAMES = [config.SPRITES.subsurface(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
-    group  = None
+    GROUP  = None
 
     def __init__(self):
         GameObject.__init__(self)
@@ -37,14 +37,14 @@ class FlameTrail(GameObject):
 
     def animate(self):
         self.anim += 1/3.0
-        self.image = FlameTrail.FRAMES[int(3 * math.sin(self.anim / 2)) + 3]
+        self.image = FlameTrail.FRAMES[int(3 * sin(self.anim / 2)) + 3]
 
     actions = {1 : 'animate'}
 
 class Ship(GameObject):
     FRAMES = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
     STATES = config.Enum('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
-    group  = None
+    GROUP  = None
 
     def __init__(self):
         '''
@@ -55,30 +55,30 @@ class Ship(GameObject):
         '''
         GameObject.__init__(self)
 
-        self.anim             = 0.0
-        self.flames           = FlameTrail()
-        self.image            = Ship.FRAMES[0]
-        self.invincible       = 0
-        self.my_bullet        = shipbullet.ShipBullet()
-        self.position         = list(START_POS.topleft)
-        self.rect             = START_POS.copy()
-        self.state            = Ship.STATES.RESPAWN
+        self.anim       = 0.0
+        self.flames     = FlameTrail()
+        self.image      = Ship.FRAMES[0]
+        self.invincible = 0
+        self.my_bullet  = ShipBullet()
+        self.position   = list(START_POS.topleft)
+        self.rect       = START_POS.copy()
+        self.state      = Ship.STATES.RESPAWN
 
         for i in Ship.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
     def on_fire_bullet(self):
         bul = self.my_bullet
-        if bul.state == bul.__class__.STATES.IDLE and self.state == Ship.STATES.ACTIVE:
+        if bul.state == ShipBullet.STATES.IDLE and self.state == Ship.STATES.ACTIVE:
         #If our bullet is not already on-screen...
-            self.anim  = 1
-            self.image = Ship.FRAMES[self.anim]
-            bul.add(Ship.group)
-            bul.rect.center    = self.rect.center
-            bul.position       = list(self.rect.topleft)
-            bul.state          = bul.__class__.STATES.FIRED
+            bul.add(Ship.GROUP)
+            self.anim       = 1
+            self.image      = Ship.FRAMES[self.anim]
+            bul.rect.center = self.rect.center
+            bul.position    = list(self.rect.topleft)
+            bul.state       = ShipBullet.STATES.FIRED
 
     def respawn(self):
-        for i in itertools.chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(128)
+        for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(128)
         self.invincible = 250
         self.position   = list(START_POS.topleft)
         self.rect       = START_POS.copy()
@@ -87,7 +87,7 @@ class Ship(GameObject):
     def move(self):
         #Shorthand for which keys have been pressed
         keys = pygame.key.get_pressed()
-        rect    = self.rect
+        rect = self.rect
 
         if self.state not in {Ship.STATES.DYING, Ship.STATES.DEAD, Ship.STATES.IDLE}:
             if keys[pygame.K_LEFT] and rect.left > 0:
@@ -97,20 +97,21 @@ class Ship(GameObject):
             #If we're pressing right and not at the right edge of the screen...
                 self.position[0] += SPEED
 
-        rect.left = self.position[0] + .5
+        rect.left = self.position[0] + 0.5
         self.flames.rect.midtop = (rect.midbottom[0], rect.midbottom[1] - 1)
+        #Compensate for the gap in the flames                           ^^^
 
         if self.invincible:
         #If we're invincible...
             self.invincible -= 1
-        else:
-            for i in itertools.chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
+        elif self.image.get_alpha() == 128:
+            for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
 
         self.anim  = self.anim + 1.0/3 * (0 < self.anim < len(Ship.FRAMES) - 1)
         self.image = Ship.FRAMES[int(self.anim)]
 
     def die(self):
-        self.state   = Ship.STATES.RESPAWN
+        self.state = Ship.STATES.RESPAWN
 
     actions = {
                STATES.IDLE      : None          ,
