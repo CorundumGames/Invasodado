@@ -8,7 +8,7 @@ from core       import color
 from core       import config
 from game.block import get_block
 
-from game.gameobject import GameObject
+from game.gameobject import GameObject#
 
 FRAMES     = [
               pygame.Rect(64 * (i % 4), 192 + 32 * (i / 4), 64, 32)
