@@ -4,7 +4,7 @@ blocks.  It's designed around Invasodado, but with a little work it could be
 refitted for other match-3 games like Bejewelled or Puzzle League.
 '''
 
-from itertools import chain
+#from itertools import chain
 from os.path   import join
 
 from pygame.display import get_surface
@@ -13,28 +13,33 @@ import pygame.mixer
 
 from game import gamedata
 
-CELL_SIZE  = (32, 32)
-DIMENSIONS = (12, 20) #(row, column)
-RECT       = pygame.rect.Rect([0, 0], (get_surface().get_width(), DIMENSIONS[0] * CELL_SIZE[0]))
+BLOCK_TYPE       = None
+CELL_SIZE = (32, 32)
+SIZE      = (12, 20) #(row, column)
+RECT      = pygame.rect.Rect((0, 0), (get_surface().get_width(), SIZE[0] * CELL_SIZE[0]))
 
-blocks           = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
-block_type       = None
-blocks_to_check  = set()
+blocks           = [[None for i in xrange(SIZE[1])] for j in xrange(SIZE[0])]
+_blocks_to_check  = set()
 _blocks_to_clear = set()
+_block_clear     = pygame.mixer.Sound(join('sfx', 'clear.wav'))
+_match_set       = set()
 
-_match_set = set()
-
-_block_clear = pygame.mixer.Sound(join('sfx', 'clear.wav'))
+def check_block(block, should_check=True):
+    if should_check:
+    #If we want to check this block for matches...
+        _blocks_to_check.add(block)
+    else:
+        _blocks_to_check.discard(block)
 
 def clean_up():
     '''
     Deletes all blocks that were created.
 
-    @postcondition: No more objects of block_type exist in memory.
+    @postcondition: No more objects of BLOCK_TYPE exist in memory.
     '''
     global blocks
-    blocks = [[None for i in range(DIMENSIONS[1])] for j in range(DIMENSIONS[0])]
-    blocks_to_check.clear()
+    blocks = [[None for i in xrange(SIZE[1])] for j in xrange(SIZE[0])]
+    _blocks_to_check.clear()
     _blocks_to_clear.clear()
     _match_set.clear()
 
@@ -45,24 +50,24 @@ def clear_color(color):
     @param color: Color of the blocks that should be deleted.
     @postcondition: No color-colored blocks exist on-screen.
     '''
-    for i in (j for j in chain(block_type.GROUP) if j and j.color is color):
+    for i in (j for j in BLOCK_TYPE.GROUP if j and j.color is color):
     #For all blocks of the given color...
-        i.state = block_type.STATES.DYING
+        i.state = BLOCK_TYPE.STATES.DYING
 
 def clear_row(row):
     '''
     Destroys all blocks in the specified row.
 
-    @param row: The row of blocks to destroy, on [0, DIMENSIONS[0]).
+    @param row: The row of blocks to destroy, on [0, SIZE[0]).
     @postcondition: No blocks on-screen exist in the given row.
     '''
 
-    assert 0 <= row < DIMENSIONS[0], \
+    assert 0 <= row < SIZE[0], \
     "Expected row value in 0 <= x < 20, but got %i" % row
 
     for i in (j for j in blocks[row] if j):
     #For all blocks in this row...
-        i.state = block_type.STATES.DYING
+        i.state = BLOCK_TYPE.STATES.DYING
 
 def update():
     '''
@@ -71,14 +76,14 @@ def update():
     @postcondition: Sets of 3+ like-colored blocks are removed from the game.
     '''
     global blocks
-    blocks = [[None for i in xrange(DIMENSIONS[1])] for j in xrange(DIMENSIONS[0])]
+    blocks = [[None for i in xrange(SIZE[1])] for j in xrange(SIZE[0])]
 
-    for i in (j for j in chain(block_type.GROUP) if j and j.state == block_type.STATES.ACTIVE):
+    for i in (j for j in BLOCK_TYPE.GROUP if j and j.state == BLOCK_TYPE.STATES.ACTIVE):
     #For all blocks that are on the grid and not moving...
-        assert isinstance(i, block_type), "A %s got into the Block grid!" % i
+        assert isinstance(i, BLOCK_TYPE), "A %s got into the Block grid!" % i
         blocks[i.gridcell[0]][i.gridcell[1]] = i
     
-    for b in blocks_to_check:
+    for b in _blocks_to_check:
     #For all blocks to check for matches...
         _match_set.add(b)    #Start with a match of one
         next_blocks = ([], [], [], []) #Respectively holds blocks down, down-right, right, up-right
@@ -121,5 +126,5 @@ def update():
         _block_clear.play()
         for k in _blocks_to_clear:
         #For every block marked for clearing...
-            k.state = block_type.STATES.DYING
+            k.state = BLOCK_TYPE.STATES.DYING
         _blocks_to_clear.clear()

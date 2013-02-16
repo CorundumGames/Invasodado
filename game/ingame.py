@@ -43,13 +43,14 @@ UFO_GROUP     = Group()
 
 rect = config.SCREEN_RECT
 
-FIRE_LOCATION      = (rect.centerx - 192, rect.centery)
-FIRE_MESSAGE       = "Press fire to continue"
-GAME_OVER_LOCATION = (rect.centerx - 64, rect.centery - 64)
-LIVES_LOCATION     = (rect.width - 160, 16)
-SCORE_LOCATION     = (16, 16)
-TIME_LOCATION      = (rect.centerx, 32)
-TYPES_TO_IGNORE    = (Block, BallOfLight, HudObject, Particle, ParticleEmitter)
+FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
+FIRE_MESSAGE   = "Press fire to continue"
+GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
+LIVES_LOCATION = (rect.width - 160, 16)
+MODULE_CLEANUP = (balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata)
+SCORE_LOCATION = (16, 16)
+TIME_LOCATION  = (rect.centerx, 32)
+TYPES_IGNORED  = (Block, BallOfLight, HudObject, Particle, ParticleEmitter)
 
 class InGameState(GameState):
     def __init__(self, *args, **kwargs):
@@ -69,13 +70,13 @@ class InGameState(GameState):
         rect = config.SCREEN_RECT
 
         self._game_running   = True
-        self.group_list     = [bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD]
+        self.group_list      = [bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD]
         self._collision_grid = CollisionGrid(4, 4, 1, self.group_list)
         self.hud_text       = {
                                'score'     : hud('', SCORE_LOCATION),
                                'lives'     : hud('', LIVES_LOCATION),
                                'time'      : hud('', TIME_LOCATION ),
-                               'game_over' : hud("GAME OVER", GAME_OVER_LOCATION),
+                               'game_over' : hud("GAME OVER", GAME_OVER_LOC),
                                'press_fire': hud(FIRE_MESSAGE, FIRE_LOCATION),
                               }
         self.key_actions    = {
@@ -111,12 +112,13 @@ class InGameState(GameState):
                 del self.key_actions[i]
             del self._mouse_actions
 
+        
         BallOfLight.BLOCK_GROUP   = BLOCKS
         BallOfLight.enemy_group   = ENEMIES
         BallOfLight.block_mod     = block
         Block.GROUP               = BLOCKS
         Particle.GROUP            = PARTICLES
-        blockgrid.block_type      = Block
+        blockgrid.BLOCK_TYPE      = Block
         Block.particle_group      = PARTICLES
         enemysquadron.ENEMY_GROUP = ENEMIES
         Enemy.GROUP               = ENEMIES
@@ -126,7 +128,7 @@ class InGameState(GameState):
         UFO.GROUP                 = UFO_GROUP
         UFO.BLOCK_GROUP           = BLOCKS
 
-        collisions.dont_check_type(*TYPES_TO_IGNORE)
+        collisions.dont_check_type(*TYPES_IGNORED)
         BG.add(bg.EARTH, bg.GRID)
         enemysquadron.reset()
         enemysquadron.start()
@@ -134,7 +136,7 @@ class InGameState(GameState):
     def __del__(self):
         map(Group.empty, self.group_list)
 
-        for i in [balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata]:
+        for i in MODULE_CLEANUP:
             i.clean_up()
 
         #vartracker.output()
