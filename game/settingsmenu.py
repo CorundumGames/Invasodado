@@ -43,7 +43,7 @@ class SettingsMenu(GameState):
         a = make_text(SETTINGS_NAMES, pos=MENU_CORNER, vspace=DIST_APART)
 
         b = make_text(
-                      [self.__on_off(settings.fullscreen), "Off", "Easy", ""],
+                      [self.__on_off(settings.fullscreen), self.__on_off(settings.color_blind), "Easy", ""],
                       pos=[MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]],
                       vspace=DIST_APART
                      )
@@ -69,7 +69,7 @@ class SettingsMenu(GameState):
         
 
         HUD.add(self.hud_cursor, self.hud_title)
-        MENU.add(a, b)
+        MENU.add((a, b))
         BG.add(bg.EARTH, bg.GRID)
 
     def __del__(self):
@@ -114,9 +114,11 @@ class SettingsMenu(GameState):
 
     def __toggle_fullscreen(self):
         config.toggle_fullscreen()
-        self.menu_settings['fullscreen'].image = HudObject.make_text(self.__on_off(settings.fullscreen), surfaces=True)
+        self.menu['fullscreen'][1].image = HudObject.make_text(self.__on_off(settings.fullscreen), surfaces=True)
 
     def __toggle_color_blind_mode(self):
+        config.toggle_color_blind_mode();
+        self.menu['colorblind'][1].image = HudObject.make_text(self.__on_off(settings.color_blind), surfaces=True)
         pass
 
     def __toggle_difficulty(self):

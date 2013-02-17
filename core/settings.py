@@ -8,3 +8,6 @@ resolution = (640, 480)
 
 #Whether we're currently in fullscreen mode.
 fullscreen = False
+
+#Whether colorblind mode is enabled.
+color_blind = False

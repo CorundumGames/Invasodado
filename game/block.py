@@ -5,6 +5,7 @@ import pygame.mixer
 
 from core            import config
 from core            import color
+from core            import settings
 from core.particles  import ParticlePool, ParticleEmitter
 from game.gameobject import GameObject
 from game            import blockgrid
@@ -19,6 +20,7 @@ _blocks_set = set()
 _bump       = pygame.mixer.Sound(os.path.join('sfx', '_bump.wav'))
 
 _block_frames    = color.get_colored_objects(FRAMES)
+_block_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
 _color_particles = color.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
 
 
@@ -87,7 +89,8 @@ class Block(GameObject):
         GameObject.__init__(self)
         self._anim    = 0
         self.color    = newcolor
-        self.image    = _block_frames[id(self.color)][0]
+        self.current_frame_list = _block_frames_color_blind if settings.color_blind else _block_frames
+        self.image              = self.current_frame_list[id(self.color)][0]
         self.position = self.__get_snap()
         self.rect     = pygame.Rect(self.position, self.image.get_size()) #(x, y)
         self._target  = None
@@ -102,9 +105,9 @@ class Block(GameObject):
         return self.__str__()
 
     def appear(self):
-        self.image        = _block_frames[id(self.color)][0]
         self.position     = self.__get_snap()
         self.rect.topleft = self.position
+        self.image        = self.current_frame_list[id(self.color)][0]
         self.gridcell     = [
                              self.rect.centerx / self.rect.width,
                              self.rect.centery / self.rect.height,
@@ -160,11 +163,11 @@ class Block(GameObject):
         if self._anim < len(FRAMES) - 1:
         #If we haven't hit the last frame of animation...
             self._anim += 1
-            self.image  = _block_frames[id(self.color)][self._anim]
+            self.image  = self.current_frame_list[id(self.color)][self._anim]
 
         if self._special:
-        #If this is a special block...
-            self.image = choice(_block_frames.values())[self._anim]
+        #If this is a _special block...
+            self.image = choice(self.current_frame_list.values())[self._anim]
 
         self.__set_target()
 

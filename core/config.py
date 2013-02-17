@@ -75,7 +75,7 @@ def toggle_fullscreen():
     '''
     global screen
     settings.fullscreen = not settings.fullscreen
-    screen = pygame.display.set_mode(settings._resolution,
+    screen = pygame.display.set_mode(settings.resolution,
                                      (
                                       pygame.FULLSCREEN |
                                       pygame.HWSURFACE  |
@@ -107,3 +107,6 @@ def toggle_frame_limit():
     '''
     global _limit_frame
     _limit_frame = not _limit_frame
+    
+def toggle_color_blind_mode():
+    settings.color_blind = not settings.color_blind
