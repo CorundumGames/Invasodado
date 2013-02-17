@@ -95,7 +95,7 @@ class SettingsMenu(GameState):
         map(Group.draw, self.group_list, [config.screen]*len(self.group_list))
 
         pygame.display.flip()
-        pygame.display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        assert not pygame.display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
 
         self.fps_timer.tick(60)
 

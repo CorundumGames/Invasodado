@@ -22,7 +22,7 @@ def main():
     Meant to be executed only once.  main() exists to facilitate profiling, as
     cProfile wants a function, not a module.
     '''
-    
+    pygame.display.set_caption("Invasodado")
     while True:
     #Until the game is closed...
         gsm.update()

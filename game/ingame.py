@@ -21,10 +21,9 @@ from game.block import Block
 
 from game           import gamedata
 from game.hudobject import HudObject
-from game           import enemy
 from game.enemy     import Enemy
-from game import enemybullet
-from enemybullet import EnemyBullet
+from game           import enemybullet
+from enemybullet    import EnemyBullet
 from game.player    import Ship
 from game.shipbullet import ShipBullet
 from game           import blockgrid
@@ -68,7 +67,6 @@ class InGameState(GameState):
         from game.mainmenu import MainMenu
         hud  = HudObject.make_text
         rect = config.SCREEN_RECT
-
         self._game_running   = True
         self.group_list      = [bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD]
         self._collision_grid = CollisionGrid(4, 4, 1, self.group_list)
@@ -208,7 +206,7 @@ class InGameState(GameState):
         map(Group.draw, self.group_list, [config.screen] * len(self.group_list))
 
         display.flip()
-        display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        assert not display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
 
         self.fps_timer.tick_busy_loop(60 * config._limit_frame)
 

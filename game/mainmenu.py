@@ -84,7 +84,7 @@ class MainMenu(GameState):
         map(Group.draw, self.group_list, [config.screen]*len(self.group_list))
 
         display.flip()
-        display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        assert not display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
 
         self.fps_timer.tick(60)
 

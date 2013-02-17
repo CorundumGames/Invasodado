@@ -105,7 +105,7 @@ class HighScoreState(GameState):
         map(Group.draw, self.group_list, [config.screen]*len(self.group_list))
 
         display.flip()
-        display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        assert not display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
 
     def __char_move(self, index):
         if self.entering_name:
