@@ -223,12 +223,13 @@ class Block(GameObject):
         self.rect.topleft    = self.position
         #self.gridcell[1]     = self.rect.centery / self.rect.height #(row, col)
         self._target         = None
+        self.state           = Block.STATES.ACTIVE
         blocks[self.gridcell[0]][self.gridcell[1]] = self
 
         blockgrid.check_block(self, True)
         _bump.play()
         blockgrid.update()
-
+        
         if self._special:
         #If this is a special block...
             if self.gridcell[1] < blockgrid.SIZE[1] - 1:
@@ -238,7 +239,6 @@ class Block(GameObject):
             else:
                 blockgrid.clear_row(self.gridcell[1])
                 
-        self.state = Block.STATES.ACTIVE
 
     def vanish(self):
         blockgrid.check_block(self, False)
