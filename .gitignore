@@ -43,4 +43,5 @@ pygame.display
 profile.out
 *.wtf
 git.sh
-
+lint_results.txt
+lint.sh

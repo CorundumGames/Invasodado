@@ -180,12 +180,14 @@ class Block(GameObject):
             rect.bottom   = blockgrid.RECT.bottom
             position[1]   = rect.top
             self.state    = Block.STATES.IMPACT
-        elif self.gridcell[1] + 1 < blockgrid.SIZE[1] and blocks[gridcell[0]][gridcell[1] + 1]:
+        elif self.gridcell[1] + 1 < blockgrid.SIZE[1]:
         #Else if it was another block...
-            below       = blocks[gridcell[0]][gridcell[1] + 1]
-            rect.bottom = below.rect.top
-            position[1] = rect.top
-            self.state  = Block.STATES.IMPACT
+            below = blocks[gridcell[0]][gridcell[1] + 1]
+            if below and rect.bottom >= below.rect.top:
+            #If we've gone past the block below...
+                rect.bottom = below.rect.top
+                position[1] = rect.top
+                self.state  = Block.STATES.IMPACT
             assert isinstance(below, Block) or below is None, \
             "A %s is trying to collide with a stray %s!" % (self, below)
         
@@ -219,7 +221,7 @@ class Block(GameObject):
         self.velocity[1]     = 0.0
         self.position        = self.__get_snap()
         self.rect.topleft    = self.position
-        self.gridcell[1]     = self.rect.centery / self.rect.height #(row, col)
+        #self.gridcell[1]     = self.rect.centery / self.rect.height #(row, col)
         self._target         = None
         blocks[self.gridcell[0]][self.gridcell[1]] = self
 
