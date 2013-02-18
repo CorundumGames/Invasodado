@@ -229,13 +229,15 @@ class InGameState(GameState):
     def __game_over(self):
         from game.highscore import HighScoreState
         from game.mainmenu  import MainMenu
+        kwargs={
+                'next' : MainMenu      ,
+                'score': gamedata.score,
+                'mode' : self._mode    ,
+                                        }
         self.key_actions[pygame.K_SPACE] = partial(self.change_state,
                                                    HighScoreState,
-                                                   kwargs={
-                                                    'next' : MainMenu      ,
-                                                    'score': gamedata.score,
-                                                    'mode' : self._mode    ,
-                                                   })
+                                                   **kwargs
+                                                   )
         for i in [self._ship, self._ship.flames]: i.kill()
         self._ship.state      = Ship.STATES.IDLE
 
