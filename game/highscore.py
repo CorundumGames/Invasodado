@@ -54,6 +54,7 @@ class HighScoreState(GameState):
     def __init__(self, *args, **kwargs):
         self.current_table = 0
         self.entering_name = False
+        self.kwargs        = kwargs
         self.key_actions = {
                             pygame.K_LEFT  : partial(self.__switch_table, -1),
                             pygame.K_RIGHT : partial(self.__switch_table,  1),
@@ -67,7 +68,7 @@ class HighScoreState(GameState):
         self.group_list = [bg.STARS_GROUP, BG, MENU]
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1
         
-        if 'score' in kwargs and kwargs['score'] > score_tables[self._mode].lowest_score():
+        if 'score' in self.kwargs and self.kwargs['score'] > score_tables[self._mode].lowest_score():
         #If we just got a high score...
             self.alphanum_index = 0
             self.entering_name  = True
@@ -130,7 +131,9 @@ class HighScoreState(GameState):
         
         if self.entering_name and self.name_index < CHAR_LIMIT:
         #If we're entering our name for a high score and it's not too long...
-            if ALPHANUMERIC[self.alphanum_index] == '<' and self.entry_name:              
+            if ALPHANUMERIC[self.alphanum_index] == '<':
+                if(len(self.entry_name) > 1):              
+                    self.entry_name.pop()
                 self.entry_name.pop()
                 self.name_index = max(self.name_index - 1, 0)
             elif ALPHANUMERIC[self.alphanum_index] == '_':
