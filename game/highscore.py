@@ -54,7 +54,6 @@ class HighScoreState(GameState):
     def __init__(self, *args, **kwargs):
         self.current_table = 0
         self.entering_name = False
-        print(kwargs)
         self.key_actions = {
                             pygame.K_LEFT  : partial(self.__switch_table, -1),
                             pygame.K_RIGHT : partial(self.__switch_table,  1),
