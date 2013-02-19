@@ -106,8 +106,11 @@ class Ship(GameObject):
             self.invincible -= 1
         elif self.image.get_alpha() == 128:
             for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
-
-        self.anim  = self.anim + 1.0/3 * (0 < self.anim < len(Ship.FRAMES) - 1)
+            
+        if self.anim != 4:
+            self.anim  = self.anim + 1.0/3 * (0 < self.anim < len(Ship.FRAMES) - 1)
+        else:
+            self.anim = 0.0
         self.image = Ship.FRAMES[int(self.anim)]
 
     def die(self):
