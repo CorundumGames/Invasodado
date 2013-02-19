@@ -87,7 +87,7 @@ class InGameState(GameState):
                                pygame.K_u     : self.__add_ufo           ,
                                pygame.K_e     : self.__game_over         ,
                               }
-        self._mode          = kwargs['time'] * 100 + 100 if 'time' in kwargs else -1
+        self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._mouse_actions = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
         self._ship          = Ship()
         self._time          = self._mode

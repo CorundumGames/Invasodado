@@ -46,7 +46,7 @@ class MainMenu(GameState):
                              partial(self.change_state, InGameState          ),
                              partial(self.change_state, InGameState, time=120),
                              partial(self.change_state, InGameState, time=300),
-                             partial(self.change_state, HighScoreState, next=type(self)),
+                             partial(self.change_state, HighScoreState, next = MainMenu),
                              partial(self.change_state, SettingsMenu         ),
                              quit                                             ,
                             ]

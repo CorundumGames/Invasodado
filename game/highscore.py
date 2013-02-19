@@ -33,6 +33,11 @@ score_tables  = [
                  HighScoreTable(f('2.wtf'), 120, 10, TITLES[1], f(DEFAULTS[1])),
                  HighScoreTable(f('5.wtf'), 300, 10, TITLES[2], f(DEFAULTS[2])),
                 ]
+score_table_dict = {
+                     -1  : 0,
+                     120 : 1,
+                     300 : 2,
+                   }
 del f
 
 def make_score_table(table, pos, vspace, width, surfaces=False):
@@ -52,7 +57,6 @@ def make_score_table(table, pos, vspace, width, surfaces=False):
 
 class HighScoreState(GameState):
     def __init__(self, *args, **kwargs):
-        self.current_table = 0
         self.entering_name = False
         self.kwargs        = kwargs
         self.key_actions = {
@@ -67,8 +71,9 @@ class HighScoreState(GameState):
         self.hud_scores = [make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3)]
         self.group_list = [bg.STARS_GROUP, BG, MENU]
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1
-        
-        if 'score' in self.kwargs and self.kwargs['score'] > score_tables[self._mode].lowest_score():
+        self.current_table = score_table_dict[self._mode]
+        print self.kwargs
+        if 'score' in self.kwargs and self.kwargs['score'] > score_tables[score_table_dict[self._mode]].lowest_score():
         #If we just got a high score...
             self.alphanum_index = 0
             self.entering_name  = True
@@ -77,7 +82,7 @@ class HighScoreState(GameState):
             self.name_index     = 0
             MENU.add(self.hud_name)
             
-        MENU.add(self.hud_scores[self._mode], self.hud_titles[self._mode])
+        MENU.add(self.hud_scores[score_table_dict[self._mode]], self.hud_titles[score_table_dict[self._mode]])
         BG.add(bg.EARTH, bg.GRID)
 
     def __del__(self):
@@ -141,6 +146,8 @@ class HighScoreState(GameState):
                 self.name_index = min(self.name_index + 1, CHAR_LIMIT - 1)
             elif ALPHANUMERIC[self.alphanum_index] == '#':
                 if self.entry_name:
+                    #Pops off the #
+                    self.entry_name.pop()
                     self.__enter_score()
                 else:
                     self.entry_name = bytearray(NO_ENTRY)
