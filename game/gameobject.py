@@ -17,7 +17,7 @@ class GameObject(Sprite, object):
         Sprite.__init__(self)
         self.acceleration = [0.0, 0.0]
         self.next_state   = None
-        self.position     = [0.0, 0.0]
+        self.position     = [-300.0,-300.0]
         self.rect         = None
         self.state        = self.__class__.STATES.IDLE
         self.velocity     = [0.0, 0.0]
