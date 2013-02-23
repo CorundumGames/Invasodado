@@ -31,18 +31,18 @@ class Particle(GameObject):
         self.move_func   = partial(move_func, self)
         self.position    = list(Particle.START_POS)
         self.rect        = pygame.Rect(self.position, self.image.get_size())
-        self.change_state(Particle.STATES.IDLE)
+        self.state       = Particle.STATES.IDLE
 
     def appear(self):
         self.appear_func()
-        super().change_state(Particle.STATES.ACTIVE)
+        self.change_state(Particle.STATES.ACTIVE)
 
     def move(self):
         self.move_func()
 
         if not self.rect.colliderect(config.SCREEN_RECT):
         #If we're no longer on-screen...
-            super().change_state(Particle.STATES.LEAVING)
+            self.change_state(Particle.STATES.LEAVING)
 
     def leave(self):
         self.kill()

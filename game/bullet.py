@@ -19,7 +19,7 @@ class Bullet(GameObject):
         self.image      = self.__class__.SPRITE #@UndefinedVariable
         self.rect       = self.__class__.START_POS.copy()
         self.position   = list(self.rect.topleft)
-        self.change_state(self.__class__.STATES.IDLE)
+        self.state      = self.__class__.STATES.IDLE
 
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
 

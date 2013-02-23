@@ -95,7 +95,7 @@ class Block(GameObject):
         self.rect     = pygame.Rect(self.position, self.image.get_size()) #(x, y)
         self._target  = None
         self._special = special
-        self.change_state(Block.STATES.IDLE)
+        self.state    = Block.STATES.IDLE
 
     def __str__(self):
         return ("<Block with color: %s, cell: %s, position: %s, rect: %s, target: %s, state: %i>" %

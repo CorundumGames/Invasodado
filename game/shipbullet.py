@@ -19,13 +19,13 @@ class ShipBullet(Bullet):
     GROUP     = None
 
     def __init__(self):
-        super(self.__class__, self).__init__()
+        Bullet.__init__(self)
 
     def move(self):
         '''
         Moves up the screen, seeing if it's hit an enemy or exited.
         '''
-        super(self.__class__, self).move()
+        Bullet.move(self)
 
         if self.rect.bottom < 0:
         #If above the top of the screen...

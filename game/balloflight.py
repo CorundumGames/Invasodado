@@ -60,7 +60,7 @@ class BallOfLight(GameObject):
         self.progress           = 0.0
         self._target            = [round(startpos[0] / size[0]) * size[1], 8.0]
         self.startpos           = startpos
-        self.change_state(BallOfLight.STATES.IDLE)
+        self.state              = BallOfLight.STATES.IDLE
 
         del self.acceleration, self.velocity
 

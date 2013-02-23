@@ -75,7 +75,7 @@ class HighScoreState(GameState):
         #If we just got a high score...
             self.alphanum_index = 0
             self.entering_name  = True
-            self.entry_name     = bytearray('A')
+            self.entry_name     = bytearray('A', config.ENCODING)
             self.hud_name       = HudObject.make_text(str(self.entry_name), ENTRY_NAME_POS)
             self.name_index     = 0
             MENU.add(self.hud_name)

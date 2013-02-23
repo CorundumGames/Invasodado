@@ -42,7 +42,7 @@ class Enemy(GameObject):
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position           = list(START_POS)
         self.rect               = pygame.Rect(START_POS, self.image.get_size())
-        self.change_state(Enemy.STATES.IDLE)
+        self.state              = Enemy.STATES.IDLE
 
         #self.emitter       = particles.ParticleEmitter(self.__class__.particles, self.rect, 4, ingame.ENEMIES)
         del self.acceleration, self.velocity

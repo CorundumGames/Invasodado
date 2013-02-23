@@ -24,6 +24,8 @@ FLAGS = pygame.HWSURFACE | pygame.HWACCEL | pygame.ASYNCBLIT | pygame.RLEACCEL
 
 NUM_COLORS = 5
 
+ENCODING = 'utf-8'
+
 DEPTH = screen.get_bitsize()
 #The color depth used, in bits
 
