@@ -25,10 +25,10 @@ def celebrate():
     '''
     Plays the Enemy celebration animation upon game over.
     '''
-    Enemy.velocity = [0, 0]
+    Enemy.velocity = [0.0, 0.0]
     for e in ENEMY_GROUP:
     #For all enemies...
-        e.state = Enemy.STATES.CHEERING
+        e.change_state(Enemy.STATES.CHEERING)
 
 def move_down():
     '''
@@ -36,7 +36,7 @@ def move_down():
     '''
     for e in ENEMY_GROUP:
     #For all enemies on-screen...
-        e.state = Enemy.STATES.LOWERING
+        e.change_state(Enemy.STATES.LOWERING)
     Enemy.should_flip  = False
 
 def reset():
@@ -45,19 +45,19 @@ def reset():
     '''
     global _enemies
     ENEMY_GROUP.empty()
-    _enemies       = [[Enemy((i, j)) for i in xrange(ROW_SIZE)] for j in xrange(COL_SIZE)]
+    _enemies       = tuple([Enemy((i, j)) for i in range(ROW_SIZE)] for j in range(COL_SIZE))
     Enemy.velocity = [0.5, 0.0]
     appearing      = Enemy.STATES.APPEARING
 
     for i in _enemies:
     #For all rows of _enemies...
-        for j in xrange(ROW_SIZE/2):
+        for j in range(ROW_SIZE // 2):
         #For the first half of each row...
             if randint(0, 1):
             #With 50% odds...
                 ENEMY_GROUP.add(i[j], i[ROW_SIZE - 1 - j])
-                i[j].state                = appearing
-                i[ROW_SIZE - 1 - j].state = appearing
+                i[j].change_state(appearing)
+                i[ROW_SIZE - 1 - j].change_state(appearing)
 
 def start():
     '''

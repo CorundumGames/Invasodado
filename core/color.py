@@ -20,7 +20,7 @@ PURPLE = pygame.Color('#FF55D5')
 WHITE  = pygame.Color('#FFFFFF')
 ###############################################################################
 
-LIST = [RED, BLUE, GREEN, YELLOW, PURPLE]
+LIST = (RED, BLUE, GREEN, YELLOW, PURPLE)
 #THESE are all used by blocks.
 
 #Holds the frames for the symbols
@@ -31,7 +31,7 @@ COLOR_BLIND_SYMBOLS = {
                         id(BLUE)   : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[1]).copy(),
                         id(GREEN)  : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[2]).copy(),
                         id(YELLOW) : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[3]).copy(),
-                        id(PURPLE) : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[4]).copy()
+                        id(PURPLE) : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[4]).copy(),
                        }
 
 def blend_color(surface, color):

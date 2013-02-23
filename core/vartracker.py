@@ -1,3 +1,5 @@
+import inspect
+
 vars = dict()
 
 def add_var(all_vars, the_var, name):

@@ -1,7 +1,7 @@
+from collections import namedtuple
 from functools import partial
 
 import pygame
-from pygame import display
 from pygame.sprite import Group, OrderedUpdates
 
 from core            import collisions
@@ -23,7 +23,7 @@ from game           import gamedata
 from game.hudobject import HudObject
 from game.enemy     import Enemy
 from game           import enemybullet
-from enemybullet    import EnemyBullet
+from game.enemybullet    import EnemyBullet
 from game.player    import Ship
 from game.shipbullet import ShipBullet
 from game           import blockgrid
@@ -41,17 +41,22 @@ PLAYER        = Group()
 UFO_GROUP     = Group()
 
 rect = config.SCREEN_RECT
-
+DEBUG_KEYS     = (pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1, pygame.K_e)
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
 FIRE_MESSAGE   = "Press fire to continue"
 GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
+HUD_TEXT       = namedtuple('Hud', 'score lives time game_over press_fire')
 LIVES_LOCATION = (rect.width - 160, 16)
 MODULE_CLEANUP = (balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata)
+MOUSE_ACTIONS  = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
 SCORE_LOCATION = (16, 16)
+TIME_FORMAT    = "{}:{:0>2}"
 TIME_LOCATION  = (rect.centerx, 32)
 TYPES_IGNORED  = (Block, BallOfLight, HudObject, Particle, ParticleEmitter)
+del rect
 
 class InGameState(GameState):
+    
     def __init__(self, *args, **kwargs):
         '''
         @ivar _collision_grid: Objects that collide with others
@@ -68,15 +73,15 @@ class InGameState(GameState):
         hud  = HudObject.make_text
         rect = config.SCREEN_RECT
         self._game_running   = True
-        self.group_list      = [bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD]
+        self.group_list      = (bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD)
         self._collision_grid = CollisionGrid(4, 4, 1, self.group_list)
-        self.hud_text       = {
-                               'score'     : hud('', SCORE_LOCATION),
-                               'lives'     : hud('', LIVES_LOCATION),
-                               'time'      : hud('', TIME_LOCATION ),
-                               'game_over' : hud("GAME OVER", GAME_OVER_LOC),
-                               'press_fire': hud(FIRE_MESSAGE, FIRE_LOCATION),
-                              }
+        self.hud_text        = HUD_TEXT(
+                                        hud('', SCORE_LOCATION),
+                                        hud('', LIVES_LOCATION),
+                                        hud('', TIME_LOCATION ),
+                                        hud("GAME OVER", GAME_OVER_LOC),
+                                        hud(FIRE_MESSAGE, FIRE_LOCATION),
+                                       )
         self.key_actions    = {
                                pygame.K_ESCAPE: partial(self.change_state, MainMenu),
                                pygame.K_F1    : config.toggle_fullscreen ,
@@ -88,27 +93,25 @@ class InGameState(GameState):
                                pygame.K_e     : self.__game_over         ,
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
-        self._mouse_actions = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
         self._ship          = Ship()
         self._time          = self._mode
         self._ufo           = UFO()
 
         PLAYER.add(self._ship, self._ship.flames, self._ship.my_bullet)
         UFO_GROUP.add(self._ufo)
-        HUD.add(self.hud_text['score'], self.hud_text['lives'])
+        HUD.add(self.hud_text.score, self.hud_text.lives)
         if self._time > -1:
         #If this is a time attack mode...
-            HUD.add(self.hud_text['time'])
+            HUD.add(self.hud_text.time)
             gamedata.lives = 1
-        else:
-            del self.hud_text['time']
+
 
         if not __debug__:
         #If this is a release build...
-            for i in [pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1, pygame.K_e]:
+            for i in DEBUG_KEYS:
             #For every debug action...
                 del self.key_actions[i]
-            del self._mouse_actions
+            del DEBUG_KEYS, MOUSE_ACTIONS
 
         
         BallOfLight.BLOCK_GROUP   = BLOCKS
@@ -132,7 +135,7 @@ class InGameState(GameState):
         enemysquadron.start()
 
     def __del__(self):
-        map(Group.empty, self.group_list)
+        GameState.__del__(self)
 
         for i in MODULE_CLEANUP:
             i.clean_up()
@@ -147,7 +150,7 @@ class InGameState(GameState):
         #For all events passed in...
             if __debug__ and e.type == pygame.MOUSEBUTTONDOWN:
             #If a mouse button is clicked and we're in debug mode...
-                self.__make_block(e.pos[0], self._mouse_actions[e.button])
+                self.__make_block(e.pos[0], MOUSE_ACTIONS[e.button])
             elif e.type == pygame.KEYDOWN and e.key in key_actions:
             #If a key is pressed...
                 if self._game_running or (not self._game_running and e.key == pygame.K_SPACE):
@@ -157,8 +160,9 @@ class InGameState(GameState):
     def logic(self):
         #if __debug__ and len(ENEMIES) == 0: vartracker.update()
         enemysquadron.update()
+        blockgrid.update()
         self._collision_grid.update()
-        map(Group.update, self.group_list)
+        GameState.logic(self)
 
         if self._time > -1 and self._game_running:
         #If this is a timed game...
@@ -167,14 +171,6 @@ class InGameState(GameState):
             #If we run out of time...
                 gamedata.lives = 0
             enemysquadron.increase_difficulty()
-
-        if gamedata.combo and gamedata.combo_counter < gamedata.COMBO_LENGTH:
-        #If we made a combo...
-            gamedata.combo_counter += 1
-        else:
-            gamedata.combo         = False
-            gamedata.combo_counter = 0
-            gamedata.multiplier    = gamedata.DEFAULT_MULTIPLIER
 
         if self._game_running and (not gamedata.lives or Block.block_full):
         #If we run out of lives or the blocks go past the top of the screen...
@@ -187,41 +183,33 @@ class InGameState(GameState):
 
         if gamedata.score != gamedata.prev_score:
         #If our score has changed since the last frame...
-            self.hud_text['score'].image = hud("Score: %i" % gamedata.score)
+            self.hud_text.score.image = hud("Score: %i" % gamedata.score)
             gamedata.prev_score          = gamedata.score
 
         if gamedata.lives != gamedata.prev_lives:
         #If we've gained or lost lives since the last frame...
-            self.hud_text['lives'].image = hud("Lives: %i" % gamedata.lives)
+            self.hud_text.lives.image = hud("Lives: %i" % gamedata.lives)
             gamedata.prev_lives          = gamedata.lives
 
         if self._time >= 0:
         #If we haven't run out of time...
             time_left  = [self._time / 100 / 60, (self._time / 100) % 60]
-            self.hud_text['time'].image = hud("{}:{:0>2}".format(*time_left))
+            self.hud_text.time.image = hud(TIME_FORMAT.format(*time_left))
 
-        config.screen.fill((0, 0, 0))
-        bg.STARS.emit()
-
-        map(Group.draw, self.group_list, [config.screen] * len(self.group_list))
-
-        display.flip()
-        assert not display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
-
-        self.fps_timer.tick_busy_loop(60 * config._limit_frame)
+        GameState.render(self)
 
     def __make_block(self, position, color):
         '''
         @param position: Position to release the Block (it'll snap to the grid)
         @param color: Color of the Block that will be released
         '''
-        BLOCKS.add(block.get_block([position, 0], color))
+        BLOCKS.add(block.get_block([position, 0.0], color))
 
     def __add_ufo(self):
         if self._ufo.state == UFO.STATES.IDLE:
         #If the UFO_GROUP is not currently on-screen...
             UFO_GROUP.add(self._ufo)
-            self._ufo.state = UFO.STATES.APPEARING
+            self._ufo.change_state(UFO.STATES.APPEARING)
 
     def __ship_fire(self):
         self._ship.on_fire_bullet()
@@ -238,10 +226,10 @@ class InGameState(GameState):
                                                    HighScoreState,
                                                    **kwargs
                                                    )
-        for i in [self._ship, self._ship.flames]: i.kill()
-        self._ship.state      = Ship.STATES.IDLE
+        for i in (self._ship, self._ship.flames): i.kill()
+        self._ship.change_state(Ship.STATES.IDLE)
 
-        HUD.add(self.hud_text['game_over'], self.hud_text['press_fire'])
+        HUD.add(self.hud_text.game_over, self.hud_text.press_fire)
 
     def __begin_tracking(self):
         pass

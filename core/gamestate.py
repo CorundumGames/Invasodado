@@ -2,7 +2,11 @@
 An interface for representing game screens.
 '''
 
-import pygame.time
+import pygame
+
+from core.config import screen, _limit_frame
+from game import bg
+from game import gameobject
 
 class GameState:
     '''
@@ -28,6 +32,10 @@ class GameState:
         slightly different than another, we can just pass in an argument.
         '''
         pass
+    
+    def __del__(self):
+        for i in self.group_list: i.empty()
+        del self.group_list
 
     def events(self, events):
         '''
@@ -35,13 +43,19 @@ class GameState:
         
         @param events: List of events to process (filtered if necessary)
         '''
-        pass
+        for e in events:
+        #For all input we've received...
+            if e.type == pygame.KEYDOWN and e.key in self.key_actions:
+            #If a key was pressed...
+                self.key_actions[e.key]()
 
     def logic(self):
         '''
         Executes the next step in the game logic (collisions, etc.).
         '''
-        pass
+        gameobject.update()
+        for i in self.group_list:
+            i.update()
 
     def render(self):
         '''
@@ -50,7 +64,17 @@ class GameState:
         Remember, Group.blit() renders Sprites in arbitrary order, so we must
         assign Sprites to groups by layer, then call Group.blit() sequentially.
         '''
-        pass
+        screen.fill((0, 0, 0))
+        bg.STARS.emit()
+        
+        for i in self.group_list:
+            i.draw(screen)
+
+        pygame.display.flip()
+        assert not pygame.display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        #^ So this statement is stripped in Release mode.
+
+        self.fps_timer.tick_busy_loop(60 * _limit_frame)
 
     def change_state(self, state_type, *args, **kwargs):
         '''

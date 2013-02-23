@@ -11,7 +11,7 @@ FRAMES       = [pygame.Rect(32 * i, 96, 32, 32) for i in range(5)]
 TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
 
 ball_frames = color.get_colored_objects(FRAMES)
-ball_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
+ball_frames_color_blind = color.get_colored_objects(FRAMES, True, True)
 
 balls = set()
 
@@ -34,10 +34,10 @@ def get_ball(startpos, newcolor):
     #If we don't have any spare BallsOfLight to give...
         balls.add(BallOfLight())
 
-    ball          = balls.pop()  #Teehee
-    ball.color    = newcolor
-    ball.startpos = tuple(startpos)
-    ball.state    = BallOfLight.STATES.APPEARING
+    ball            = balls.pop()  #Teehee
+    ball.color      = newcolor
+    ball.startpos   = tuple(startpos)
+    ball.change_state(BallOfLight.STATES.APPEARING)
     return ball
 
 class BallOfLight(GameObject):
@@ -60,7 +60,7 @@ class BallOfLight(GameObject):
         self.progress           = 0.0
         self._target            = [round(startpos[0] / size[0]) * size[1], 8.0]
         self.startpos           = startpos
-        self.state              = BallOfLight.STATES.IDLE
+        self.change_state(BallOfLight.STATES.IDLE)
 
         del self.acceleration, self.velocity
 
@@ -69,7 +69,7 @@ class BallOfLight(GameObject):
         self.position     = list(self.startpos)
         self.progress     = 0.0
         self.rect.topleft = self.startpos
-        self.state        = BallOfLight.STATES.MOVING
+        self.change_state(BallOfLight.STATES.MOVING)
         self._target[0]   = round(self.position[0]/self.image.get_width())*self.image.get_height()
         
         assert config.SCREEN_RECT.collidepoint(self._target), \
@@ -96,7 +96,7 @@ class BallOfLight(GameObject):
 
         if position[1] == target[1]:  #Only y-coordinate check is needed
         #If we've reached our target location...
-            self.state = BallOfLight.STATES.DYING
+            self.change_state(BallOfLight.STATES.DYING)
 
         assert self.rect.colliderect(config.SCREEN_RECT), \
         "A BallOfLight at %s is trying to move off-screen!" % position
@@ -104,11 +104,11 @@ class BallOfLight(GameObject):
     def vanish(self):
         balls.add(self)
         BallOfLight.BLOCK_GROUP.add(BallOfLight.block_mod.get_block([self.rect.centerx, 0], self.color))
-        self.remove(BallOfLight.enemy_group)
+        self.kill()
         self._anim        = 0
         self.position     = [-300.0, -300.0]
         self.rect.topleft = self.position
-        self.state        = BallOfLight.STATES.IDLE
+        self.change_state(BallOfLight.STATES.IDLE)
 
     actions = {
                 STATES.IDLE     : None    ,

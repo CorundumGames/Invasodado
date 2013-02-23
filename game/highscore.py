@@ -1,6 +1,6 @@
 from os.path   import join
 from functools import partial
-from string    import uppercase, lowercase, digits
+from string    import ascii_letters, digits
 
 import pygame
 from pygame.sprite import Group, OrderedUpdates
@@ -15,7 +15,7 @@ from game.hudobject import HudObject
 BG             = OrderedUpdates()
 MENU           = Group()
 
-ALPHANUMERIC   = ''.join([uppercase, lowercase, digits, '_-\'#<'])
+ALPHANUMERIC   = ''.join([ascii_letters, digits, '_-\'#<'])
 CHAR_LIMIT     = 20
 DEFAULTS       = ['norm_default.json', '2_default.json', '5_default.json']
 ENTRY_NAME_POS = (0, config.SCREEN_HEIGHT - 32)
@@ -51,7 +51,6 @@ def make_score_table(table, pos, vspace, width, surfaces=False):
     @param vspace: The vertical space between each line in pixels
     @param width: The width of the table in characters
     '''
-
     scores = [SCORE_FORMAT.format(i.name, i.score) for i in table.get_scores()]
     return HudObject.make_text(scores, TABLE_CORNER, color.WHITE, config.FONT, V_SPACE, surfaces)
 
@@ -72,7 +71,6 @@ class HighScoreState(GameState):
         self.group_list = [bg.STARS_GROUP, BG, MENU]
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1
         self.current_table = score_table_dict[self._mode]
-        print self.kwargs
         if 'score' in self.kwargs and self.kwargs['score'] > score_tables[score_table_dict[self._mode]].lowest_score():
         #If we just got a high score...
             self.alphanum_index = 0
@@ -85,33 +83,12 @@ class HighScoreState(GameState):
         MENU.add(self.hud_scores[score_table_dict[self._mode]], self.hud_titles[score_table_dict[self._mode]])
         BG.add(bg.EARTH, bg.GRID)
 
-    def __del__(self):
-        map(Group.empty, self.group_list)
-        self.group_list = []
-
-    def events(self, events):
-        for e in events:
-        #For all input we've received...
-            if e.type == pygame.KEYDOWN and e.key in self.key_actions:
-            #If a key was pressed...
-                self.key_actions[e.key]()
-
-    def logic(self):
-        map(Group.update, self.group_list)
-
-    def render(self):
-        display = pygame.display
-        
+    def render(self):  
         if self.entering_name:
         #If we're entering our name for a high score...
             self.hud_name.image = HudObject.make_text(str(self.entry_name), surfaces=True)
 
-        display.get_surface().fill((0, 0, 0))
-        bg.STARS.emit()
-        map(Group.draw, self.group_list, [config.screen]*len(self.group_list))
-
-        display.flip()
-        assert not display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        GameState.render(self)
 
     def __char_move(self, index):
         if self.entering_name:
@@ -137,7 +114,7 @@ class HighScoreState(GameState):
         if self.entering_name and self.name_index < CHAR_LIMIT:
         #If we're entering our name for a high score and it's not too long...
             if ALPHANUMERIC[self.alphanum_index] == '<':
-                if(len(self.entry_name) > 1):              
+                if len(self.entry_name) > 1:              
                     self.entry_name.pop()
                 self.entry_name.pop()
                 self.name_index = max(self.name_index - 1, 0)

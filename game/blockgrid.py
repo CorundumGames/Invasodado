@@ -16,7 +16,7 @@ def get_empty_block_array():
     '''
     Returns an empty 2D array to reset the block grid
     '''
-    return [[None for i in xrange(SIZE[1])] for j in xrange(SIZE[0])]
+    return tuple([None for i in range(SIZE[1])] for j in range(SIZE[0]))
 
 BLOCK_TYPE = None
 CELL_SIZE  = (32, 32)
@@ -34,6 +34,7 @@ def check_block(block, should_check=True):
         _blocks_to_check.add(block)
     else:
         _blocks_to_check.discard(block)
+        
 
 def clean_up():
     '''
@@ -55,7 +56,7 @@ def clear_color(color):
     '''
     for i in (j for j in BLOCK_TYPE.GROUP if j and j.color is color):
     #For all blocks of the given color...
-        i.state = BLOCK_TYPE.STATES.DYING
+        i.change_state(BLOCK_TYPE.STATES.DYING)
 
 def clear_row(row):
     '''
@@ -70,7 +71,7 @@ def clear_row(row):
 
     for i in (j for j in blocks[row] if j):
     #For all blocks in this row...
-        i.state = BLOCK_TYPE.STATES.DYING
+        i.change_state(BLOCK_TYPE.STATES.DYING)
 
 def update():
     '''
@@ -117,15 +118,15 @@ def update():
 
         if len(match_set) >= 3:
         #If at least 3 blocks are aligned...
-            _blocks_to_clear.update(match_set) #Mark these blocks for removal
-            gamedata.score     += (len(match_set) ** 2) * gamedata.multiplier
-            gamedata.combo      = True
-            gamedata.multiplier = gamedata.DEFAULT_MULTIPLIER * 2
+            _blocks_to_clear.update(match_set) #Mark these blocks for removal      
 
     if len(_blocks_to_clear) >= 3:
     #If we're clearing any blocks...
         _block_clear.play()
+        gamedata.score     += len(_blocks_to_clear) ** (gamedata.combo_counter + 1)
+        gamedata.combo      = True
+        gamedata.multiplier *= 2
         for k in _blocks_to_clear:
         #For every block marked for clearing...
-            k.state = BLOCK_TYPE.STATES.DYING
+            k.change_state(BLOCK_TYPE.STATES.DYING)
         _blocks_to_clear.clear()

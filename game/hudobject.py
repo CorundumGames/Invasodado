@@ -11,15 +11,17 @@ class HudObject(GameObject):
     It is its own type so it can be in collisions._do_not_check, because we
     don't intend for these to collide with anything.
     '''
+    STATES = config.Enum('IDLE')
     actions    = None
     collisions = None
     fonts      = [config.FONT]
+    
 
     def __init__(self, image, pos):
         GameObject.__init__(self)
         self.image        = image.convert(config.DEPTH, config.FLAGS)
         self.rect         = pygame.Rect(pos, image.get_size())
-        del self.velocity, self.acceleration, self.position, self.state
+        del self.velocity, self.acceleration, self.position
 
     def update(self):
         '''
@@ -40,7 +42,7 @@ class HudObject(GameObject):
         @return: list(pygame.Surface) if surfaces else list(HudObject)
         '''
 
-        if isinstance(text, basestring):
+        if isinstance(text, str):
         #If we were given a single string...
             hud = font.render(text, False, col)
             return hud if surfaces else HudObject(hud, pos)
@@ -49,4 +51,4 @@ class HudObject(GameObject):
                 hud = font.render(text[t], False, col)
                 return hud if surfaces else HudObject(hud, (pos[0], pos[1] + vspace * t))
 
-            return map(d, range(len(text)))
+            return list(map(d, range(len(text))))

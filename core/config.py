@@ -110,3 +110,6 @@ def toggle_frame_limit():
     
 def toggle_color_blind_mode():
     settings.color_blind = not settings.color_blind
+
+def on_off(condition):
+    return "On" if condition else "Off"

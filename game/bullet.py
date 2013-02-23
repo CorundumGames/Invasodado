@@ -16,10 +16,10 @@ class Bullet(GameObject):
 
     def __init__(self):
         GameObject.__init__(self)
-        self.image    = self.__class__.SPRITE #@UndefinedVariable
-        self.rect     = self.__class__.START_POS.copy()
-        self.position = list(self.rect.topleft)
-        self.state    = self.__class__.STATES.IDLE
+        self.image      = self.__class__.SPRITE #@UndefinedVariable
+        self.rect       = self.__class__.START_POS.copy()
+        self.position   = list(self.rect.topleft)
+        self.change_state(self.__class__.STATES.IDLE)
 
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
@@ -30,7 +30,7 @@ class Bullet(GameObject):
         #TODO: Play a sound here later
         self.position    = list(self.rect.topleft)
         self.velocity[1] = self.__class__.SPEED
-        self.state       = self.__class__.STATES.MOVING
+        self.change_state(self.__class__.STATES.MOVING)
 
     def move(self):
         '''
@@ -47,7 +47,7 @@ class Bullet(GameObject):
         self.velocity[1] = 0
         self.rect        = self.__class__.START_POS.copy()
         self.position    = list(self.rect.topleft)
-        self.state       = self.__class__.STATES.IDLE
+        self.change_state(self.__class__.STATES.IDLE)
 
     actions  = {
                 STATES.IDLE   : None          ,

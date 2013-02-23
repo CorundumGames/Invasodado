@@ -19,7 +19,7 @@ START_POS = (32, 32)
 
 ENEMY_FRAMES = color.get_colored_objects(FRAMES)
 ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES,True,True)
-_hurt        = pygame.mixer.Sound(os.path.join('sfx', 'enemyhurt.wav'))
+_hurt        = pygame.mixer.Sound(os.path.join('sfx', 'enemyhit.wav'))
 
 
 class Enemy(GameObject):
@@ -42,7 +42,7 @@ class Enemy(GameObject):
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position           = list(START_POS)
         self.rect               = pygame.Rect(START_POS, self.image.get_size())
-        self.state              = Enemy.STATES.IDLE
+        self.change_state(Enemy.STATES.IDLE)
 
         #self.emitter       = particles.ParticleEmitter(self.__class__.particles, self.rect, 4, ingame.ENEMIES)
         del self.acceleration, self.velocity
@@ -54,7 +54,7 @@ class Enemy(GameObject):
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         self.color        = choice(color.LIST[0:config.NUM_COLORS])
         self.image        = self.current_frame_list[id(self.color)][0]
-        self.state        = Enemy.STATES.ACTIVE
+        self.change_state(Enemy.STATES.ACTIVE)
 
     def move(self):
         self.image        = self.current_frame_list[id(self.color)][int(-abs(Enemy.anim - 3) + 3) % 4]
@@ -82,14 +82,14 @@ class Enemy(GameObject):
 
         self.position      = [-300.0, -300.0]
         self.rect.topleft  = self.position
-        self.state         = Enemy.STATES.IDLE
+        self.change_state(Enemy.STATES.IDLE)
         Enemy.velocity[0] += copysign(0.1, Enemy.velocity[0])
         #^ Increase the enemy squadron's speed (copysign() considers direction)
 
     def lower(self):  #Later we'll make this smoother.
         self.position[1] += 8
         self.rect.top     = self.position[1]
-        self.state        = Enemy.STATES.ACTIVE
+        self.change_state(Enemy.STATES.ACTIVE)
 
     def cheer(self):
         pass

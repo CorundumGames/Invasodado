@@ -10,6 +10,7 @@ from core import config
 
 from game.bullet import Bullet
 from game.enemy  import Enemy
+from game import gamedata
 
 
 class ShipBullet(Bullet):
@@ -28,7 +29,7 @@ class ShipBullet(Bullet):
 
         if self.rect.bottom < 0:
         #If above the top of the screen...
-            self.state = self.__class__.STATES.RESET
+            self.change_state(self.__class__.STATES.RESET)
 
     def kill_enemy(self, other):
         '''
@@ -36,8 +37,9 @@ class ShipBullet(Bullet):
         '''
         if other.state is other.__class__.STATES.ACTIVE:
         #And that other enemy is alive...
-            self.state  = self.__class__.STATES.RESET
-            other.state = other.__class__.STATES.DYING
+            gamedata.score += 1
+            self.change_state(self.__class__.STATES.RESET)
+            other.change_state(other.__class__.STATES.DYING)
 
     from game.ufo import UFO
     collisions = {

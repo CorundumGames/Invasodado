@@ -29,7 +29,7 @@ def get_enemy_bullet():
         _enemy_bullets.add(EnemyBullet())
 
     bullet       = _enemy_bullets.pop()
-    bullet.state = bullet.__class__.STATES.FIRED
+    bullet.change_state(bullet.__class__.STATES.FIRED)
     return bullet
 
 
@@ -52,7 +52,7 @@ class EnemyBullet(Bullet):
 
         if self.rect.top > config.SCREEN_HEIGHT:
         #If below the bottom of the screen...
-            self.state = self.__class__.STATES.RESET
+            self.change_state(self.__class__.STATES.RESET)
 
     def reset(self):
         '''
@@ -67,8 +67,8 @@ class EnemyBullet(Bullet):
         '''
         if not other.invincible and other.state == Ship.STATES.ACTIVE:
         #If the player is not invincible...
-            gamedata.lives -= 1
-            other.state     = Ship.STATES.DYING
-            self.state      = self.__class__.STATES.RESET
+            gamedata.lives  -= 1
+            other.change_state(Ship.STATES.DYING)
+            self.change_state(self.__class__.STATES.RESET)
 
     collisions = {Ship: kill_player}

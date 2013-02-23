@@ -1,5 +1,5 @@
 from functools import partial
-from itertools import ifilterfalse
+from itertools import filterfalse
 from random    import uniform
 
 import pygame.time
@@ -16,8 +16,7 @@ class Particle(GameObject):
 
     Particles should have some randomization, particularly in initial direction.
     '''
-
-    START_POS = [-100.0, -100.0]
+    START_POS = (-100.0, -100.0)
     STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'LEAVING')
     GROUP     = None
 
@@ -32,18 +31,18 @@ class Particle(GameObject):
         self.move_func   = partial(move_func, self)
         self.position    = list(Particle.START_POS)
         self.rect        = pygame.Rect(self.position, self.image.get_size())
-        self.state       = Particle.STATES.IDLE
+        self.change_state(Particle.STATES.IDLE)
 
     def appear(self):
         self.appear_func()
-        self.state = Particle.STATES.ACTIVE
+        super().change_state(Particle.STATES.ACTIVE)
 
     def move(self):
         self.move_func()
 
         if not self.rect.colliderect(config.SCREEN_RECT):
         #If we're no longer on-screen...
-            self.state = Particle.STATES.LEAVING
+            super().change_state(Particle.STATES.LEAVING)
 
     def leave(self):
         self.kill()
@@ -51,7 +50,7 @@ class Particle(GameObject):
         self.velocity     = [0.0, 0.0]
         self.position     = list(Particle.START_POS)
         self.rect.topleft = self.position
-        self.state        = Particle.STATES.IDLE
+        self.change_state(Particle.STATES.IDLE)
 
     actions = {
                STATES.IDLE     : None    ,
@@ -97,7 +96,7 @@ class ParticleEmitter:
                                  uniform(rect.top , rect.bottom)
                                 ]
         particle.rect.topleft = particle.position
-        particle.state        = Particle.STATES.APPEARING
+        particle.change_state(Particle.STATES.APPEARING)
         particle.add(self.group)
 
     def emit(self):
@@ -119,9 +118,10 @@ class ParticleEmitter:
 
         @param amount: No. of particles to release, max is self.pool.amount
         '''
-        pool = self.pool
-        for i in xrange(amount):
-            self._release(pool.get_particle())
+        pool     = self.pool
+        _release = self._release
+        for i in range(amount):
+            _release(pool.get_particle())
 
     actions    = None
     collisions = None
@@ -162,8 +162,8 @@ class ParticlePool:
         memory.
         '''
         particles_to_remove = set()
-        map(particles_to_remove.add, 
-            ifilterfalse(config.SCREEN_RECT.colliderect, self.particles_out))
+        for i in filterfalse(config.SCREEN_RECT.colliderect, self.particles_out):
+            particles_to_remove.add(i)
 
         self.particles_in.update(particles_to_remove)
         self.particles_out -= particles_to_remove

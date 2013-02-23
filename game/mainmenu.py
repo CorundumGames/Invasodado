@@ -27,7 +27,7 @@ DIST_APART = 48
 
 MENU_CORNER = (config.SCREEN_RECT.centerx-112, config.SCREEN_RECT.centery-64)
 #The location of the top-left corner of the menu
-MENU_ENTRIES = ["Normal Mode", "2 Minutes", "5 Minutes", "High Scores", "Settings", "Quit"]
+MENU_ENTRIES = ("Normal Mode", "2 Minutes", "5 Minutes", "High Scores", "Settings", "Quit")
 
 class MainMenu(GameState):
     def __init__(self):
@@ -42,14 +42,14 @@ class MainMenu(GameState):
 
         self.menu = make_text(MENU_ENTRIES, pos=MENU_CORNER, vspace=DIST_APART)
 
-        self.menu_actions = [
+        self.menu_actions = (
                              partial(self.change_state, InGameState          ),
                              partial(self.change_state, InGameState, time=120),
                              partial(self.change_state, InGameState, time=300),
                              partial(self.change_state, HighScoreState, next = MainMenu),
                              partial(self.change_state, SettingsMenu         ),
                              quit                                             ,
-                            ]
+                            )
 
         self.key_actions  = {
                              pygame.K_RETURN : self.__enter_selection         ,
@@ -62,31 +62,9 @@ class MainMenu(GameState):
         MENU.add(self.menu)
         BG.add(bg.EARTH, bg.GRID)
 
-    def __del__(self):
-        map(Group.empty, self.group_list)
-        self.group_list = []
-
-    def events(self, events):
-        key_actions = self.key_actions
-        for e in events:
-        #For all input we've received...
-            if e.type == pygame.KEYDOWN and e.key in key_actions:
-            #If a key was pressed...
-                key_actions[e.key]()
-
-    def logic(self):
-        map(Group.update, self.group_list)
-
     def render(self):
-        self.hud_cursor.rect.midright = self.menu[self.cursor_index].rect.midleft
-        config.screen.fill((0, 0, 0))
-        bg.STARS.emit()
-        map(Group.draw, self.group_list, [config.screen]*len(self.group_list))
-
-        display.flip()
-        assert not display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
-
-        self.fps_timer.tick(60)
+        self.hud_cursor.rect.midright = self.menu[self.cursor_index].rect.midleft    
+        GameState.render(self)
 
     def __move_cursor(self, index):
         '''

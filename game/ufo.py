@@ -11,7 +11,7 @@ from game.block import get_block
 from game.gameobject import GameObject
 
 FRAMES     = [
-              pygame.Rect(64 * (i % 4), 192 + 32 * (i / 4), 64, 32)
+              pygame.Rect(64 * (i % 4), 192 + 32 * (i // 4), 64, 32)
               for i in range(10, -1, -1)
              ]
 START_POS  = (640, 16)

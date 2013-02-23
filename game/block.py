@@ -9,15 +9,15 @@ from core            import settings
 from core.particles  import ParticlePool, ParticleEmitter
 from game.gameobject import GameObject
 from game            import blockgrid
-from blockgrid       import blocks
+from game.blockgrid  import blocks
 
 
 FRAMES    = [pygame.Rect(32 * i, 160, 32, 32) for i in range(8)]
-GRAVITY   = 0.5
+GRAVITY   =  0.5
 MAX_SPEED = 12.0
 
 _blocks_set = set()
-_bump       = pygame.mixer.Sound(os.path.join('sfx', '_bump.wav'))
+_bump       = pygame.mixer.Sound(os.path.join('sfx', 'bump.wav'))
 
 _block_frames    = color.get_colored_objects(FRAMES)
 _block_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
@@ -64,11 +64,11 @@ def get_block(position, newcolor=choice(color.LIST), special=False):
     #If we've run out of unused Blocks...
         _blocks_set.add(Block(position, newcolor))
 
-    block          = _blocks_set.pop()
-    block.color    = newcolor
-    block.position = position
-    block._special = special
-    block.state    = Block.STATES.APPEARING
+    block            = _blocks_set.pop()
+    block.color      = newcolor
+    block.position   = position
+    block._special   = special
+    block.change_state(Block.STATES.APPEARING)
     return block
 
 _block_particles  = dict([(id(c), ParticlePool(_color_particles[id(c)][0], _bp_move, _bp_appear)) for c in color.LIST])
@@ -91,11 +91,11 @@ class Block(GameObject):
         self.color    = newcolor
         self.current_frame_list = _block_frames_color_blind if settings.color_blind else _block_frames
         self.image              = self.current_frame_list[id(self.color)][0]
-        self.position = self.__get_snap()
+        self.position = position
         self.rect     = pygame.Rect(self.position, self.image.get_size()) #(x, y)
         self._target  = None
         self._special = special
-        self.state    = Block.STATES.IDLE
+        self.change_state(Block.STATES.IDLE)
 
     def __str__(self):
         return ("<Block with color: %s, cell: %s, position: %s, rect: %s, target: %s, state: %i>" %
@@ -109,12 +109,12 @@ class Block(GameObject):
         self.rect.topleft = self.position
         self.image        = self.current_frame_list[id(self.color)][0]
         self.gridcell     = [
-                             self.rect.centerx / self.rect.width,
-                             self.rect.centery / self.rect.height,
+                             self.rect.centerx // self.rect.width,
+                             self.rect.centery // self.rect.height,
                             ] #(x, y)
         self._target      = self.__set_target()
         self.emitter      = ParticleEmitter(_block_particles[id(self.color)], self.rect, 5, Block.particle_group)
-        self.state        = Block.STATES.START_FALLING
+        self.change_state(Block.STATES.START_FALLING)
         self.add(Block.GROUP)
 
     def start_falling(self):
@@ -137,12 +137,13 @@ class Block(GameObject):
 
                 for i in blocks[self.gridcell[0]]:
                 #For all grid cells above us...
-                    if i and i.state == Block.STATES.ACTIVE:
-                        i.state = Block.STATES.START_FALLING
+                    if i and not i.velocity[1]:
+                    #If this is a block that's not moving...
+                        i.change_state(Block.STATES.START_FALLING)
                     else:
                         break
 
-        self.state = Block.STATES.FALLING
+        self.change_state(Block.STATES.FALLING)
 
     def fall(self):
         '''
@@ -157,7 +158,7 @@ class Block(GameObject):
         self.velocity[1] = min(MAX_SPEED, self.velocity[1] + self.acceleration[1])
         position[1]     += self.velocity[1]
         rect.top         = position[1] + 0.5 #Round to the nearest integer
-        gridcell[1]      = self.rect.centery / self.rect.height
+        gridcell[1]      = self.rect.centery // self.rect.height
         self.emitter.rect.topleft = rect.topleft
 
         if self._anim < len(FRAMES) - 1:
@@ -167,7 +168,7 @@ class Block(GameObject):
 
         if self._special:
         #If this is a _special block...
-            self.image = choice(self.current_frame_list.values())[self._anim]
+            self.image = self.current_frame_list[id(choice(color.LIST))][self._anim]
 
         self.__set_target()
 
@@ -177,21 +178,23 @@ class Block(GameObject):
         
         if rect.bottom >= blockgrid.RECT.bottom:
         #If we've hit the bottom of the grid...
-            rect.bottom   = blockgrid.RECT.bottom
-            position[1]   = rect.top
-            self.state    = Block.STATES.IMPACT
+            rect.bottom     = blockgrid.RECT.bottom
+            position[1]     = rect.top
+            self.change_state(Block.STATES.IMPACT)
         elif self.gridcell[1] + 1 < blockgrid.SIZE[1]:
         #Else if it was another block...
             below = blocks[gridcell[0]][gridcell[1] + 1]
             if below and rect.bottom >= below.rect.top:
             #If we've gone past the block below...
-                rect.bottom = below.rect.top
-                position[1] = rect.top
-                self.state  = Block.STATES.IMPACT
+                rect.bottom     = below.rect.top
+                position[1]     = rect.top
+                self.change_state(Block.STATES.IMPACT)
             assert isinstance(below, Block) or below is None, \
             "A %s is trying to collide with a stray %s!" % (self, below)
         
-        assert rect.colliderect(blockgrid.RECT) and blockgrid.RECT.collidepoint(position), \
+        assert rect.colliderect(blockgrid.RECT) \
+        and blockgrid.RECT.collidepoint(position) \
+        and self.state == Block.STATES.FALLING, \
         "An active %s has somehow left the field!" % self
 
     def wait(self):
@@ -203,14 +206,14 @@ class Block(GameObject):
         if self.rect.bottom < blockgrid.RECT.bottom:
         #If we're not at the bottom of the grid...
             block_below = blocks[gridcell[0]][gridcell[1] + 1]
-            if not block_below or block_below.state not in {Block.STATES.ACTIVE, Block.STATES.IMPACT}:
+            if not block_below or block_below.velocity[1]:
             #If there's no block directly below...
                 blockgrid.check_block(self, False)
                 self.acceleration[1] = GRAVITY
-                self.state           = Block.STATES.START_FALLING
+                self.change_state(Block.STATES.START_FALLING)
                 
         if __debug__ and self.rect.collidepoint(pygame.mouse.get_pos()):
-            print self
+            print(self)
 
     def stop(self):
         '''
@@ -221,14 +224,14 @@ class Block(GameObject):
         self.velocity[1]     = 0.0
         self.position        = self.__get_snap()
         self.rect.topleft    = self.position
-        #self.gridcell[1]     = self.rect.centery / self.rect.height #(row, col)
+        self.gridcell[1]     = self.rect.centery // self.rect.height #(row, col)
         self._target         = None
         self.state           = Block.STATES.ACTIVE
         blocks[self.gridcell[0]][self.gridcell[1]] = self
 
         blockgrid.check_block(self, True)
         _bump.play()
-        blockgrid.update()
+        #blockgrid.update()
         
         if self._special:
         #If this is a special block...
@@ -251,7 +254,7 @@ class Block(GameObject):
         self.rect.topleft                          = self.position
         self.gridcell                              = None
         self._target                               = None
-        self.state                                 = Block.STATES.IDLE
+        self.change_state(Block.STATES.IDLE)
         self.__replace()
         
     def __replace(self):
@@ -266,10 +269,10 @@ class Block(GameObject):
         '''
         Determines which row this block should fall down to.
         '''
-        for i in xrange(self.gridcell[1] + 1, blockgrid.SIZE[1]):
+        for i in range(self.gridcell[1] + 1, blockgrid.SIZE[1]):
         #For all grid cells below this one...
             other = blocks[self.gridcell[0]][i]
-            if other and other.state in {Block.STATES.ACTIVE, Block.STATES.IMPACT}:
+            if other and not other.velocity[1]:
             #If this grid cell is occupied...
                 self._target = i - 1
                 break

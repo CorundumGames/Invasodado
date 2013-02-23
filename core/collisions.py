@@ -7,7 +7,7 @@ possible.
 @var _do_not_compare: Object type pairings that don't collide with each other
 '''
 
-from itertools import chain, combinations, ifilterfalse
+from itertools import chain, combinations, filterfalse
 
 import pygame.display
 import pygame.sprite
@@ -51,16 +51,16 @@ class CollisionGrid:
         @ivar spare_collisions: Spare Collisions, so we don't keep creating them
         '''
         size = pygame.display.get_surface().get_size()
-        cell_size = (size[0]/width, size[1]/height)
+        cell_size = (size[0] / width, size[1] / height)
 
         self.collisions = []
         self.grid       = [[GridCell(pygame.Rect((i*cell_size[0], j*cell_size[1]),
                                                   cell_size
                                                   ),
                                                   self)
-                                    for i in xrange(width)
+                                    for i in range(width)
                             ]
-                            for j in xrange(height)
+                            for j in range(height)
                           ]
         self.group_list = group_list
         self.layer      = layer
@@ -123,13 +123,12 @@ class GridCell:
         '''
         Removes objects that are no longer within this cell.
         '''
-        rect              = self.rect
-        objects           = self.objects
         objects_to_remove = self.objects_to_remove
 
-        map(objects_to_remove.add, ifilterfalse(rect.colliderect, objects))
+        for i in filterfalse(self.rect.colliderect, self.objects):
+            objects_to_remove.add(i)
 
-        objects -= objects_to_remove
+        self.objects -= objects_to_remove
         objects_to_remove.clear()
 
     def add_entering(self):  #TODO: Optimize!
@@ -211,10 +210,10 @@ class Collision:
         self.obj1, self.obj2, self._time = None, None, None
         return self
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
         '''
         Lets us sort Collisions by time.
         
         @param other: The other Collision being compared with this one
         '''
-        return cmp(self._time, other._time)
+        return self._time < other._time
