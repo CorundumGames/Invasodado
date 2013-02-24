@@ -4,71 +4,54 @@ utilities, etc.  It's a Python convention to call this sort of file config.py.
 '''
 
 from os.path import join
-import sys
+from sys     import argv
 
 import pygame.display
 import pygame.image
+from pygame import ASYNCBLIT, FULLSCREEN, DOUBLEBUF, HWACCEL, HWSURFACE, RLEACCEL
 
 from core import settings
 
 screen = pygame.display.set_mode(settings.resolution, pygame.DOUBLEBUF)
 #The window we blit graphics onto.
 
-SCREEN_DIMS = tuple(pygame.display.list_modes())
-#A tuple of all available screen resolutions.
-
-SCREEN_RECT = pygame.Rect((0, 0), screen.get_size())
-
-FLAGS = pygame.HWSURFACE | pygame.HWACCEL | pygame.ASYNCBLIT | pygame.RLEACCEL
+### Constants ##################################################################
+CURSOR_BEEP = pygame.mixer.Sound(join('sfx', 'cursor.wav'))
+DEPTH    = screen.get_bitsize()
+ENCODING = 'utf-8'
+FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
 #The flags used to create all Surfaces; these are best for performance.
 
 NUM_COLORS = 5
-
-ENCODING = 'utf-8'
-
-DEPTH = screen.get_bitsize()
 #The color depth used, in bits
 
-SCREEN_WIDTH  = screen.get_width()  #640 20 cells 32
+SCREEN_DIMS   = tuple(pygame.display.list_modes()) #Available screen resolutions
 SCREEN_HEIGHT = screen.get_height() #480 15 cells 32
+SCREEN_RECT   = pygame.Rect((0, 0), screen.get_size())
+SCREEN_WIDTH  = screen.get_width()  #640 20 cells 32
 #Screen width and height, in pixels
-
 SPRITES = pygame.image.load(join('gfx', 'sprites.png')).convert(DEPTH, FLAGS)
-#The main spritesheet for this game.
-
 EARTH   = pygame.image.load(join('gfx', 'earth.png'  )).convert(DEPTH, FLAGS)
-EARTH.set_colorkey(pygame.Color('#000000'))
-
 BG      = pygame.image.load(join('gfx', 'bg.png'     )).convert(DEPTH, FLAGS)
-BG.set_colorkey(pygame.Color('#000000'))
-BG.set_alpha(128)
-#The background
-
 FONT    = pygame.font.Font(join('gfx', 'font.ttf'), 18)
-#The main typeface we will use; we might use more.
+################################################################################
 
+### Globals ####################################################################
 _pause = False
 #True if the game is paused
 
 _limit_frame = True
 #True if we're restricting framerate to 60FPS
 
-tracking = __debug__ and 'track' in sys.argv
+tracking = __debug__ and 'track' in argv
 #True if we're outputting graphs of the player's statistics
 
-class Enum:
-    '''
-    A simple class I copied and pasted from StackOverflow that lets us use the
-    enum-like syntax I miss so much.  Associates integers to Python variable
-    names, which are generated dynamically.
-    '''
-    def __init__(self, *keys):
-        '''
-        @param keys: List of enum entries, given as a list of strings
-        '''
-        self.__dict__.update(zip(keys, range(len(keys))))
+_music_playing = None
+################################################################################
 
 
+
+### Functions ##################################################################
 def toggle_fullscreen():
     '''
     Toggles full-screen on or off.
@@ -78,11 +61,8 @@ def toggle_fullscreen():
     global screen
     settings.fullscreen = not settings.fullscreen
     screen = pygame.display.set_mode(settings.resolution,
-                                     (
-                                      pygame.FULLSCREEN |
-                                      pygame.HWSURFACE  |
-                                      pygame.DOUBLEBUF
-                                     ) * settings.fullscreen
+                                     (FULLSCREEN | HWSURFACE | DOUBLEBUF)
+                                     * settings.fullscreen
                                     )
 
 def toggle_pause():
@@ -114,4 +94,43 @@ def toggle_color_blind_mode():
     settings.color_blind = not settings.color_blind
 
 def on_off(condition):
+    '''
+    Primarily for the Settings menu.
+    '''
     return "On" if condition else "Off"
+
+def show_fps(fps):
+    pygame.display.set_caption("FPS: %f" % round(fps, 3))
+
+def play_music(name):
+    global _music_playing
+    if name != _music_playing:
+    #If we want to play a song that isn't already playing...
+        _music_playing = name
+        pygame.mixer.music.load(join('sfx', name))
+        pygame.mixer.music.play(-1)
+
+################################################################################
+
+### Preparation ################################################################
+for i in (EARTH, BG): i.set_colorkey(pygame.Color('#000000'))
+BG.set_alpha(128)
+
+if not __debug__:
+    del show_fps
+    del tracking
+################################################################################
+
+class Enum:
+    '''
+    A simple class I copied and pasted from StackOverflow that lets us use the
+    enum-like syntax I miss so much.  Associates integers to Python variable
+    names, which are generated dynamically.
+    '''
+    def __init__(self, *keys):
+        '''
+        @param keys: List of enum entries, given as a list of strings
+        '''
+        self.__dict__.update(zip(keys, range(len(keys))))
+
+

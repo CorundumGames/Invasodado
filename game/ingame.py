@@ -1,36 +1,37 @@
 from collections import namedtuple
-from functools import partial
+from functools   import partial
+from os.path     import join
 
 import pygame
 from pygame.sprite import Group, OrderedUpdates
+from pygame.mixer  import music
 
-from core            import collisions
-from core.collisions import CollisionGrid
-from core.gamestate  import GameState
-from core            import color
-from core            import config
+from core             import collisions
+from core.collisions  import CollisionGrid
+from core             import color
+from core             import config
+from core.gamestate   import GameState
+from core.particles   import Particle, ParticleEmitter
+from game             import balloflight
+from game.balloflight import BallOfLight
+from game             import bg
+from game             import block
+from game.block       import Block
+from game             import blockgrid
+from game.enemy       import Enemy
+from game             import enemybullet
+from game.enemybullet import EnemyBullet
+from game             import enemysquadron
+from game             import gamedata
+from game.highscore   import HighScoreState
+from game.hudobject   import HudObject
+from game.player      import Ship
+from game.shipbullet  import ShipBullet
+from game.ufo         import UFO
 
-from game import enemysquadron
 #if __debug__: import core.vartracker
 
-from game       import balloflight
-from game.balloflight import BallOfLight
-from game       import bg
-from game       import block
-from game.block import Block
-
-from game           import gamedata
-from game.hudobject import HudObject
-from game.enemy     import Enemy
-from game           import enemybullet
-from game.enemybullet    import EnemyBullet
-from game.player    import Ship
-from game.shipbullet import ShipBullet
-from game           import blockgrid
-from core.particles import Particle, ParticleEmitter
-from game.ufo       import UFO
-
-
+### Groups #####################################################################
 BG            = OrderedUpdates()
 BLOCKS        = Group()
 ENEMIES       = Group()
@@ -39,7 +40,9 @@ HUD           = Group()
 PARTICLES     = Group()
 PLAYER        = Group()
 UFO_GROUP     = Group()
+################################################################################
 
+### Constants ##################################################################
 rect = config.SCREEN_RECT
 DEBUG_KEYS     = (pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1, pygame.K_e)
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
@@ -49,14 +52,15 @@ HUD_TEXT       = namedtuple('Hud', 'score lives time game_over press_fire')
 LIVES_LOCATION = (rect.width - 160, 16)
 MODULE_CLEANUP = (balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata)
 MOUSE_ACTIONS  = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
+MUSIC_PATHS    = {-1:'music.ogg', 120:'2.ogg', 300:'5.ogg'}
 SCORE_LOCATION = (16, 16)
 TIME_FORMAT    = "{}:{:0>2}"
 TIME_LOCATION  = (rect.centerx, 32)
 TYPES_IGNORED  = (Block, BallOfLight, HudObject, Particle, ParticleEmitter)
 del rect
+################################################################################
 
 class InGameState(GameState):
-    
     def __init__(self, *args, **kwargs):
         '''
         @ivar _collision_grid: Objects that collide with others
@@ -94,7 +98,7 @@ class InGameState(GameState):
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._ship          = Ship()
-        self._time          = self._mode
+        self._time          = self._mode * 60
         self._ufo           = UFO()
 
         PLAYER.add(self._ship, self._ship.flames, self._ship.my_bullet)
@@ -105,7 +109,6 @@ class InGameState(GameState):
             HUD.add(self.hud_text.time)
             gamedata.lives = 1
 
-
         if not __debug__:
         #If this is a release build...
             for i in DEBUG_KEYS:
@@ -113,7 +116,6 @@ class InGameState(GameState):
                 del self.key_actions[i]
             del DEBUG_KEYS, MOUSE_ACTIONS
 
-        
         BallOfLight.BLOCK_GROUP   = BLOCKS
         BallOfLight.enemy_group   = ENEMIES
         BallOfLight.block_mod     = block
@@ -133,6 +135,7 @@ class InGameState(GameState):
         BG.add(bg.EARTH, bg.GRID)
         enemysquadron.reset()
         enemysquadron.start()
+        config.play_music(MUSIC_PATHS[self._mode])
 
     def __del__(self):
         GameState.__del__(self)
@@ -184,16 +187,16 @@ class InGameState(GameState):
         if gamedata.score != gamedata.prev_score:
         #If our score has changed since the last frame...
             self.hud_text.score.image = hud("Score: %i" % gamedata.score)
-            gamedata.prev_score          = gamedata.score
+            gamedata.prev_score       = gamedata.score
 
         if gamedata.lives != gamedata.prev_lives:
         #If we've gained or lost lives since the last frame...
             self.hud_text.lives.image = hud("Lives: %i" % gamedata.lives)
-            gamedata.prev_lives          = gamedata.lives
+            gamedata.prev_lives       = gamedata.lives
 
         if self._time >= 0:
         #If we haven't run out of time...
-            time_left  = [self._time / 100 / 60, (self._time / 100) % 60]
+            time_left  = (self._time // 100 // 60, (self._time // 100) % 60)
             self.hud_text.time.image = hud(TIME_FORMAT.format(*time_left))
 
         GameState.render(self)
@@ -215,7 +218,6 @@ class InGameState(GameState):
         self._ship.on_fire_bullet()
 
     def __game_over(self):
-        from game.highscore import HighScoreState
         from game.mainmenu  import MainMenu
         kwargs={
                 'next' : MainMenu      ,

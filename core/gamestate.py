@@ -4,6 +4,7 @@ An interface for representing game screens.
 
 import pygame
 
+from core import config
 from core.config import screen, _limit_frame
 from game import bg
 from game import gameobject
@@ -71,7 +72,7 @@ class GameState:
             i.draw(screen)
 
         pygame.display.flip()
-        assert not pygame.display.set_caption("FPS: %f" % round(self.fps_timer.get_fps(), 3))
+        assert not config.show_fps(self.fps_timer.get_fps())
         #^ So this statement is stripped in Release mode.
 
         self.fps_timer.tick_busy_loop(60 * _limit_frame)
