@@ -1,10 +1,12 @@
 from itertools import chain
 from math      import sin
+from random    import gauss, uniform
 
 import pygame.key
 
 from core            import color
 from core            import config
+from core.particles  import ParticleEmitter, ParticlePool
 from game.gameobject import GameObject
 from game.shipbullet import ShipBullet
 
@@ -14,7 +16,17 @@ but it has to inherit from pygame.sprite.Sprite, so we can't make it a true
 Python singleton.
 '''
 
+### Functions ##################################################################
+def _burst_appear(self):
+    self.acceleration[1] = GRAVITY
+    self.velocity        = [gauss(0, 25), uniform(-10, -20)]
+    
+################################################################################
+
 ### Constants ##################################################################
+DEATH       = config.load_sound('death.wav')
+GRAVITY     = 0.5
+PARTICLE_POOL = ParticlePool(config.SPRITES.subsurface(pygame.Rect(4, 170, 4, 4)), appear_func=_burst_appear)
 SHIP_STATES = ('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
 SPEED       = 4
 START_POS   = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
@@ -34,7 +46,7 @@ class FlameTrail(GameObject):
         for i in self.__class__.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
     def animate(self):
-        self.anim += 1/3.0
+        self.anim += 1/3
         self.image = FlameTrail.FRAMES[int(3 * sin(self.anim / 2)) + 3]
 
     actions = {1 : 'animate'}
@@ -60,6 +72,8 @@ class Ship(GameObject):
         self.my_bullet  = ShipBullet()
         self.position   = list(START_POS.topleft)
         self.rect       = START_POS.copy()
+        self.respawn_time = 3 * 60
+        self.emitter    = ParticleEmitter(PARTICLE_POOL, self.rect, 2)
         self.change_state(Ship.STATES.RESPAWN)
 
         for i in Ship.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
@@ -77,6 +91,7 @@ class Ship(GameObject):
 
     def respawn(self):
         for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(128)
+        self.respawn_time = 3 * 60
         self.invincible = 250
         self.position   = list(START_POS.topleft)
         self.rect       = START_POS.copy()
@@ -112,13 +127,24 @@ class Ship(GameObject):
         self.image = Ship.FRAMES[int(self.anim)]
 
     def die(self):
-        self.change_state(Ship.STATES.RESPAWN)
+        for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(0)
+        self.emitter.rect = self.rect
+        DEATH.play()
+        self.emitter.burst(100)
+        self.change_state(Ship.STATES.DEAD)
+            
+    def wait_to_respawn(self):
+        self.respawn_time -= 1
+        if not self.respawn_time:
+        #If we're done waiting to respawn...
+            self.change_state(Ship.STATES.RESPAWN)
+            
 
     actions = {
                STATES.IDLE      : None          ,
                STATES.SPAWNING  : 'respawn'     ,
                STATES.ACTIVE    : 'move'        ,
                STATES.DYING     : 'die'         ,
-               STATES.DEAD      : NotImplemented,
+               STATES.DEAD      : 'wait_to_respawn',
                STATES.RESPAWN   : 'respawn'     ,
               }

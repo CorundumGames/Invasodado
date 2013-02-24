@@ -110,6 +110,9 @@ def play_music(name):
         pygame.mixer.music.load(join('sfx', name))
         pygame.mixer.music.play(-1)
 
+def load_sound(name):
+    return pygame.mixer.Sound(join('sfx', name))
+
 ################################################################################
 
 ### Preparation ################################################################
