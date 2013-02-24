@@ -12,8 +12,11 @@ from game.bullet import Bullet
 from game.player import Ship
 from game        import gamedata
 
+### Globals ####################################################################
 _enemy_bullets = set()
+################################################################################
 
+### Functions ##################################################################
 def clean_up():
     '''
     Removes all EnemyBullets from memory.
@@ -28,10 +31,11 @@ def get_enemy_bullet():
     #If we don't have any spare EnemyBullets...
         _enemy_bullets.add(EnemyBullet())
 
-    bullet       = _enemy_bullets.pop()
+    bullet = _enemy_bullets.pop()
     bullet.change_state(bullet.__class__.STATES.FIRED)
     return bullet
 
+################################################################################
 
 class EnemyBullet(Bullet):
     SPEED     = 2
@@ -40,7 +44,7 @@ class EnemyBullet(Bullet):
     GROUP     = None
 
     def __init__(self):
-        super(self.__class__, self).__init__()
+        super().__init__()
         self.image = config.SPRITES.subsurface(self.__class__.FRAME)
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
@@ -48,7 +52,7 @@ class EnemyBullet(Bullet):
         '''
         Moves down the screen.
         '''
-        super(self.__class__, self).move()
+        super().move()
 
         if self.rect.top > config.SCREEN_HEIGHT:
         #If below the bottom of the screen...
@@ -58,7 +62,7 @@ class EnemyBullet(Bullet):
         '''
         Remove this EnemyBullet from the game screen, but not from memory.
         '''
-        super(self.__class__, self).reset()
+        super().reset()
         _enemy_bullets.add(self)
 
     def kill_player(self, other):

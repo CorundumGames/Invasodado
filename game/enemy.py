@@ -10,21 +10,25 @@ from core import config
 from core import particles
 from core import settings
 
-from game import balloflight
+from game            import balloflight
 from game.gameobject import GameObject
 
-
-FRAMES    = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4)]
-START_POS = (32, 32)
+### Constants ##################################################################
+ENEMY_STATES = ('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'CHEERING')
+FRAMES       = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4)]
+START_POS    = (32.0, 32.0)
 
 ENEMY_FRAMES = color.get_colored_objects(FRAMES)
-ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES,True,True)
-_hurt        = pygame.mixer.Sound(os.path.join('sfx', 'enemyhit.wav'))
+ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES, True, True)
+################################################################################
 
+### Globals ####################################################################
+_hurt = pygame.mixer.Sound(os.path.join('sfx', 'enemyhit.wav'))
+_hurt.set_volume(.5)
+################################################################################
 
 class Enemy(GameObject):
-    STATES       = config.Enum('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'CHEERING')
-    acceleration = [0.0, 0.0]
+    STATES       = config.Enum(*ENEMY_STATES)
     anim         = 0.0
     base_speed   = 0.5
     GROUP        = None
@@ -35,7 +39,7 @@ class Enemy(GameObject):
     #particles    = particles.ParticlePool(particles.Particle)
 
     def __init__(self, form_position):
-        GameObject.__init__(self)
+        super().__init__()
         self.color              = choice(color.LIST[:config.NUM_COLORS])
         self._form_position     = form_position
         self.current_frame_list = ENEMY_FRAMES_COLOR_BLIND if settings.color_blind else ENEMY_FRAMES
@@ -49,8 +53,10 @@ class Enemy(GameObject):
 
     def appear(self):
         self.add(Enemy.GROUP)
-        self.position     = [START_POS[0] * (self._form_position[0]+1)* 1.5,
-                             START_POS[1] * (self._form_position[1]+1)* 1.5]
+        self.position     = [
+                             START_POS[0] * (self._form_position[0]+1)* 1.5,
+                             START_POS[1] * (self._form_position[1]+1)* 1.5
+                            ]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         self.color        = choice(color.LIST[0:config.NUM_COLORS])
         self.image        = self.current_frame_list[id(self.color)][0]

@@ -8,20 +8,19 @@ import pygame
 from core import config
 from core import settings
 
-COLOR_KEY = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
-#The color that will be transparent, taken from the bottom-left corner
+### Constants #################################################################
 
-#Common colors we would refer to; not all of these are used by blocks!  #######
+# Common colors we would refer to; not all of these are used by blocks!
 RED    = pygame.Color('#FF3333')
 GREEN  = pygame.Color('#4FFF55')
 BLUE   = pygame.Color('#585EFF')
 YELLOW = pygame.Color('#EBFF55')
 PURPLE = pygame.Color('#FF55D5')
 WHITE  = pygame.Color('#FFFFFF')
-###############################################################################
+LIST   = (RED, BLUE, GREEN, YELLOW, PURPLE) # THESE are used by blocks.
 
-LIST = (RED, BLUE, GREEN, YELLOW, PURPLE)
-#THESE are all used by blocks.
+# The color that will be transparent, taken from the bottom-left corner
+COLOR_KEY = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 
 #Holds the frames for the symbols
 COLOR_BLIND_FRAMES  = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4,9)]
@@ -33,7 +32,9 @@ COLOR_BLIND_SYMBOLS = {
                         id(YELLOW) : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[3]).copy(),
                         id(PURPLE) : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[4]).copy(),
                        }
+################################################################################
 
+### Functions ##################################################################
 def blend_color(surface, color):
     '''
     Returns a new Surface blended with the given color.
@@ -77,3 +78,4 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False):
             for i in colored[id(c)]:
                 i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(),(2,2))
     return colored
+################################################################################

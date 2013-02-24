@@ -1,7 +1,7 @@
 import pygame.sprite
 
-from core import config
-from core import color
+from core            import config
+from core            import color
 from game.gameobject import GameObject
 
 class HudObject(GameObject):
@@ -12,16 +12,13 @@ class HudObject(GameObject):
     don't intend for these to collide with anything.
     '''
     STATES = config.Enum('IDLE')
-    actions    = None
-    collisions = None
-    fonts      = [config.FONT]
+    fonts  = (config.FONT,)
     
-
     def __init__(self, image, pos):
-        GameObject.__init__(self)
-        self.image        = image.convert(config.DEPTH, config.FLAGS)
-        self.rect         = pygame.Rect(pos, image.get_size())
-        del self.velocity, self.acceleration, self.position
+        super().__init__()
+        self.image = image.convert(config.DEPTH, config.FLAGS)
+        self.rect  = pygame.Rect(pos, image.get_size())
+        del self.velocity, self.acceleration, self.position, self.next_state
 
     def update(self):
         '''
@@ -51,4 +48,4 @@ class HudObject(GameObject):
                 hud = font.render(text[t], False, col)
                 return hud if surfaces else HudObject(hud, (pos[0], pos[1] + vspace * t))
 
-            return list(map(d, range(len(text))))
+            return [d(i) for i in range(len(text))]

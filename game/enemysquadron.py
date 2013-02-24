@@ -1,15 +1,19 @@
-from math import log1p
+from math   import log1p
 from random import randint
 
 import pygame
 
 from game.enemy import Enemy
 
+### Constants ##################################################################
 ROW_SIZE = 7
 COL_SIZE = 4
+################################################################################
 
+### Globals ####################################################################
 _enemies    = None
 ENEMY_GROUP = None
+################################################################################
 
 def clean_up():
     '''

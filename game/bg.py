@@ -11,8 +11,7 @@ from core           import config
 from core.particles import ParticleEmitter, ParticlePool
 from game.hudobject import HudObject
 
-STARS_GROUP = pygame.sprite.RenderUpdates()
-
+### Functions ##################################################################
 def _star_appear(self):
     '''
     Stars appear on the left edge of the screen and travel right at one of five
@@ -26,7 +25,10 @@ def _star_move(self):
     '''
     self.position[0] += self.velocity[0]
     self.rect.left    = self.position[0]
+    
+################################################################################
 
+STARS_GROUP = pygame.sprite.RenderUpdates()
 _STAR_IMAGE = config.SPRITES.subsurface(4, 170, 2, 2)
 
 EARTH = HudObject(config.EARTH, [0, 0])

@@ -7,19 +7,24 @@ from core import config
 from core import settings
 from game.gameobject import GameObject
 
+### Constants ##################################################################
+BALL_STATES  = ('IDLE', 'APPEARING', 'MOVING', 'DYING', 'RESET')
 FRAMES       = [pygame.Rect(32 * i, 96, 32, 32) for i in range(5)]
 TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
+################################################################################
 
-ball_frames = color.get_colored_objects(FRAMES)
-ball_frames_color_blind = color.get_colored_objects(FRAMES, True, True)
+### Globals ####################################################################
+_ball_frames             = color.get_colored_objects(FRAMES)
+_ball_frames_color_blind = color.get_colored_objects(FRAMES, True, True)
+_balls                   = set()
+################################################################################
 
-balls = set()
-
+### Functions ##################################################################
 def clean_up():
     '''
     Removes all BallOfLights from memory.
     '''
-    balls.clear()
+    _balls.clear()
 
 def get_ball(startpos, newcolor):
     '''
@@ -30,19 +35,20 @@ def get_ball(startpos, newcolor):
     @rtype: BallOfLight
     '''
 
-    if not balls:
+    if not _balls:
     #If we don't have any spare BallsOfLight to give...
-        balls.add(BallOfLight())
+        _balls.add(BallOfLight())
 
-    ball            = balls.pop()  #Teehee
-    ball.color      = newcolor
-    ball.startpos   = tuple(startpos)
+    ball          = _balls.pop()  #Teehee
+    ball.color    = newcolor
+    ball.startpos = tuple(startpos)
     ball.change_state(BallOfLight.STATES.APPEARING)
     return ball
 
+################################################################################
+
 class BallOfLight(GameObject):
-    collisions  = None
-    STATES      = config.Enum('IDLE', 'APPEARING', 'MOVING', 'DYING', 'RESET')
+    STATES      = config.Enum(*BALL_STATES)
     BLOCK_GROUP = None
     block_mod   = None
     ENEMY_GROUP = None
@@ -52,7 +58,7 @@ class BallOfLight(GameObject):
 
         self._anim              = 0
         self.color              = newcolor
-        self.current_frame_list = ball_frames_color_blind if settings.color_blind else ball_frames
+        self.current_frame_list = _ball_frames_color_blind if settings.color_blind else _ball_frames
         self.image              = self.current_frame_list[id(newcolor)][0]
         size                    = self.image.get_size()
         self.rect               = pygame.Rect(startpos, size)
@@ -66,14 +72,15 @@ class BallOfLight(GameObject):
 
     def appear(self):
         self.image        = self.current_frame_list[id(self.color)][0]
+        size = self.image.get_size()
         self.position     = list(self.startpos)
         self.progress     = 0.0
         self.rect.topleft = self.startpos
         self.change_state(BallOfLight.STATES.MOVING)
-        self._target[0]   = round(self.position[0]/self.image.get_width())*self.image.get_height()
+        self._target[0]   = round(self.position[0] / size[0]) * size[1]
         
         assert config.SCREEN_RECT.collidepoint(self._target), \
-        "BallOfLight's target should be on-screen, instead it's %s" % self._target
+        "BallOfLight's target should be on-screen, but it's %s" % self._target
 
     def move(self):
         position = self.position
@@ -86,7 +93,7 @@ class BallOfLight(GameObject):
         if self._anim < len(FRAMES) - 1:
         #If we haven't finished animating...
             self._anim += 1
-            self.image = self.current_frame_list[id(self.color)][self._anim]
+            self.image  = self.current_frame_list[id(self.color)][self._anim]
 
         dx                = (percent**2)*(3-2*percent)
         ddx               = 1 - dx
@@ -102,8 +109,8 @@ class BallOfLight(GameObject):
         "A BallOfLight at %s is trying to move off-screen!" % position
 
     def vanish(self):
-        balls.add(self)
-        BallOfLight.BLOCK_GROUP.add(BallOfLight.block_mod.get_block([self.rect.centerx, 0], self.color))
+        _balls.add(self)
+        BallOfLight.BLOCK_GROUP.add(BallOfLight.block_mod.get_block([self.rect.centerx, 0.0], self.color))
         self.kill()
         self._anim        = 0
         self.position     = [-300.0, -300.0]

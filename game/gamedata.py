@@ -1,4 +1,8 @@
+### Constants ##################################################################
 DEFAULT_MULTIPLIER = 10
+################################################################################
+
+### Globals ####################################################################
 multiplier         = DEFAULT_MULTIPLIER
 COMBO_LENGTH       = 50
 
@@ -10,7 +14,9 @@ prev_score         = None
 
 lives              = 3
 prev_lives         = None
+################################################################################
 
+### Functions ##################################################################
 def clean_up():
     global score, prev_score
     global lives, prev_lives
@@ -21,3 +27,5 @@ def clean_up():
     lives, prev_lives    = 3, None
     combo, combo_counter = False, 0
     multiplier           = DEFAULT_MULTIPLIER
+
+################################################################################

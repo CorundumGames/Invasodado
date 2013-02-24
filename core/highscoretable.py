@@ -1,21 +1,33 @@
 from base64   import b64encode, b64decode
-import binascii
+from binascii import Error as binascii_Error
 from datetime import datetime
+from json     import load
 from platform import platform
-import json
 import dbm.dumb as shelve
 
 from core import geolocation
 from core import config
 
+### Constants ##################################################################
 PATTERN      = '%Y-%m-%d %H:%M:%S.%f'
 SCORE_FORMAT = '{0.name}|{0.score}|{0.mode}|{0.country}|{0.platform}|{0.time}'
+################################################################################
 
+### Functions ##################################################################
 def encode(text):
+    '''
+    Returns the base64 encoding of the given string-like as a string, instead
+    of as a byte array
+    '''
     return b64encode(str(text).encode('utf-8','ignore')).decode('utf-8','ignore')
 
 def decode(text):
+    '''
+    Same as encode(), but returns the text behind a base64 encoding.
+    '''
     return b64decode(str(text).encode('utf-8','ignore')).decode('utf-8','ignore')
+
+################################################################################
 
 class HighScoreEntry:
     def __init__(self, name='', score=0, mode=0, entry=None):
@@ -54,7 +66,7 @@ class HighScoreEntry:
         try:
         #First see if our data is scrambled...
             self.unscramble()
-        except binascii.Error:
+        except binascii_Error:
         #Well apparently it's not.
             pass
         except ValueError:
@@ -196,7 +208,7 @@ class HighScoreTable:
         Takes in a JSON file and loads default scores from there.
         This is meant to be used for default high score tables, and NOT for storage.
         '''
-        return json.load(open(filename))
+        return load(open(filename))
 
     def __len__(self):
         return self.size

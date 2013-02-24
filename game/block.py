@@ -11,19 +11,23 @@ from game.gameobject import GameObject
 from game            import blockgrid
 from game.blockgrid  import blocks
 
+### Constants ##################################################################
+BLOCK_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
+FRAMES       = [pygame.Rect(32 * i, 160, 32, 32) for i in range(8)]
+GRAVITY      =  0.5
+MAX_SPEED    = 12.0
+################################################################################
 
-FRAMES    = [pygame.Rect(32 * i, 160, 32, 32) for i in range(8)]
-GRAVITY   =  0.5
-MAX_SPEED = 12.0
-
+### Globals ####################################################################
 _blocks_set = set()
 _bump       = pygame.mixer.Sound(os.path.join('sfx', 'bump.wav'))
 
 _block_frames    = color.get_colored_objects(FRAMES)
 _block_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
 _color_particles = color.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
+################################################################################
 
-
+### Functions ##################################################################
 def _bp_move(self):
     '''
     Moves this Particle a little bit this frame.
@@ -58,32 +62,32 @@ def get_block(position, newcolor=choice(color.LIST), special=False):
 
     @param position: Where to add the new block
     @param newcolor: The color of the new block
-    @param _special: True if it's a special block dropped by the UFO
+    @param special: True if it's a special block dropped by the UFO
     '''
     if not _blocks_set:
     #If we've run out of unused Blocks...
         _blocks_set.add(Block(position, newcolor))
 
-    block            = _blocks_set.pop()
-    block.color      = newcolor
-    block.position   = position
-    block._special   = special
+    block          = _blocks_set.pop()
+    block.color    = newcolor
+    block.position = position
+    block._special = special
     block.change_state(Block.STATES.APPEARING)
     return block
 
-_block_particles  = dict([(id(c), ParticlePool(_color_particles[id(c)][0], _bp_move, _bp_appear)) for c in color.LIST])
+################################################################################
+
+_block_particles = dict([(id(c), ParticlePool(_color_particles[id(c)][0], _bp_move, _bp_appear)) for c in color.LIST])
 
 class Block(GameObject):
     '''
     Blocks are left by enemies when they're killed.  Match three of the same
     color, and they'll disappear.
     '''
+    STATES         = config.Enum(*BLOCK_STATES)
     block_full     = False
-    collisions     = None
     GROUP          = None
     particle_group = None
-    
-    STATES         = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
 
     def __init__(self, position, newcolor=choice(color.LIST), special=False):
         GameObject.__init__(self)
@@ -98,7 +102,7 @@ class Block(GameObject):
         self.state    = Block.STATES.IDLE
 
     def __str__(self):
-        return ("<Block with color: %s, cell: %s, position: %s, rect: %s, target: %s, state: %i>" %
+        return ("<Block - color: %s, cell: %s, position: %s, rect: %s, target: %s, state: %i>" %
                (self.color, self.gridcell, self.position, self.rect, self._target, self.state))
         
     def __repr__(self):
@@ -115,6 +119,7 @@ class Block(GameObject):
         self._target      = self.__set_target()
         self.emitter      = ParticleEmitter(_block_particles[id(self.color)], self.rect, 5, Block.particle_group)
         self.change_state(Block.STATES.START_FALLING)
+        self.color.set_length(3)
         self.add(Block.GROUP)
 
     def start_falling(self):

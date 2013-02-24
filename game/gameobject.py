@@ -1,13 +1,24 @@
 from pygame.sprite import Sprite
 
-state_changes = set()
+### Globals ####################################################################
+_state_changes = set()
+################################################################################
 
+### Functions ##################################################################
 def update():
-    global state_changes
-    for i in state_changes:
-        i.state = i.next_state
+    '''
+    Handles all of the object state changes queued up before this frame's game
+    logic is handled.  This way, it's much easier to predict when an object
+    will be in what state.
+    '''
+    for i in _state_changes:
+    #For all state changes we have lined up...
+        i.state      = i.next_state
         i.next_state = None
-    state_changes.clear()
+        
+    _state_changes.clear()
+    
+################################################################################
 
 class GameObject(Sprite, object):
     actions    = None
@@ -17,7 +28,7 @@ class GameObject(Sprite, object):
         Sprite.__init__(self)
         self.acceleration = [0.0, 0.0]
         self.next_state   = None
-        self.position     = [-300.0,-300.0]
+        self.position     = [-300.0, -300.0]
         self.rect         = None
         self.state        = None
         self.velocity     = [0.0, 0.0]
@@ -36,13 +47,13 @@ class GameObject(Sprite, object):
             #If we can interact with the other object...
                 collisions[other_type](self, other)
         elif callable(collisions):
-        #Else if we have any collisions...
+        #Else if we can collide with just one other type of object...
             collisions(other)
 
     def update(self):
-        if self.state is None:
-            self.state = self.__class__.STATES.IDLE
-        
+        '''
+        Acts on this object's current state.
+        '''
         assert self.state in self.__class__.actions, \
         "A %s tried to act on an invalid state %s!" % (self, self.state)
 
@@ -52,5 +63,8 @@ class GameObject(Sprite, object):
             getattr(self, method_name)()
             
     def change_state(self, next_state):
+        '''
+        Queues this object for a state change in the next frame.
+        '''
         self.next_state = next_state
-        state_changes.add(self)
+        _state_changes.add(self)

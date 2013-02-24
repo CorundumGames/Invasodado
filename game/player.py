@@ -3,31 +3,29 @@ from math      import sin
 
 import pygame.key
 
-from core import color
-from core import config
-
+from core            import color
+from core            import config
 from game.gameobject import GameObject
 from game.shipbullet import ShipBullet
 
 '''
-The Ship is the player character.  There's only going to be one instance of
-it, but it has to inherit from pygame.sprite.Sprite, so I can't make it a true
+The Ship is the player character.  There's only going to be one instance of it,
+but it has to inherit from pygame.sprite.Sprite, so we can't make it a true
 Python singleton.
 '''
 
-#Constants/magic numbers#
-
-
-START_POS = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
-SPEED     = 4
-#########################
+### Constants ##################################################################
+SHIP_STATES = ('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
+SPEED       = 4
+START_POS   = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
+################################################################################
 
 class FlameTrail(GameObject):
     FRAMES = [config.SPRITES.subsurface(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
     GROUP  = None
 
     def __init__(self):
-        GameObject.__init__(self)
+        super().__init__()
         self.anim  = 0.0
         self.image = FlameTrail.FRAMES[0]
         self.rect  = pygame.Rect([0, 0], self.image.get_size())
@@ -43,7 +41,7 @@ class FlameTrail(GameObject):
 
 class Ship(GameObject):
     FRAMES = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
-    STATES = config.Enum('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
+    STATES = config.Enum(*SHIP_STATES)
     GROUP  = None
 
     def __init__(self):
@@ -53,7 +51,7 @@ class Ship(GameObject):
         @ivar invincible: How many frames of invincibility the player has if any
         @ivar my_bullet: The single bullet this ship may fire
         '''
-        GameObject.__init__(self)
+        super().__init__()
 
         self.anim       = 0.0
         self.flames     = FlameTrail()

@@ -7,6 +7,10 @@ import pygame.time
 from core            import config
 from game.gameobject import GameObject
 
+### Constants ##################################################################
+PARTICLE_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'LEAVING')
+################################################################################
+
 class Particle(GameObject):
     '''
     Tiny bits and pieces used for graphical effects.  Meant for things like
@@ -17,7 +21,7 @@ class Particle(GameObject):
     Particles should have some randomization, particularly in initial direction.
     '''
     START_POS = (-100.0, -100.0)
-    STATES    = config.Enum('IDLE', 'APPEARING', 'ACTIVE', 'LEAVING')
+    STATES    = config.Enum(*PARTICLE_STATES)
     GROUP     = None
 
     def __init__(self, image, move_func, appear_func):
@@ -25,7 +29,7 @@ class Particle(GameObject):
         @ivar move_func: The function that defines motion; called each update()
                          Takes one parameter
         '''
-        GameObject.__init__(self)
+        super().__init__()
         self.appear_func = partial(appear_func, self)
         self.image       = image
         self.move_func   = partial(move_func, self)
@@ -57,7 +61,7 @@ class Particle(GameObject):
                STATES.APPEARING: 'appear',
                STATES.ACTIVE   : 'move'  ,
                STATES.LEAVING  : 'leave' ,
-               }
+              }
     
 ################################################################################
 

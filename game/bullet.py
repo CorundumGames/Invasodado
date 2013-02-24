@@ -5,29 +5,32 @@ Bullet should NOT be created in and of itself.
 
 import pygame
 
-from core import config
-from core import color
+from core            import config
+from core            import color
 from game.gameobject import GameObject
+
+### Constants ##################################################################
+BULLET_STATES = ('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
+################################################################################
 
 class Bullet(GameObject):
     FRAME  = pygame.Rect(227, 6, 26, 19)
-    STATES = config.Enum('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
+    STATES = config.Enum(*BULLET_STATES)
     SPRITE = config.SPRITES.subsurface(FRAME)
 
     def __init__(self):
-        GameObject.__init__(self)
-        self.image      = self.__class__.SPRITE #@UndefinedVariable
-        self.rect       = self.__class__.START_POS.copy()
-        self.position   = list(self.rect.topleft)
-        self.state      = self.__class__.STATES.IDLE
+        super().__init__()
+        self.image    = self.__class__.SPRITE #@UndefinedVariable
+        self.rect     = self.__class__.START_POS.copy()
+        self.position = list(self.rect.topleft)
+        self.state    = self.__class__.STATES.IDLE
 
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
     def start_moving(self):
         '''
-        Plays a sound and begins moving.
+        Begins moving.
         '''
-        #TODO: Play a sound here later
         self.position    = list(self.rect.topleft)
         self.velocity[1] = self.__class__.SPEED
         self.change_state(self.__class__.STATES.MOVING)

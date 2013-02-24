@@ -4,7 +4,7 @@ blocks.  It's designed around Invasodado, but with a little work it could be
 refitted for other match-3 games like Bejewelled or Puzzle League.
 '''
 
-from os.path   import join
+from os.path import join
 
 from pygame.display import get_surface
 import pygame.rect
@@ -12,21 +12,19 @@ import pygame.mixer
 
 from game import gamedata
 
-def get_empty_block_array():
-    '''
-    Returns an empty 2D array to reset the block grid
-    '''
-    return tuple([None for i in range(SIZE[1])] for j in range(SIZE[0]))
-
+### Constants ##################################################################
 BLOCK_TYPE = None
 CELL_SIZE  = (32, 32)
 SIZE       = (20, 12) #(width, height)
 RECT       = pygame.rect.Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL_SIZE[1]))
+################################################################################
 
-blocks           = get_empty_block_array()
+### Globals ####################################################################
+blocks           = None
 _blocks_to_check = set()
 _blocks_to_clear = set()
 _block_clear     = pygame.mixer.Sound(join('sfx', 'clear.wav'))
+################################################################################
 
 def check_block(block, should_check=True):
     if should_check:
@@ -72,6 +70,14 @@ def clear_row(row):
     for i in (j for j in blocks[row] if j):
     #For all blocks in this row...
         i.change_state(BLOCK_TYPE.STATES.DYING)
+        
+def get_empty_block_array():
+    '''
+    Returns an empty 2D array to reset the block grid
+    '''
+    return tuple([None for i in range(SIZE[1])] for j in range(SIZE[0]))
+
+blocks = get_empty_block_array()
 
 def update():
     '''

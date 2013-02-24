@@ -13,12 +13,15 @@ import pygame.display
 import pygame.sprite
 import pygame.time
 
+### Globals ####################################################################
 _do_not_compare = set()
 #Contains 2-tuples of types.  Don't check for collisions between objects
 #with these type pairings.
 
-_do_not_check = set()
+_do_not_check   = set()
+################################################################################
 
+### Functions ##################################################################
 def dont_check_type(*types):
     '''
     Prevents the given types of objects from colliding with other objects.
@@ -27,6 +30,7 @@ def dont_check_type(*types):
     @postcondition: The classes in types are no longer capable of collisions.
     '''
     _do_not_check.update(types)
+################################################################################
 
 class CollisionGrid:
     '''
@@ -52,12 +56,12 @@ class CollisionGrid:
         '''
         size = pygame.display.get_surface().get_size()
         cell_size = (size[0] / width, size[1] / height)
+        
+        def get_pos(i, j):
+            return (i*cell_size[0], j*cell_size[1])
 
         self.collisions = []
-        self.grid       = [[GridCell(pygame.Rect((i*cell_size[0], j*cell_size[1]),
-                                                  cell_size
-                                                  ),
-                                                  self)
+        self.grid       = [[GridCell(pygame.Rect(get_pos(i, j), cell_size), self)
                                     for i in range(width)
                             ]
                             for j in range(height)
@@ -83,7 +87,6 @@ class CollisionGrid:
         Handles all collisions, from first to last.
         '''
         collisions = self.collisions
-
         collisions.sort()
 
         for i in collisions:
