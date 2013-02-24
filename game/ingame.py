@@ -1,5 +1,6 @@
 from collections import namedtuple
 from functools   import partial
+from math import log1p
 from os.path     import join
 
 import pygame
@@ -44,7 +45,7 @@ UFO_GROUP     = Group()
 
 ### Constants ##################################################################
 rect = config.SCREEN_RECT
-DEBUG_KEYS     = (pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1, pygame.K_e)
+DEBUG_KEYS     = (pygame.K_u, pygame.K_c, pygame.K_f, pygame.K_F1, pygame.K_e, pygame.K_k)
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
 FIRE_MESSAGE   = "Press fire to continue"
 GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
@@ -86,6 +87,7 @@ class InGameState(GameState):
                                         hud("GAME OVER", GAME_OVER_LOC),
                                         hud(FIRE_MESSAGE, FIRE_LOCATION),
                                        )
+        self._ship          = Ship()
         self.key_actions    = {
                                pygame.K_ESCAPE: partial(self.change_state, MainMenu),
                                pygame.K_F1    : config.toggle_fullscreen ,
@@ -94,6 +96,7 @@ class InGameState(GameState):
                                pygame.K_f     : config.toggle_frame_limit,
                                pygame.K_p     : config.toggle_pause      ,
                                pygame.K_u     : self.__add_ufo           ,
+                               pygame.K_k     : partial(self._ship.change_state, Ship.STATES.DYING),
                                pygame.K_e     : self.__game_over         ,
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
@@ -114,7 +117,6 @@ class InGameState(GameState):
             for i in DEBUG_KEYS:
             #For every debug action...
                 del self.key_actions[i]
-            del DEBUG_KEYS, MOUSE_ACTIONS
 
         BallOfLight.BLOCK_GROUP   = BLOCKS
         BallOfLight.enemy_group   = ENEMIES
@@ -180,6 +182,10 @@ class InGameState(GameState):
             self.__game_over()
             enemysquadron.celebrate()
             self._game_running = False
+        elif not self._game_running:
+            if not self._ship.respawn_time:
+                for i in (self._ship, self._ship.flames): i.kill()
+                
 
     def render(self):
         hud = partial(HudObject.make_text, surfaces=True)
@@ -200,6 +206,15 @@ class InGameState(GameState):
             self.hud_text.time.image = hud(TIME_FORMAT.format(*time_left))
 
         GameState.render(self)
+        
+        if self._ship.image.get_alpha() == 0:
+            pygame.draw.circle(config.screen,
+                               color.WHITE,
+                               self._ship.rect.center,
+                               int(150*log1p((3 * 60) - self._ship.respawn_time)) + 32,
+                               16)
+        
+        pygame.display.flip()
 
     def __make_block(self, position, color):
         '''
@@ -228,8 +243,6 @@ class InGameState(GameState):
                                                    HighScoreState,
                                                    **kwargs
                                                    )
-        for i in (self._ship, self._ship.flames): i.kill()
-        self._ship.change_state(Ship.STATES.IDLE)
 
         HUD.add(self.hud_text.game_over, self.hud_text.press_fire)
 

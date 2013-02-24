@@ -81,6 +81,7 @@ class SettingsMenu(GameState):
     def render(self):
         self.hud_cursor.rect.midright = self.menu[self.cursor_index][0].rect.midleft
         super().render()
+        pygame.display.flip()
 
     def __enter_selection(self):
         '''Go with the cursor_index the player made.'''

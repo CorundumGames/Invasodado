@@ -71,7 +71,8 @@ class MainMenu(GameState):
 
     def render(self):
         self.hud_cursor.rect.midright = self.menu[self.cursor_index].rect.midleft    
-        GameState.render(self)
+        super().render()
+        pygame.display.flip()
 
     def __move_cursor(self, index):
         '''

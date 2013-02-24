@@ -71,7 +71,6 @@ class GameState:
         for i in self.group_list:
             i.draw(screen)
 
-        pygame.display.flip()
         assert not config.show_fps(self.fps_timer.get_fps())
         #^ So this statement is stripped in Release mode.
 

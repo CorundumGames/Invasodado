@@ -96,6 +96,7 @@ class HighScoreState(GameState):
             self.hud_name.image = HudObject.make_text(self.entry_name.decode(config.ENCODING), surfaces=True)
 
         GameState.render(self)
+        pygame.display.flip()
 
     def __char_move(self, index):
         if self.entering_name:

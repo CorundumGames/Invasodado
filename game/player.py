@@ -24,6 +24,7 @@ def _burst_appear(self):
 ################################################################################
 
 ### Constants ##################################################################
+APPEAR      = config.load_sound('appear.wav')
 DEATH       = config.load_sound('death.wav')
 GRAVITY     = 0.5
 PARTICLE_POOL = ParticlePool(config.SPRITES.subsurface(pygame.Rect(4, 170, 4, 4)), appear_func=_burst_appear)
@@ -90,6 +91,7 @@ class Ship(GameObject):
             bul.change_state(ShipBullet.STATES.FIRED)
 
     def respawn(self):
+        APPEAR.play()
         for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(128)
         self.respawn_time = 3 * 60
         self.invincible = 250
