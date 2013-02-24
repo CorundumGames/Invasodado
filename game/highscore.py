@@ -93,7 +93,7 @@ class HighScoreState(GameState):
     def render(self):  
         if self.entering_name:
         #If we're entering our name for a high score...
-            self.hud_name.image = HudObject.make_text(self.entry_name.decode(), surfaces=True)
+            self.hud_name.image = HudObject.make_text(self.entry_name.decode(config.ENCODING), surfaces=True)
 
         GameState.render(self)
 
@@ -102,7 +102,7 @@ class HighScoreState(GameState):
         #If we're entering our name for a high score...
             self.alphanum_index += index
             self.alphanum_index %= len(ALPHANUMERIC)
-            self.entry_name[self.name_index] = ALPHANUMERIC[self.alphanum_index]
+            self.entry_name[self.name_index] = ord(ALPHANUMERIC[self.alphanum_index])
 
     def __switch_table(self, index):
         '''
@@ -140,7 +140,7 @@ class HighScoreState(GameState):
                 self.name_index = min(self.name_index + 1, CHAR_LIMIT - 1)
                 
             self.alphanum_index = 0
-            self.entry_name    += 'A'
+            self.entry_name    += bytes('A', config.ENCODING)
         elif self.entering_name:
         #If we've finished entering our name...
             self.__enter_score()
