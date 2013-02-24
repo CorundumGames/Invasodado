@@ -4,13 +4,15 @@ game screen) to the next.
 
 @var _current_state: The screen we're currently at.
 '''
+import pygame
 
-import pygame.display
+from game.splash import SplashScreen
 
-from game.mainmenu import MainMenu
+### Globals ####################################################################
+_current_state = SplashScreen()
+################################################################################
 
-_current_state = MainMenu()
-
+### Functions ##################################################################
 def update():
     '''
     Moves us forward one frame.
@@ -33,3 +35,4 @@ def update():
             _current_state.__del__()
             _current_state = temp
 
+################################################################################
