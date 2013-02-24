@@ -8,7 +8,29 @@ from core            import config
 from game.gameobject import GameObject
 
 ### Constants ##################################################################
+GRAVITY         = 0.5
 PARTICLE_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'LEAVING')
+################################################################################
+
+### Functions ##################################################################
+def _p_move(self):
+    '''
+    Moves this Particle a little bit this frame.
+    '''
+    position = self.position
+    velocity = self.velocity
+
+    velocity[1]      += self.acceleration[1]
+    position[0]      += velocity[0]
+    position[1]      += velocity[1]
+    self.rect.topleft = (position[0] + .5, position[1] + .5)
+    
+def _p_appear(self):
+    '''
+    Initializes the location and velocity for this Particle.
+    '''
+    self.acceleration[1] = GRAVITY
+    self.velocity        = [uniform(-5, 5), uniform(-1, -3)]
 ################################################################################
 
 class Particle(GameObject):
@@ -24,7 +46,7 @@ class Particle(GameObject):
     STATES    = config.Enum(*PARTICLE_STATES)
     GROUP     = None
 
-    def __init__(self, image, move_func, appear_func):
+    def __init__(self, image, move_func=_p_move, appear_func=_p_appear):
         '''
         @ivar move_func: The function that defines motion; called each update()
                          Takes one parameter
@@ -124,6 +146,7 @@ class ParticleEmitter:
         '''
         pool     = self.pool
         _release = self._release
+        self.group = Particle.GROUP
         for i in range(amount):
             _release(pool.get_particle())
 
@@ -141,7 +164,7 @@ class ParticlePool:
     @ivar particles_out: Particles visible on-screen
     '''
 
-    def __init__(self, image, move_func, appear_func):
+    def __init__(self, image, move_func=_p_move, appear_func=_p_appear):
         self.appear_func   = appear_func
         self.image         = image
         self.move_func     = move_func

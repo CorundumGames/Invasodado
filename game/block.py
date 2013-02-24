@@ -1,5 +1,5 @@
 import os.path
-from random import choice, uniform
+from random import choice
 
 import pygame.mixer
 
@@ -28,25 +28,6 @@ _color_particles = color.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
 ################################################################################
 
 ### Functions ##################################################################
-def _bp_move(self):
-    '''
-    Moves this Particle a little bit this frame.
-    '''
-    position = self.position
-    velocity = self.velocity
-
-    velocity[1]      += self.acceleration[1]
-    position[0]      += velocity[0]
-    position[1]      += velocity[1]
-    self.rect.topleft = (position[0] + .5, position[1] + .5)
-
-def _bp_appear(self):
-    '''
-    Initializes the location and velocity for this Particle.
-    '''
-    self.acceleration[1] = GRAVITY
-    self.velocity        = [uniform(-5, 5), uniform(-1, -3)]
-
 def clean_up():
     '''
     Removes every Block from memory.
@@ -77,7 +58,7 @@ def get_block(position, newcolor=choice(color.LIST), special=False):
 
 ################################################################################
 
-_block_particles = dict([(id(c), ParticlePool(_color_particles[id(c)][0], _bp_move, _bp_appear)) for c in color.LIST])
+_block_particles = dict([(id(c), ParticlePool(_color_particles[id(c)][0])) for c in color.LIST])
 
 class Block(GameObject):
     '''
