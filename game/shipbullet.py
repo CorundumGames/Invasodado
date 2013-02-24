@@ -24,10 +24,12 @@ class ShipBullet(Bullet):
 
     def __init__(self):
         super().__init__()
+        self.column = 0
         
     def start_moving(self):
         SHOOT.play()
-        super().start_moving()  
+        super().start_moving()
+        self.column = round(self.position[0] / 32)
 
     def move(self):
         '''
@@ -48,6 +50,7 @@ class ShipBullet(Bullet):
             gamedata.score += 1
             self.change_state(self.__class__.STATES.RESET)
             other.change_state(other.__class__.STATES.DYING)
+            other.column = self.column
 
     
     collisions = {

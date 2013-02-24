@@ -20,11 +20,10 @@ MAX_SPEED    = 12.0
 
 ### Globals ####################################################################
 _blocks_set = set()
-_bump       = pygame.mixer.Sound(os.path.join('sfx', 'bump.wav'))
+_bump       = config.load_sound('bump.wav')
 
 _block_frames    = color.get_colored_objects(FRAMES)
 _block_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
-_color_particles = color.get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
 ################################################################################
 
 ### Functions ##################################################################
@@ -58,8 +57,6 @@ def get_block(position, newcolor=choice(color.LIST), special=False):
 
 ################################################################################
 
-_block_particles = dict([(id(c), ParticlePool(_color_particles[id(c)][0])) for c in color.LIST])
-
 class Block(GameObject):
     '''
     Blocks are left by enemies when they're killed.  Match three of the same
@@ -77,7 +74,7 @@ class Block(GameObject):
         self.current_frame_list = _block_frames_color_blind if settings.color_blind else _block_frames
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position = position
-        self.rect     = pygame.Rect(self.position, self.image.get_size()) #(x, y)
+        self.rect     = pygame.Rect(position, self.image.get_size()) #(x, y)
         self._target  = None
         self._special = special
         self.state    = Block.STATES.IDLE
@@ -98,7 +95,7 @@ class Block(GameObject):
                              self.rect.centery // self.rect.height,
                             ] #(x, y)
         self._target      = self.__set_target()
-        self.emitter      = ParticleEmitter(_block_particles[id(self.color)], self.rect, 5, Block.particle_group)
+        self.emitter      = ParticleEmitter(color.color_particles[id(self.color)], self.rect, 5, Block.particle_group)
         self.change_state(Block.STATES.START_FALLING)
         self.color.set_length(3)
         self.add(Block.GROUP)

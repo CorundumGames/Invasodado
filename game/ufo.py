@@ -30,6 +30,7 @@ class UFO(GameObject):
     def __init__(self):
         super().__init__()
         self._anim    = 0.0
+        self.column   = None
         self.image    = config.SPRITES.subsurface(FRAMES[0]).copy()
         self.odds     = .0001
         self.position = list(START_POS)

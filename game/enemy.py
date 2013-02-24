@@ -7,7 +7,7 @@ import pygame.rect
 
 from core import color
 from core import config
-from core import particles
+from core.particles import ParticlePool, ParticleEmitter
 from core import settings
 
 from game            import balloflight
@@ -41,14 +41,14 @@ class Enemy(GameObject):
     def __init__(self, form_position):
         super().__init__()
         self.color              = choice(color.LIST[:config.NUM_COLORS])
+        self.column             = None
         self._form_position     = form_position
         self.current_frame_list = ENEMY_FRAMES_COLOR_BLIND if settings.color_blind else ENEMY_FRAMES
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position           = list(START_POS)
         self.rect               = pygame.Rect(START_POS, self.image.get_size())
         self.state              = Enemy.STATES.IDLE
-
-        #self.emitter       = particles.ParticleEmitter(self.__class__.particles, self.rect, 4, ingame.ENEMIES)
+        self.emitter            = ParticleEmitter(color.color_particles[id(self.color)], self.rect, 1)
         del self.acceleration, self.velocity
 
     def appear(self):
@@ -60,6 +60,7 @@ class Enemy(GameObject):
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         self.color        = choice(color.LIST[0:config.NUM_COLORS])
         self.image        = self.current_frame_list[id(self.color)][0]
+        self.emitter.pool = color.color_particles[id(self.color)]
         self.change_state(Enemy.STATES.ACTIVE)
 
     def move(self):
@@ -82,10 +83,11 @@ class Enemy(GameObject):
                 Enemy.should_flip = True
 
     def die(self):
-        balloflight.get_ball(self.position, self.color).add(Enemy.GROUP)
+        balloflight.get_ball(self.position, self.column, self.color).add(Enemy.GROUP)
         _hurt.play()
+        self.emitter.burst(20)
         self.kill()
-
+        
         self.position      = [-300.0, -300.0]
         self.rect.topleft  = self.position
         self.change_state(Enemy.STATES.IDLE)

@@ -7,6 +7,7 @@ import pygame
 
 from core import config
 from core import settings
+from core.particles import ParticlePool
 
 ### Constants #################################################################
 
@@ -78,4 +79,10 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False):
             for i in colored[id(c)]:
                 i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(),(2,2))
     return colored
+################################################################################
+
+### Globals ####################################################################
+_parts = get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
+color_particles = dict([(id(c), ParticlePool(_parts[id(c)][0])) for c in LIST])
+
 ################################################################################

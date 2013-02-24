@@ -67,13 +67,16 @@ def clear_row(row):
     assert 0 <= row < SIZE[1], \
     "Expected row value in 0 <= x < %i, but got %i" % (SIZE[1], row)
 
-    for i in (j for j in blocks[row] if j):
+    for i in (j for j in blocks if any(j)):
     #For all blocks in this row...
-        i.change_state(BLOCK_TYPE.STATES.DYING)
+        i[SIZE[1] - 1].change_state(BLOCK_TYPE.STATES.DYING)
         
 def get_empty_block_array():
     '''
     Returns an empty 2D array to reset the block grid
+    
+    Outer list is the list of columns
+    Inner list is the list of rows
     '''
     return tuple([None for i in range(SIZE[1])] for j in range(SIZE[0]))
 
