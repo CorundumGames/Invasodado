@@ -12,10 +12,10 @@ PATTERN      = '%Y-%m-%d %H:%M:%S.%f'
 SCORE_FORMAT = '{0.name}|{0.score}|{0.mode}|{0.country}|{0.platform}|{0.time}'
 
 def encode(text):
-    return b64encode(str(text).encode()).decode()
+    return b64encode(str(text).encode('utf-8','ignore')).decode('utf-8','ignore')
 
 def decode(text):
-    return b64decode(str(text).encode()).decode()
+    return b64decode(str(text).encode('utf-8','ignore')).decode('utf-8','ignore')
 
 class HighScoreEntry:
     def __init__(self, name='', score=0, mode=0, entry=None):
@@ -56,6 +56,8 @@ class HighScoreEntry:
             self.unscramble()
         except binascii.Error:
         #Well apparently it's not.
+            pass
+        except ValueError:
             pass
 
     def scramble(self):

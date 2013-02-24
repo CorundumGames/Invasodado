@@ -45,3 +45,6 @@ profile.out
 git.sh
 lint_results.txt
 lint.sh
+*.dir
+*.dat
+*.bak
