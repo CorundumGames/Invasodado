@@ -25,11 +25,13 @@ class ShipBullet(Bullet):
     def __init__(self):
         super().__init__()
         self.column = 0
+        self.hit_enemy = False
         
     def start_moving(self):
         SHOOT.play()
         super().start_moving()
         self.column = round(self.position[0] / 32)
+        self.hit_enemy = False
 
     def move(self):
         '''
@@ -45,8 +47,9 @@ class ShipBullet(Bullet):
         '''
         Kills whatever enemy we collided with.
         '''
-        if other.state is other.__class__.STATES.ACTIVE:
-        #And that other enemy is alive...
+        if not self.hit_enemy and other.state == other.__class__.STATES.ACTIVE:
+        #If we hit another enemy that's alive...
+            self.hit_enemy = True
             gamedata.score += 1
             self.change_state(self.__class__.STATES.RESET)
             other.change_state(other.__class__.STATES.DYING)

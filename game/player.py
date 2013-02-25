@@ -104,7 +104,7 @@ class Ship(GameObject):
         keys = pygame.key.get_pressed()
         rect = self.rect
 
-        if self.state not in (Ship.STATES.DYING, Ship.STATES.DEAD, Ship.STATES.IDLE):
+        if self.state not in {Ship.STATES.DYING, Ship.STATES.DEAD, Ship.STATES.IDLE}:
             if keys[pygame.K_LEFT] and rect.left > 0:
             #If we're pressing left and not at the left edge of the screen...
                 self.position[0] -= SPEED

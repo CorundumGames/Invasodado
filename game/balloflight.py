@@ -19,7 +19,6 @@ TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
 _ball_frames             = color.get_colored_objects(FRAMES)
 _ball_frames_color_blind = color.get_colored_objects(FRAMES, True, True)
 _balls                   = set()
-_balls_queued            = tuple([] for i in range(blockgrid.SIZE[0]))
 ################################################################################
 
 ### Functions ##################################################################
@@ -46,16 +45,8 @@ def get_ball(startpos, target, newcolor):
     ball.color      = newcolor
     ball.startpos   = tuple(startpos)
     ball._target[0] = target
-    _balls_queued[target].append(ball)
     ball.change_state(BallOfLight.STATES.APPEARING)
     return ball
-
-def release_block(column):
-    for b in (i for i in BallOfLight.BLOCK_GROUP if i.velocity[1] != 0.0):
-        if b.gridcell[0] == column:
-            return
-    
-    _balls_queued[column].pop().change_state(BallOfLight.STATES.DYING)
 
 ################################################################################
 
@@ -90,7 +81,6 @@ class BallOfLight(GameObject):
         self.rect.topleft = self.startpos
         self.change_state(BallOfLight.STATES.MOVING)
         
-        
         assert config.SCREEN_RECT.collidepoint(self._target), \
         "BallOfLight's target should be on-screen, but it's %s" % self._target
 
@@ -109,7 +99,7 @@ class BallOfLight(GameObject):
 
         if position[1] <= target[1]:  #Only y-coordinate check is needed
         #If we've reached our target location...
-            release_block(target[0])
+            self.change_state(BallOfLight.STATES.DYING)
         else:
             dx                = (percent**2)*(3-2*percent)
             ddx               = 1 - dx
@@ -127,6 +117,7 @@ class BallOfLight(GameObject):
         self._anim        = 0
         self.position     = [-300.0, -300.0]
         self.rect.topleft = self.position
+        
         self.change_state(BallOfLight.STATES.IDLE)
 
     actions = {

@@ -96,7 +96,6 @@ class Block(GameObject):
         self._target      = self.__set_target()
         self.emitter      = ParticleEmitter(color.color_particles[id(self.color)], self.rect, 5, Block.particle_group)
         self.change_state(Block.STATES.START_FALLING)
-        self.color.set_length(3)
         self.add(Block.GROUP)
 
     def start_falling(self):
