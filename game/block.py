@@ -9,7 +9,6 @@ from core            import settings
 from core.particles  import ParticlePool, ParticleEmitter
 from game.gameobject import GameObject
 from game            import blockgrid
-from game.blockgrid  import blocks
 
 ### Constants ##################################################################
 BLOCK_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
@@ -110,7 +109,7 @@ class Block(GameObject):
 
         if self.gridcell[1]:
         #If we're not at the top of the grid...
-            block_above = blocks[self.gridcell[0]][self.gridcell[1] - 1]
+            block_above = blockgrid.blocks[self.gridcell[0]][self.gridcell[1] - 1]
             if block_above:
             #If there's at least one block above us...
                 assert isinstance(block_above, Block), \
@@ -164,7 +163,7 @@ class Block(GameObject):
             self.change_state(Block.STATES.IMPACT)
         elif self.gridcell[1] + 1 < blockgrid.SIZE[1]:
         #Else if it was another block...
-            below = blocks[gridcell[0]][gridcell[1] + 1]
+            below = blockgrid.blocks[gridcell[0]][gridcell[1] + 1]
             if below and rect.bottom >= below.rect.top:
             #If we've gone past the block below...
                 rect.bottom     = below.rect.top
@@ -186,7 +185,7 @@ class Block(GameObject):
 
         if self.rect.bottom < blockgrid.RECT.bottom:
         #If we're not at the bottom of the grid...
-            block_below = blocks[gridcell[0]][gridcell[1] + 1]
+            block_below = blockgrid.blocks[gridcell[0]][gridcell[1] + 1]
             if not block_below or block_below.velocity[1]:
             #If there's no block directly below...
                 blockgrid.check_block(self, False)
@@ -208,7 +207,7 @@ class Block(GameObject):
         self.gridcell[1]     = self.rect.centery // self.rect.height #(row, col)
         self._target         = None
         self.state           = Block.STATES.ACTIVE
-        blocks[self.gridcell[0]][self.gridcell[1]] = self
+        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self
 
         blockgrid.check_block(self, True)
         _bump.play()
@@ -218,7 +217,7 @@ class Block(GameObject):
         #If this is a special block...
             if self.gridcell[1] < blockgrid.SIZE[1] - 1:
             #If we're not at the bottom of the grid...
-                self.color = blocks[self.gridcell[0]][self.gridcell[1]+ 1].color
+                self.color = blockgrid.blocks[self.gridcell[0]][self.gridcell[1]+ 1].color
                 blockgrid.clear_color(self.color)
             else:
                 blockgrid.clear_row(self.gridcell[1])
@@ -229,7 +228,7 @@ class Block(GameObject):
         self.emitter.burst(20)
         self.kill()
         
-        blocks[self.gridcell[0]][self.gridcell[1]] = None
+        blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = None
         self._anim                                 = 0
         self.position                              = [-300.0, -300.0]
         self.rect.topleft                          = self.position
@@ -252,7 +251,7 @@ class Block(GameObject):
         '''
         for i in range(self.gridcell[1] + 1, blockgrid.SIZE[1]):
         #For all grid cells below this one...
-            other = blocks[self.gridcell[0]][i]
+            other = blockgrid.blocks[self.gridcell[0]][i]
             if other and not other.velocity[1]:
             #If this grid cell is occupied...
                 self._target = i - 1
