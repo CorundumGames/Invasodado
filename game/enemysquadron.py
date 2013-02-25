@@ -62,6 +62,10 @@ def reset():
                 ENEMY_GROUP.add(i[j], i[ROW_SIZE - 1 - j])
                 i[j].change_state(appearing)
                 i[ROW_SIZE - 1 - j].change_state(appearing)
+                
+    if not ENEMY_GROUP:
+    #If for some odd reason no enemies were created...
+        reset()  #...then try again.
 
 def start():
     '''

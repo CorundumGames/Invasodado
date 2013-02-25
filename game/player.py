@@ -34,6 +34,10 @@ START_POS   = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32
 ################################################################################
 
 class FlameTrail(GameObject):
+    '''
+    FlameTrail is the jet left by the Ship's engines.  This is purely a
+    graphical effect.
+    '''
     FRAMES = [config.get_sprite(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
     GROUP  = None
 
@@ -51,6 +55,26 @@ class FlameTrail(GameObject):
         self.image = FlameTrail.FRAMES[int(3 * sin(self.anim / 2)) + 3]
 
     actions = {1 : 'animate'}
+    
+################################################################################
+
+class LightColumn(GameObject):
+    '''
+    This class exists to let the player know where exactly he's aiming.
+    '''
+    def __init__(self):
+        super().__init__()
+        self.state = 1
+        self.rect  = pygame.Rect(0, 0, 32, config.SCREEN_HEIGHT - 32 * 3)
+        self.position = self.rect.topleft
+        self.image = pygame.Surface(self.rect.size, config.FLAGS)
+        self.image.fill(color.WHITE)
+        self.image.set_alpha(128)
+        del self.acceleration, self.velocity
+        
+    actions = {1 : None}
+        
+################################################################################
 
 class Ship(GameObject):
     FRAMES = [config.get_sprite(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
@@ -70,6 +94,7 @@ class Ship(GameObject):
         self.flames       = FlameTrail()
         self.image        = Ship.FRAMES[0]
         self.invincible   = 0
+        self.light_column = LightColumn()
         self.my_bullet    = ShipBullet()
         self.position     = list(START_POS.topleft)
         self.rect         = START_POS.copy()
@@ -92,7 +117,7 @@ class Ship(GameObject):
 
     def respawn(self):
         APPEAR.play()
-        for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(128)
+        for i in chain(Ship.FRAMES, FlameTrail.FRAMES, {self.light_column.image}): i.set_alpha(128)
         self.respawn_time = 3 * 60
         self.invincible = 250
         self.position   = list(START_POS.topleft)
@@ -103,6 +128,7 @@ class Ship(GameObject):
         #Shorthand for which keys have been pressed
         keys = pygame.key.get_pressed()
         rect = self.rect
+        width = self.image.get_width()
 
         if self.state not in {Ship.STATES.DYING, Ship.STATES.DEAD, Ship.STATES.IDLE}:
             if keys[pygame.K_LEFT] and rect.left > 0:
@@ -115,6 +141,7 @@ class Ship(GameObject):
         rect.left = self.position[0] + 0.5
         self.flames.rect.midtop = (rect.midbottom[0], rect.midbottom[1] - 1)
         #Compensate for the gap in the flames                           ^^^
+        self.light_column.rect.left = round(rect.left / width) * width
 
         if self.invincible:
         #If we're invincible...
@@ -129,7 +156,7 @@ class Ship(GameObject):
         self.image = Ship.FRAMES[int(self.anim)]
 
     def die(self):
-        for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(0)
+        for i in chain(Ship.FRAMES, FlameTrail.FRAMES, {self.light_column.image}): i.set_alpha(0)
         self.emitter.rect = self.rect
         DEATH.play()
         self.emitter.burst(100)

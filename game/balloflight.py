@@ -6,8 +6,6 @@ from core            import color
 from core            import config
 from core            import settings
 from game.gameobject import GameObject
-from game import blockgrid
-
 
 ### Constants ##################################################################
 BALL_STATES  = ('IDLE', 'APPEARING', 'MOVING', 'DYING', 'RESET')
@@ -97,7 +95,7 @@ class BallOfLight(GameObject):
             self._anim += 1
             self.image  = self.current_frame_list[id(self.color)][self._anim]
 
-        if position[1] <= target[1]:  #Only y-coordinate check is needed
+        if percent == 1:
         #If we've reached our target location...
             self.change_state(BallOfLight.STATES.DYING)
         else:

@@ -105,7 +105,7 @@ class InGameState(GameState):
         self._time          = self._mode * 60
         self._ufo           = UFO()
 
-        PLAYER.add(self._ship, self._ship.flames, self._ship.my_bullet)
+        PLAYER.add(self._ship, self._ship.flames, self._ship.my_bullet, self._ship.light_column)
         UFO_GROUP.add(self._ufo)
         HUD.add(self.hud_text.score, self.hud_text.lives)
         if self._time > -1:
@@ -188,7 +188,7 @@ class InGameState(GameState):
             self._game_running = False
         elif not self._game_running:
             if not self._ship.respawn_time:
-                for i in (self._ship, self._ship.flames): i.kill()
+                for i in (self._ship, self._ship.flames, self._ship.light_column): i.kill()
                 
 
     def render(self):
