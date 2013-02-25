@@ -40,6 +40,7 @@ class Enemy(GameObject):
 
     def __init__(self, form_position):
         super().__init__()
+        self.amount_lowered     = 0
         self.color              = choice(color.LIST[:config.NUM_COLORS])
         self.column             = None
         self._form_position     = form_position
@@ -95,9 +96,13 @@ class Enemy(GameObject):
         #^ Increase the enemy squadron's speed (copysign() considers direction)
 
     def lower(self):  #Later we'll make this smoother.
-        self.position[1] += 8
+        self.amount_lowered += 1
+        self.image        = self.current_frame_list[id(self.color)][int(-abs(Enemy.anim - 3) + 3) % 4]
+        self.position[1] += 1
         self.rect.top     = self.position[1]
-        self.change_state(Enemy.STATES.ACTIVE)
+        if self.amount_lowered == 8:
+            self.amount_lowered = 0
+            self.change_state(Enemy.STATES.ACTIVE)
 
     def cheer(self):
         pass
