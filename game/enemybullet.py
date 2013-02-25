@@ -4,6 +4,8 @@ and deleted over and over, but to be reused by the enemy (so we don't take as
 much time creating and destroying bullets).
 '''
 
+from math import sin
+
 import pygame.rect
 
 from core        import config
@@ -11,6 +13,10 @@ from core        import color
 from game.bullet import Bullet
 from game.player import Ship
 from game        import gamedata
+
+### Constants ##################################################################
+BULLET_STATES = ('IDLE', 'FIRED', 'MOVING', 'DYING', 'RESET')
+################################################################################
 
 ### Globals ####################################################################
 _enemy_bullets = set()
@@ -40,11 +46,13 @@ def get_enemy_bullet():
 class EnemyBullet(Bullet):
     SPEED     = 2
     START_POS = pygame.Rect(30, config.screen.get_height() * 2, 5, 5)
+    STATES    = config.Enum(*BULLET_STATES)
     FRAME     = pygame.Rect(262, 6, 20, 18)
     GROUP     = None
 
     def __init__(self):
         super().__init__()
+        self.blink_timer = 3 * 60
         self.image = config.SPRITES.subsurface(self.__class__.FRAME)
         self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
@@ -64,6 +72,16 @@ class EnemyBullet(Bullet):
         '''
         super().reset()
         _enemy_bullets.add(self)
+        self.blink_timer = 3 * 60
+        
+    def blink(self):
+        self.blink_timer -= 1
+        
+        self.image.set_alpha(256 * (sin(self.blink_timer/4) > 0))
+            
+        if not self.blink_timer:
+            self.image.set_alpha(256)
+            self.change_state(EnemyBullet.STATES.RESET)
 
     def kill_player(self, other):
         '''
@@ -73,6 +91,13 @@ class EnemyBullet(Bullet):
         #If the player is not invincible...
             gamedata.lives  -= 1
             other.change_state(Ship.STATES.DYING)
-            self.change_state(self.__class__.STATES.RESET)
-
+            self.change_state(self.__class__.STATES.DYING)
+            
+    actions  = {
+                STATES.IDLE   : None          ,
+                STATES.FIRED  : 'start_moving',
+                STATES.MOVING : 'move'        ,
+                STATES.DYING  : 'blink'       ,
+                STATES.RESET  : 'reset'       ,
+                }
     collisions = {Ship: kill_player}

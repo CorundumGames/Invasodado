@@ -207,7 +207,7 @@ class InGameState(GameState):
 
         GameState.render(self)
         
-        if self._ship.image.get_alpha() == 0:
+        if not self._ship.image.get_alpha():
             pygame.draw.circle(config.screen,
                                color.WHITE,
                                self._ship.rect.center,
@@ -245,6 +245,7 @@ class InGameState(GameState):
                                                    )
 
         HUD.add(self.hud_text.game_over, self.hud_text.press_fire)
+        self._ship.change_state(Ship.STATES.DYING)
 
     def __begin_tracking(self):
         pass

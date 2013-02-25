@@ -56,6 +56,5 @@ class Bullet(GameObject):
                 STATES.IDLE   : None          ,
                 STATES.FIRED  : 'start_moving',
                 STATES.MOVING : 'move'        ,
-                STATES.COLLIDE: NotImplemented,
                 STATES.RESET  : 'reset'       ,
                }
