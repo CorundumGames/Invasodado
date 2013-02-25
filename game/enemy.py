@@ -70,7 +70,7 @@ class Enemy(GameObject):
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         #self.emitter.rect = self.rect
         
-        if uniform(0, 1) < Enemy.shoot_odds:
+        if uniform(0, 1) < Enemy.shoot_odds and not enemybullet.EnemyBullet.halt:
         #With Enemy.shoot_odds% of firing...
             b             = enemybullet.get_enemy_bullet()
             b.rect.midtop = self.rect.midbottom

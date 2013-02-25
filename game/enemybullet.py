@@ -28,6 +28,10 @@ def clean_up():
     Removes all EnemyBullets from memory.
     '''
     _enemy_bullets.clear()
+    
+def all_disappear():
+    for i in EnemyBullet.GROUP:
+        i.change_state(i.__class__.STATES.RESET)
 
 def get_enemy_bullet():
     '''
@@ -49,6 +53,7 @@ class EnemyBullet(Bullet):
     STATES    = config.Enum(*BULLET_STATES)
     FRAME     = pygame.Rect(262, 6, 20, 18)
     GROUP     = None
+    halt      = False
 
     def __init__(self):
         super().__init__()
@@ -80,7 +85,9 @@ class EnemyBullet(Bullet):
         self.image.set_alpha(256 * (sin(self.blink_timer/4) > 0))
             
         if not self.blink_timer:
+        #If we're done animating...
             self.image.set_alpha(256)
+            EnemyBullet.halt = False
             self.change_state(EnemyBullet.STATES.RESET)
 
     def kill_player(self, other):
@@ -90,8 +97,12 @@ class EnemyBullet(Bullet):
         if not other.invincible and other.state == Ship.STATES.ACTIVE:
         #If the player is not invincible...
             gamedata.lives  -= 1
+            all_disappear()
+            EnemyBullet.halt = True
             other.change_state(Ship.STATES.DYING)
             self.change_state(self.__class__.STATES.DYING)
+            
+            
             
     actions  = {
                 STATES.IDLE   : None          ,

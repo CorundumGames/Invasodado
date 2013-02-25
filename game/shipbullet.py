@@ -47,7 +47,7 @@ class ShipBullet(Bullet):
         '''
         Kills whatever enemy we collided with.
         '''
-        if not self.hit_enemy and other.state == other.__class__.STATES.ACTIVE:
+        if not self.hit_enemy and other.state in {other.__class__.STATES.ACTIVE, other.__class__.STATES.LOWERING}:
         #If we hit another enemy that's alive...
             self.hit_enemy = True
             gamedata.score += 1

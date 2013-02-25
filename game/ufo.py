@@ -17,7 +17,7 @@ FRAMES     = [
              ]
 START_POS  = (640, 16)
 UFO_FRAMES = color.get_colored_objects(FRAMES)
-UFO_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING')
+UFO_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING', 'LOWERING')
 ################################################################################
 
 class UFO(GameObject):
