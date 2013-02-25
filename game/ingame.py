@@ -2,6 +2,7 @@ from collections import namedtuple
 from functools   import partial
 from math import log1p
 from os.path     import join
+from random      import choice
 
 import pygame
 from pygame.sprite import Group, OrderedUpdates
@@ -155,7 +156,10 @@ class InGameState(GameState):
         #For all events passed in...
             if __debug__ and e.type == pygame.MOUSEBUTTONDOWN:
             #If a mouse button is clicked and we're in debug mode...
-                self.__make_block(e.pos[0], MOUSE_ACTIONS[e.button])
+                if e.button < 4:
+                    self.__make_block(e.pos[0], MOUSE_ACTIONS[e.button])
+                else:
+                    self.__make_block(e.pos[0],None,True)
             elif e.type == pygame.KEYDOWN and e.key in key_actions:
             #If a key is pressed...
                 if self._game_running or (not self._game_running and e.key == pygame.K_SPACE):
@@ -216,12 +220,15 @@ class InGameState(GameState):
         
         pygame.display.flip()
 
-    def __make_block(self, position, color):
+    def __make_block(self, position, color = choice(color.LIST), special = False):
         '''
         @param position: Position to release the Block (it'll snap to the grid)
         @param color: Color of the Block that will be released
         '''
-        BLOCKS.add(block.get_block([position, 0.0], color))
+        if not special:
+            BLOCKS.add(block.get_block([position, 0.0], color))
+        else:
+            UFO.BLOCK_GROUP.add(block.get_block([position, 0.0], special=True))
 
     def __add_ufo(self):
         if self._ufo.state == UFO.STATES.IDLE:
