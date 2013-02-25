@@ -115,7 +115,7 @@ class Block(GameObject):
                 assert isinstance(block_above, Block), \
                 "%s expected a Block, got a %s" % (self, block_above)
 
-                for i in blocks[self.gridcell[0]]:
+                for i in blockgrid.blocks[self.gridcell[0]]:
                 #For all grid cells above us...
                     if i and not i.velocity[1]:
                     #If this is a block that's not moving...
