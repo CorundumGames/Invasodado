@@ -47,6 +47,14 @@ tracking = __debug__ and 'track' in argv
 #True if we're outputting graphs of the player's statistics
 
 _music_playing = None
+
+_current_music_volume = 50
+
+_current_effects_volume = 50
+
+_difficulties = ["Easy", "Normal", "Hard"]
+
+_current_difficulty = 1
 ################################################################################
 
 
@@ -90,6 +98,26 @@ def toggle_frame_limit():
     global _limit_frame
     _limit_frame = not _limit_frame
     
+def toggle_music_volume(delta_volume):
+    global _current_music_volume
+    if _current_music_volume + delta_volume in range(0,101):
+        _current_music_volume += delta_volume
+      
+def toggle_effects_volume(delta_volume):
+    global _current_effects_volume
+    if _current_effects_volume + delta_volume in range(0,101):
+        _current_effects_volume += delta_volume
+
+def toggle_difficulty(toggle):
+    global _current_difficulty
+    _current_difficulty += toggle
+    _current_difficulty %= len(_difficulties)
+
+def difficulty_string():
+    global _difficulties
+    global _current_difficulty
+    return _difficulties[_current_difficulty]
+
 def toggle_color_blind_mode():
     settings.color_blind = not settings.color_blind
 
