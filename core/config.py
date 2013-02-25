@@ -35,11 +35,6 @@ screen = pygame.display.set_mode(settings.resolution, DOUBLEBUF)
 tracking = __debug__ and 'track' in argv
 #True if we're outputting graphs of the player's statistics
 
-
-
-
-
-
 ################################################################################
 
 
