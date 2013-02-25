@@ -12,6 +12,7 @@ fullscreen = False
 #Whether colorblind mode is enabled.
 color_blind = False
 
-sound_volume = 0.6
+sound_volume = 0.5
 
-music_volume = 0.6
+music_volume = 0.5
+

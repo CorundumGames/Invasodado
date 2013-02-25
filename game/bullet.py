@@ -16,7 +16,7 @@ BULLET_STATES = ('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
 class Bullet(GameObject):
     FRAME  = pygame.Rect(227, 6, 26, 19)
     STATES = config.Enum(*BULLET_STATES)
-    SPRITE = config.SPRITES.subsurface(FRAME)
+    SPRITE = config.get_sprite(FRAME)
 
     def __init__(self):
         super().__init__()

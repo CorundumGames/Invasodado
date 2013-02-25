@@ -18,6 +18,7 @@ BLUE   = pygame.Color('#585EFF')
 YELLOW = pygame.Color('#EBFF55')
 PURPLE = pygame.Color('#FF55D5')
 WHITE  = pygame.Color('#FFFFFF')
+BLACK  = pygame.Color('#000000')
 LIST   = (RED, BLUE, GREEN, YELLOW, PURPLE) # THESE are used by blocks.
 
 # The color that will be transparent, taken from the bottom-left corner
@@ -27,11 +28,11 @@ COLOR_KEY = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 COLOR_BLIND_FRAMES  = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4,9)]
 #Holds the symbols.
 COLOR_BLIND_SYMBOLS = {
-                        id(RED)    : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[0]).copy(),
-                        id(BLUE)   : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[1]).copy(),
-                        id(GREEN)  : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[2]).copy(),
-                        id(YELLOW) : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[3]).copy(),
-                        id(PURPLE) : config.SPRITES.subsurface(COLOR_BLIND_FRAMES[4]).copy(),
+                        id(RED)    : config.get_sprite(COLOR_BLIND_FRAMES[0]),
+                        id(BLUE)   : config.get_sprite(COLOR_BLIND_FRAMES[1]),
+                        id(GREEN)  : config.get_sprite(COLOR_BLIND_FRAMES[2]),
+                        id(YELLOW) : config.get_sprite(COLOR_BLIND_FRAMES[3]),
+                        id(PURPLE) : config.get_sprite(COLOR_BLIND_FRAMES[4]),
                        }
 ################################################################################
 
@@ -54,13 +55,7 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False):
     @rtype: dict of {color: [frames_list]}
     '''
     colored = dict([
-                    (
-                     id(c),
-                     [
-                      blend_color(config.SPRITES.subsurface(f).copy(), c)
-                      for f in frames
-                     ]
-                    )
+                    (id(c), [blend_color(config.get_sprite(f), c) for f in frames])
                     for c in LIST
                    ]
                   )

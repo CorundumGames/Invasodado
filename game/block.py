@@ -21,7 +21,6 @@ MAX_SPEED    = 12.0
 ### Globals ####################################################################
 _blocks_set = set()
 _bump       = config.load_sound('bump.wav')
-
 _block_frames    = color.get_colored_objects(FRAMES)
 _block_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
 ################################################################################

@@ -23,7 +23,7 @@ ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES, True, True)
 ################################################################################
 
 ### Globals ####################################################################
-_hurt = pygame.mixer.Sound(os.path.join('sfx', 'enemyhit.wav'))
+_hurt = config.load_sound('enemyhit.wav')
 _hurt.set_volume(.5)
 ################################################################################
 

@@ -14,7 +14,7 @@ from game.ufo    import UFO
 from game        import gamedata
 
 ### Constants ##################################################################
-SHOOT = pygame.mixer.Sound(join('sfx', 'shoot.wav'))
+SHOOT = config.load_sound('shoot.wav')
 ################################################################################
 
 class ShipBullet(Bullet):

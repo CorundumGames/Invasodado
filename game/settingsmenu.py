@@ -51,8 +51,9 @@ class SettingsMenu(GameState):
         a = make_text(SETTINGS_NAMES, pos=MENU_CORNER, vspace=DIST_APART)
 
         b = make_text(
-                      [config.on_off(settings.fullscreen), config.on_off(settings.color_blind), config.difficulty_string(), str(config._current_music_volume),
-                        str(config._current_effects_volume), ""],
+                      [config.on_off(settings.fullscreen), config.on_off(settings.color_blind), config.difficulty_string(),
+                       config.percent_str(settings.music_volume),
+                       config.percent_str(settings.sound_volume), ""],
                       pos=[MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]],
                       vspace=DIST_APART
                      )
@@ -66,14 +67,14 @@ class SettingsMenu(GameState):
                              self.__toggle_color_blind_mode      ,
                              self.__toggle_difficulty            ,
                              self.__toggle_music_volume          ,
-                             self.__toggle_effects_volume        ,
+                             self.__toggle_sound_volume          ,
                              partial(self.change_state, MainMenu),
                             )
 
         self.key_actions  = {
                              pygame.K_RETURN: partial(self.__enter_selection, 1)  ,
-                             pygame.K_LEFT  : partial(self.__enter_selection, -1) ,
-                             pygame.K_RIGHT : partial(self.__enter_selection, 1)  ,
+                             pygame.K_LEFT  : partial(self.__enter_selection, -.1) ,
+                             pygame.K_RIGHT : partial(self.__enter_selection, .1)  ,
                              pygame.K_UP    : partial(self.__move_cursor, -1)     ,
                              pygame.K_DOWN  : partial(self.__move_cursor,  1)     ,
                              pygame.K_ESCAPE: partial(self.change_state, MainMenu),
@@ -113,15 +114,15 @@ class SettingsMenu(GameState):
         self.menu.colorblind[1].image = HudObject.make_text(config.on_off(settings.color_blind), surfaces=True)
 
     def __toggle_difficulty(self, toggle):
-        config.toggle_difficulty(toggle)
+        config.toggle_difficulty(int(toggle * 10))
         self.menu.difficulty[1].image = HudObject.make_text(config.difficulty_string(), surfaces=True)
 
     def __toggle_music_volume(self, delta_volume):
-        delta_volume *= 10
-        config.toggle_music_volume(delta_volume)
-        self.menu.musicvolume[1].image = HudObject.make_text(str(config._current_music_volume), surfaces=True)
+        settings.music_volume += delta_volume
+        settings.music_volume = round(settings.music_volume % 1.1, 1)
+        self.menu.musicvolume[1].image = HudObject.make_text(config.percent_str(settings.music_volume), surfaces=True)
         
-    def __toggle_effects_volume(self, delta_volume):
-        delta_volume *= 10
-        config.toggle_effects_volume(delta_volume)
-        self.menu.effectsvolume[1].image = HudObject.make_text(str(config._current_effects_volume), surfaces=True)
+    def __toggle_sound_volume(self, delta_volume):
+        settings.sound_volume += delta_volume
+        settings.sound_volume = round(settings.sound_volume % 1.1, 1)
+        self.menu.effectsvolume[1].image = HudObject.make_text(config.percent_str(settings.sound_volume), surfaces=True)

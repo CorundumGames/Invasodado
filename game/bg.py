@@ -29,7 +29,7 @@ def _star_move(self):
 ################################################################################
 
 STARS_GROUP = pygame.sprite.RenderUpdates()
-_STAR_IMAGE = config.SPRITES.subsurface(4, 170, 2, 2)
+_STAR_IMAGE = config.get_sprite(pygame.Rect(4, 170, 2, 2))
 
 EARTH = HudObject(config.EARTH, [0, 0])
 GRID  = HudObject(config.BG   , [0, 0])

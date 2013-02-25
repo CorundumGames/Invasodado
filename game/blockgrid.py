@@ -4,12 +4,11 @@ blocks.  It's designed around Invasodado, but with a little work it could be
 refitted for other match-3 games like Bejewelled or Puzzle League.
 '''
 
-from os.path import join
-
 from pygame.display import get_surface
 import pygame.rect
 import pygame.mixer
 
+from core import config
 from game import gamedata
 
 ### Constants ##################################################################
@@ -23,7 +22,7 @@ RECT       = pygame.rect.Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL
 blocks           = None
 _blocks_to_check = set()
 _blocks_to_clear = set()
-_block_clear     = pygame.mixer.Sound(join('sfx', 'clear.wav'))
+_block_clear     = config.load_sound('clear.wav')
 ################################################################################
 
 def check_block(block, should_check=True):

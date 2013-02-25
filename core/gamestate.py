@@ -4,6 +4,7 @@ An interface for representing game screens.
 
 import pygame
 
+from core import color
 from core import config
 from core.config import screen, _limit_frame
 from game import bg
@@ -21,7 +22,6 @@ class GameState:
     @ivar group_list: List of game object groups to process
     @ivar next_state: If not None, the gsm switches to this state
     '''
-    fps_timer  = pygame.time.Clock()
     group_list = []
     next_state = None
 
@@ -65,16 +65,16 @@ class GameState:
         Remember, Group.blit() renders Sprites in arbitrary order, so we must
         assign Sprites to groups by layer, then call Group.blit() sequentially.
         '''
-        screen.fill((0, 0, 0))
+        screen.fill(color.BLACK)
         bg.STARS.emit()
         
         for i in self.group_list:
             i.draw(screen)
 
-        assert not config.show_fps(self.fps_timer.get_fps())
+        assert not config.show_fps()
         #^ So this statement is stripped in Release mode.
 
-        self.fps_timer.tick_busy_loop(60 * _limit_frame)
+        config.fps_timer.tick_busy_loop(60 * _limit_frame)
 
     def change_state(self, state_type, *args, **kwargs):
         '''

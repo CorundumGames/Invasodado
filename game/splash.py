@@ -4,7 +4,9 @@ from os.path   import join
 import pygame
 from pygame.sprite import Group
 
+from core import color
 from core import config
+
 from core.config import screen, _limit_frame
 from core.gamestate import GameState
 from game.hudobject import HudObject
@@ -16,8 +18,8 @@ LETTERS = Group()
 ################################################################################
 
 ### Constants ##################################################################
-LOGO = pygame.image.load(join('gfx', 'logo.png'))
-BOOT = pygame.mixer.Sound(join('sfx', 'boot.wav'))
+LOGO = config.load_image('logo.png')
+BOOT = config.load_sound('boot.wav')
 ################################################################################
 
 ### Preparation ################################################################
@@ -26,9 +28,9 @@ BOOT = pygame.mixer.Sound(join('sfx', 'boot.wav'))
 
 class SplashScreen(GameState):
     def __init__(self):
-        self.group_list = (DIAMOND, LETTERS)
-        self.logo       = HudObject(LOGO, [0, 0])
-        self.start_time = 5 * 60
+        self.group_list    = (DIAMOND, LETTERS)
+        self.logo          = HudObject(LOGO, [0, 0])
+        self.start_time    = 5 * 60
         self.alpha_percent = 0.0
         
         self.logo.rect.center = config.SCREEN_RECT.center
@@ -53,13 +55,13 @@ class SplashScreen(GameState):
             self.change_state(MainMenu)
     
     def render(self):
-        screen.fill((255, 255, 255))
+        screen.fill(color.WHITE)
         
         for i in self.group_list:
             i.draw(screen)
 
         pygame.display.flip()
-        assert not config.show_fps(self.fps_timer.get_fps())
+        assert not config.show_fps()
         #^ So this statement is stripped in Release mode.
 
-        self.fps_timer.tick_busy_loop(60 * _limit_frame)
+        config.fps_timer.tick_busy_loop(60 * _limit_frame)

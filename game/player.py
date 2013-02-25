@@ -27,14 +27,14 @@ def _burst_appear(self):
 APPEAR      = config.load_sound('appear.wav')
 DEATH       = config.load_sound('death.wav')
 GRAVITY     = 0.5
-PARTICLE_POOL = ParticlePool(config.SPRITES.subsurface(pygame.Rect(4, 170, 4, 4)), appear_func=_burst_appear)
+PARTICLE_POOL = ParticlePool(config.get_sprite(pygame.Rect(4, 170, 4, 4)), appear_func=_burst_appear)
 SHIP_STATES = ('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
 SPEED       = 4
 START_POS   = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
 ################################################################################
 
 class FlameTrail(GameObject):
-    FRAMES = [config.SPRITES.subsurface(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
+    FRAMES = [config.get_sprite(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
     GROUP  = None
 
     def __init__(self):
@@ -53,7 +53,7 @@ class FlameTrail(GameObject):
     actions = {1 : 'animate'}
 
 class Ship(GameObject):
-    FRAMES = [config.SPRITES.subsurface(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
+    FRAMES = [config.get_sprite(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
     STATES = config.Enum(*SHIP_STATES)
     GROUP  = None
 
@@ -66,15 +66,15 @@ class Ship(GameObject):
         '''
         super().__init__()
 
-        self.anim       = 0.0
-        self.flames     = FlameTrail()
-        self.image      = Ship.FRAMES[0]
-        self.invincible = 0
-        self.my_bullet  = ShipBullet()
-        self.position   = list(START_POS.topleft)
-        self.rect       = START_POS.copy()
+        self.anim         = 0.0
+        self.flames       = FlameTrail()
+        self.image        = Ship.FRAMES[0]
+        self.invincible   = 0
+        self.my_bullet    = ShipBullet()
+        self.position     = list(START_POS.topleft)
+        self.rect         = START_POS.copy()
         self.respawn_time = 3 * 60
-        self.emitter    = ParticleEmitter(PARTICLE_POOL, self.rect, 2)
+        self.emitter      = ParticleEmitter(PARTICLE_POOL, self.rect, 2)
         self.change_state(Ship.STATES.RESPAWN)
 
         for i in Ship.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)

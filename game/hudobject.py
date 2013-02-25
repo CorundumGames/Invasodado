@@ -16,7 +16,7 @@ class HudObject(GameObject):
     
     def __init__(self, image, pos):
         super().__init__()
-        self.image = image.convert(config.DEPTH, config.FLAGS)
+        self.image = image#
         self.rect  = pygame.Rect(pos, image.get_size())
         del self.velocity, self.acceleration, self.position, self.next_state
 
@@ -41,11 +41,11 @@ class HudObject(GameObject):
 
         if isinstance(text, str):
         #If we were given a single string...
-            hud = font.render(text, False, col)
+            hud = font.render(text, False, col).convert(config.DEPTH, config.FLAGS)
             return hud if surfaces else HudObject(hud, pos)
         else:
             def d(t):
-                hud = font.render(text[t], False, col)
+                hud = font.render(text[t], False, col).convert(config.DEPTH, config.FLAGS)
                 return hud if surfaces else HudObject(hud, (pos[0], pos[1] + vspace * t))
 
             return [d(i) for i in range(len(text))]

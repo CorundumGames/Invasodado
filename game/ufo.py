@@ -22,7 +22,7 @@ UFO_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING')
 
 class UFO(GameObject):
     STATES      = config.Enum(*UFO_STATES)
-    invade      = pygame.mixer.Sound(os.path.join('sfx', 'ufo.wav'))
+    invade      = config.load_sound('ufo.wav')
     GROUP       = None
     BLOCK_GROUP = None
     #The sound the UFO makes as it flies across the screen
@@ -31,7 +31,7 @@ class UFO(GameObject):
         super().__init__()
         self._anim    = 0.0
         self.column   = None
-        self.image    = config.SPRITES.subsurface(FRAMES[0]).copy()
+        self.image    = config.get_sprite(FRAMES[0])
         self.odds     = .0001
         self.position = list(START_POS)
         self.rect     = pygame.Rect(START_POS, self.image.get_size())

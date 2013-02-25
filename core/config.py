@@ -6,60 +6,103 @@ utilities, etc.  It's a Python convention to call this sort of file config.py.
 from os.path import join
 from sys     import argv
 
-import pygame.display
+from pygame.display import set_caption
 import pygame.image
 from pygame import ASYNCBLIT, FULLSCREEN, DOUBLEBUF, HWACCEL, HWSURFACE, RLEACCEL
 
 from core import settings
 
-screen = pygame.display.set_mode(settings.resolution, pygame.DOUBLEBUF)
+### Globals ####################################################################
+
 #The window we blit graphics onto.
 
-### Constants ##################################################################
-CURSOR_BEEP = pygame.mixer.Sound(join('sfx', 'cursor.wav'))
-DEPTH    = screen.get_bitsize()
-ENCODING = 'utf-8'
-FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
-#The flags used to create all Surfaces; these are best for performance.
+_current_difficulty = 1
 
-NUM_COLORS = 5
-#The color depth used, in bits
-
-SCREEN_DIMS   = tuple(pygame.display.list_modes()) #Available screen resolutions
-SCREEN_HEIGHT = screen.get_height() #480 15 cells 32
-SCREEN_RECT   = pygame.Rect((0, 0), screen.get_size())
-SCREEN_WIDTH  = screen.get_width()  #640 20 cells 32
-#Screen width and height, in pixels
-SPRITES = pygame.image.load(join('gfx', 'sprites.png')).convert(DEPTH, FLAGS)
-EARTH   = pygame.image.load(join('gfx', 'earth.png'  )).convert(DEPTH, FLAGS)
-BG      = pygame.image.load(join('gfx', 'bg.png'     )).convert(DEPTH, FLAGS)
-FONT    = pygame.font.Font(join('gfx', 'font.ttf'), 18)
-################################################################################
-
-### Globals ####################################################################
-_pause = False
-#True if the game is paused
+_difficulties = ["Easy", "Normal", "Hard"]
 
 _limit_frame = True
 #True if we're restricting framerate to 60FPS
 
+_music_playing = None
+
+_pause = False
+#True if the game is paused
+
+fps_timer = pygame.time.Clock()
+
+screen = pygame.display.set_mode(settings.resolution, DOUBLEBUF)
+
 tracking = __debug__ and 'track' in argv
 #True if we're outputting graphs of the player's statistics
 
-_music_playing = None
 
-_current_music_volume = 50
 
-_current_effects_volume = 50
 
-_difficulties = ["Easy", "Normal", "Hard"]
 
-_current_difficulty = 1
+
 ################################################################################
 
 
 
 ### Functions ##################################################################
+def difficulty_string():
+    return _difficulties[_current_difficulty]
+
+def get_sprite(frame):
+    return SPRITES.subsurface(frame).copy()
+
+def load_image(name):
+    return pygame.image.load(join('gfx', name)).convert(DEPTH, FLAGS)
+
+def load_sound(name):
+    return pygame.mixer.Sound(join('sfx', name))
+
+def on_off(condition):
+    '''
+    Primarily for the Settings menu.
+    '''
+    return "On" if condition else "Off"
+
+def percent_str(var):
+    return "%d%%" % (var * 100)
+
+def play_music(name):
+    '''
+    Plays a music fil
+    '''
+    global _music_playing
+    if name != _music_playing:
+    #If we want to play a song that isn't already playing...
+        _music_playing = name
+        pygame.mixer.music.load(join('sfx', name))
+        pygame.mixer.music.play(-1)
+
+def show_fps():
+    set_caption("FPS: %3g" % round(fps_timer.get_fps(), 3))
+    
+def toggle_color_blind_mode():
+    '''
+    Toggles color-blind mode.
+    '''
+    settings.color_blind = not settings.color_blind
+    
+def toggle_difficulty(toggle):
+    '''
+    Toggles difficulty
+    '''
+    #TODO: Improve documentation
+    global _current_difficulty
+    _current_difficulty += toggle
+    _current_difficulty %= len(_difficulties)
+    
+def toggle_frame_limit():
+    '''
+    Toggles the regulation of the frame rate.  If unregulated, the game runs as
+    fast as the computer can process it.
+    '''
+    global _limit_frame
+    _limit_frame = not _limit_frame
+
 def toggle_fullscreen():
     '''
     Toggles full-screen on or off.
@@ -90,57 +133,27 @@ def toggle_pause():
                 _pause = not _pause
                 break
 
-def toggle_frame_limit():
-    '''
-    Toggles the regulation of the frame rate.  If unregulated, the game runs as
-    fast as the computer can process it.
-    '''
-    global _limit_frame
-    _limit_frame = not _limit_frame
-    
-def toggle_music_volume(delta_volume):
-    global _current_music_volume
-    if _current_music_volume + delta_volume in range(0,101):
-        _current_music_volume += delta_volume
-      
-def toggle_effects_volume(delta_volume):
-    global _current_effects_volume
-    if _current_effects_volume + delta_volume in range(0,101):
-        _current_effects_volume += delta_volume
+################################################################################
 
-def toggle_difficulty(toggle):
-    global _current_difficulty
-    _current_difficulty += toggle
-    _current_difficulty %= len(_difficulties)
+### Constants ##################################################################
+CURSOR_BEEP = load_sound('cursor.wav')
+DEPTH    = screen.get_bitsize()
+ENCODING = 'utf-8'
+FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
+#The flags used to create all Surfaces; these are best for performance.
 
-def difficulty_string():
-    global _difficulties
-    global _current_difficulty
-    return _difficulties[_current_difficulty]
+NUM_COLORS = 5
+#The color depth used, in bits
 
-def toggle_color_blind_mode():
-    settings.color_blind = not settings.color_blind
-
-def on_off(condition):
-    '''
-    Primarily for the Settings menu.
-    '''
-    return "On" if condition else "Off"
-
-def show_fps(fps):
-    pygame.display.set_caption("FPS: %f" % round(fps, 3))
-
-def play_music(name):
-    global _music_playing
-    if name != _music_playing:
-    #If we want to play a song that isn't already playing...
-        _music_playing = name
-        pygame.mixer.music.load(join('sfx', name))
-        pygame.mixer.music.play(-1)
-
-def load_sound(name):
-    return pygame.mixer.Sound(join('sfx', name))
-
+SCREEN_DIMS   = tuple(pygame.display.list_modes()) #Available screen resolutions
+SCREEN_HEIGHT = screen.get_height() #480 15 cells 32
+SCREEN_RECT   = pygame.Rect((0, 0), screen.get_size())
+SCREEN_WIDTH  = screen.get_width()  #640 20 cells 32
+#Screen width and height, in pixels
+SPRITES = load_image('sprites.png')
+EARTH   = load_image('earth.png')
+BG      = load_image('bg.png')
+FONT    = pygame.font.Font(join('gfx', 'font.ttf'), 18)
 ################################################################################
 
 ### Preparation ################################################################
@@ -163,5 +176,3 @@ class Enum:
         @param keys: List of enum entries, given as a list of strings
         '''
         self.__dict__.update(zip(keys, range(len(keys))))
-
-
