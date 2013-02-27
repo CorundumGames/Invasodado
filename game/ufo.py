@@ -6,15 +6,19 @@ import pygame
 
 from core       import color
 from core       import config
+from core.particles import ParticleEmitter
 from game.block import get_block
 
 from game.gameobject import GameObject
 
 ### Constants ##################################################################
+BLOCK      = config.load_sound('ufo_block.wav')
+DEATH      = config.load_sound('ufo_explosion.wav')
 FRAMES     = [
               pygame.Rect(64 * (i % 4), 192 + 32 * (i // 4), 64, 32)
               for i in range(10, -1, -1)
              ]
+INVADE     = config.load_sound('ufo.wav')
 START_POS  = (640, 16)
 UFO_FRAMES = color.get_colored_objects(FRAMES)
 UFO_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING', 'LOWERING')
@@ -22,7 +26,6 @@ UFO_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING', 'LOWERING')
 
 class UFO(GameObject):
     STATES      = config.Enum(*UFO_STATES)
-    invade      = config.load_sound('ufo.wav')
     GROUP       = None
     BLOCK_GROUP = None
     #The sound the UFO makes as it flies across the screen
@@ -36,6 +39,7 @@ class UFO(GameObject):
         self.position = list(START_POS)
         self.rect     = pygame.Rect(START_POS, self.image.get_size())
         self.state    = UFO.STATES.IDLE
+        self.emitter  = ParticleEmitter(color.random_color_particles, self.rect)
 
         del self.acceleration
 
@@ -43,10 +47,11 @@ class UFO(GameObject):
         '''
         Appear on-screen, but not for very long!
         '''
+        INVADE.play(-1)
         self.position     = list(START_POS)
         self.rect.topleft = list(START_POS)
-        self.state        = UFO.STATES.ACTIVE
-        self.velocity[0]  = -1.1
+        self.change_state(UFO.STATES.ACTIVE)
+        self.velocity[0]  = -2.0
 
     def move(self):
         '''
@@ -54,8 +59,7 @@ class UFO(GameObject):
         '''
         position = self.position
         rect     = self.rect
-
-        #UFO_GROUP.invade.play()
+            
         self._anim += 0.5
         self.image  = UFO_FRAMES[id(choice(color.LIST))       ] \
                                 [int(self._anim) % len(FRAMES)]
@@ -65,21 +69,26 @@ class UFO(GameObject):
 
         if rect.right < 0:
         #If we've gone past the left edge of the screen...
-            self.state = UFO.STATES.LEAVING
+            self.change_state(UFO.STATES.LEAVING)
 
     def die(self):
         '''
         Vanish and release a special Block that clears lots of other Blocks.
         '''
+        print(self.emitter.pool.image)
+        self.emitter.rect = self.rect
+        self.emitter.burst(30)
+        DEATH.play()
+        BLOCK.play()
         UFO.BLOCK_GROUP.add(get_block([self.rect.centerx, 0], special=True))
-        self.state = UFO.STATES.LEAVING
+        self.change_state(UFO.STATES.LEAVING)
 
     def leave(self):
-        UFO.invade.stop()
+        INVADE.stop()
         self.velocity[0]  = 0
         self.position     = list(START_POS)
         self.rect.topleft = START_POS
-        self.state        = UFO.STATES.IDLE
+        self.change_state(UFO.STATES.IDLE)
 
     def wait(self):
         '''
@@ -87,7 +96,7 @@ class UFO(GameObject):
         '''
         if uniform(0, 1) < self.odds:
         #With a certain probability...
-            self.state = UFO.STATES.APPEARING
+            self.change_state(UFO.STATES.APPEARING)
 
     actions = {
                 STATES.IDLE     : 'wait'  ,

@@ -215,6 +215,7 @@ class Block(GameObject):
         
         if self._special:
         #If this is a special block...
+            self.emitter.pool = color.random_color_particles
             if self.gridcell[1] < blockgrid.SIZE[1] - 1:
             #If we're not at the bottom of the grid...
                 self.color = blockgrid.blocks[self.gridcell[0]][self.gridcell[1]+ 1].color

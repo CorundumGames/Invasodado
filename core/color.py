@@ -2,6 +2,7 @@
 This module just provides some useful tools for the various color-reliant
 objects in Invasodado to use.  Nothing too special here.
 '''
+from random import uniform, choice
 
 import pygame
 
@@ -74,10 +75,15 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False):
             for i in colored[id(c)]:
                 i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(),(2,2))
     return colored
+
+def _rand_color_appear(self):
+    self.acceleration[1] = 0.5
+    self.velocity        = [uniform(-5, 5), uniform(-1, -3)]
+    self.image           = choice(list(_parts.values()))[0]
 ################################################################################
 
 ### Globals ####################################################################
 _parts = get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
 color_particles = dict([(id(c), ParticlePool(_parts[id(c)][0])) for c in LIST])
-
+random_color_particles = ParticlePool(_parts[id(RED)][0], appear_func=_rand_color_appear)
 ################################################################################
