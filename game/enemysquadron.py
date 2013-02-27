@@ -30,7 +30,7 @@ def celebrate():
     Plays the Enemy celebration animation upon game over.
     '''
     Enemy.velocity = [0.0, 0.0]
-    for e in ENEMY_GROUP:
+    for e in (j for j in ENEMY_GROUP if isinstance(j, Enemy)):
     #For all enemies...
         e.change_state(Enemy.STATES.CHEERING)
 

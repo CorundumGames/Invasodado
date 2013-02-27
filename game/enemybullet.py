@@ -28,6 +28,7 @@ def clean_up():
     Removes all EnemyBullets from memory.
     '''
     _enemy_bullets.clear()
+    EnemyBullet.halt = False
     
 def all_disappear():
     for i in EnemyBullet.GROUP:
