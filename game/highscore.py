@@ -101,6 +101,7 @@ class HighScoreState(GameState):
     def __char_move(self, index):
         if self.entering_name:
         #If we're entering our name for a high score...
+            config.CURSOR_BEEP.play()
             self.alphanum_index += index
             self.alphanum_index %= len(ALPHANUMERIC)
             self.entry_name[self.name_index] = ord(ALPHANUMERIC[self.alphanum_index])
@@ -109,8 +110,10 @@ class HighScoreState(GameState):
         '''
         Move between the three tables, but not if you're entering a high score.
         '''
+        
         if not self.entering_name:
         #If we're not currently entering our name...
+            config.CURSOR_BEEP.play()
             scores, titles = self.hud_scores, self.hud_titles
             MENU.remove(scores[self.current_table], titles[self.current_table])
             self.current_table += index
@@ -120,6 +123,7 @@ class HighScoreState(GameState):
     def __enter_char(self):
         
         if self.entering_name and self.name_index < CHAR_LIMIT:
+            config.CURSOR_SELECT.play()
         #If we're entering our name for a high score and it's not too long...
             if ALPHANUMERIC[self.alphanum_index] == '<':
                 if len(self.entry_name) > 1:              
@@ -144,9 +148,11 @@ class HighScoreState(GameState):
             self.entry_name    += bytes('A', config.ENCODING)
         elif self.entering_name:
         #If we've finished entering our name...
+            config.CURSOR_SELECT.play()
             self.__enter_score()
             
     def __enter_score(self):
+        config.CURSOR_SELECT.play()
         self.entering_name = False
         self.hud_name.kill()#Get rid of the name entry characters
         score_tables[self.current_table].add_score(HighScoreEntry(self.entry_name.decode(), self.kwargs['score'], self._mode))#add the entry to the leaderboard

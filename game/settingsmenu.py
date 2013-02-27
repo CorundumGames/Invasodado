@@ -91,7 +91,8 @@ class SettingsMenu(GameState):
 
     def __enter_selection(self, toggle):
         '''Go with the cursor_index the player made.'''
-        if(self.cursor_index != len(self.menu_actions) - 1):
+        config.CURSOR_SELECT.play()
+        if self.cursor_index != len(self.menu_actions) - 1:
             self.menu_actions[self.cursor_index](toggle)
         else:
             self.menu_actions[self.cursor_index]()
@@ -120,9 +121,12 @@ class SettingsMenu(GameState):
     def __toggle_music_volume(self, delta_volume):
         settings.music_volume += delta_volume
         settings.music_volume = round(settings.music_volume % 1.1, 1)
+        pygame.mixer.music.set_volume(settings.music_volume)
         self.menu.musicvolume[1].image = HudObject.make_text(config.percent_str(settings.music_volume), surfaces=True)
         
     def __toggle_sound_volume(self, delta_volume):
         settings.sound_volume += delta_volume
         settings.sound_volume = round(settings.sound_volume % 1.1, 1)
+        config.set_volume()
+        
         self.menu.effectsvolume[1].image = HudObject.make_text(config.percent_str(settings.sound_volume), surfaces=True)

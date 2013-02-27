@@ -28,6 +28,8 @@ _music_playing = None
 _pause = False
 #True if the game is paused
 
+_sounds = []
+
 fps_timer = pygame.time.Clock()
 
 screen = pygame.display.set_mode(settings.resolution, DOUBLEBUF)
@@ -50,7 +52,9 @@ def load_image(name):
     return pygame.image.load(join('gfx', name)).convert(DEPTH, FLAGS)
 
 def load_sound(name):
-    return pygame.mixer.Sound(join('sfx', name))
+    sound = pygame.mixer.Sound(join('sfx', name))
+    _sounds.append(sound)
+    return sound
 
 def on_off(condition):
     '''
@@ -71,6 +75,10 @@ def play_music(name):
         _music_playing = name
         pygame.mixer.music.load(join('sfx', name))
         pygame.mixer.music.play(-1)
+        
+def set_volume():
+    for i in _sounds:
+        i.set_volume(settings.sound_volume)
 
 def show_fps():
     set_caption("FPS: %3g" % round(fps_timer.get_fps(), 3))
@@ -131,7 +139,8 @@ def toggle_pause():
 ################################################################################
 
 ### Constants ##################################################################
-CURSOR_BEEP = load_sound('cursor.wav')
+CURSOR_BEEP   = load_sound('cursor.wav')
+CURSOR_SELECT = load_sound('select.wav')
 DEPTH    = screen.get_bitsize()
 ENCODING = 'utf-8'
 FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
@@ -152,8 +161,11 @@ FONT    = pygame.font.Font(join('gfx', 'font.ttf'), 18)
 ################################################################################
 
 ### Preparation ################################################################
-for i in (EARTH, BG): i.set_colorkey(pygame.Color('#000000'))
+for i in (EARTH, BG):
+    i.set_colorkey(pygame.Color('#000000'))
+
 BG.set_alpha(128)
+EARTH = EARTH.subsurface(pygame.Rect(0, 0, EARTH.get_width(), EARTH.get_height()/2))
 
 if not __debug__:
     del show_fps

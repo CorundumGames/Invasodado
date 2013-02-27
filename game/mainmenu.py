@@ -42,7 +42,7 @@ class MainMenu(GameState):
         self.group_list   = (bg.STARS_GROUP, BG, HUD, MENU)
 
         self.hud_title  = make_text("Invasodado", TITLE_POS)
-
+        self.cursor_moving = False
         self.hud_cursor = make_text("->", (0, 0))
 
         self.menu = make_text(MENU_ENTRIES, pos=MENU_CORNER, vspace=DIST_APART)
@@ -91,4 +91,5 @@ class MainMenu(GameState):
         self.key_actions because it'll store self.menu_actions[0], and then only
         one menu item will actually be executed.
         '''
+        config.CURSOR_SELECT.play()
         self.menu_actions[self.cursor_index]()
