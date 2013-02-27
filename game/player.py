@@ -1,12 +1,12 @@
 from itertools import chain
-from math      import sin
+from math      import sin, cos, tan, pi
 from random    import gauss, uniform
 
 import pygame.key
 
 from core            import color
 from core            import config
-from core.particles  import ParticleEmitter, ParticlePool
+from core.particles  import ParticleEmitter, ParticlePool, Particle
 from game.gameobject import GameObject
 from game.shipbullet import ShipBullet
 
@@ -21,13 +21,39 @@ def _burst_appear(self):
     self.acceleration[1] = GRAVITY
     self.velocity        = [gauss(0, 25), uniform(-10, -20)]
     
+def _radius_appear(self):
+    self.progress = 0
+    distance_magnitude = gauss(300, 50)
+    angle              = uniform(0, -pi)
+    self.position[0]   = START_POS.centerx + distance_magnitude * cos(angle)
+    self.position[1]   = START_POS.centery + distance_magnitude * sin(angle)
+    self.startpos      = tuple(self.position)
+    self.rect.topleft  = (self.position[0] + .5, self.position[1] + .5)
+    
+def _radius_move(self):
+    self.progress += 1
+    position = self.position
+    percent  = self.progress / 30
+    
+    if percent == 1:
+        #If we've reached our target location...
+        self.change_state(Particle.STATES.LEAVING)
+    else:
+        dx                = (percent**2) * (3-2*percent)
+        ddx               = 1 - dx
+        position[0]       = (self.startpos[0] * ddx) + (START_POS.centerx * dx)
+        position[1]       = (self.startpos[1] * ddx) + (START_POS.centery * dx)
+        self.rect.topleft = (position[0] + .5, position[1] + .5)
+    
+    
 ################################################################################
 
 ### Constants ##################################################################
 APPEAR      = config.load_sound('appear.wav')
+APPEAR_POOL = ParticlePool(config.get_sprite(pygame.Rect(4, 170, 4, 4)), _radius_move, _radius_appear)
 DEATH       = config.load_sound('death.wav')
 GRAVITY     = 0.5
-PARTICLE_POOL = ParticlePool(config.get_sprite(pygame.Rect(4, 170, 4, 4)), appear_func=_burst_appear)
+DEATH_POOL  = ParticlePool(config.get_sprite(pygame.Rect(4, 170, 4, 4)), appear_func=_burst_appear)
 SHIP_STATES = ('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
 SPEED       = 4
 START_POS   = pygame.Rect(config.SCREEN_WIDTH/2, config.SCREEN_HEIGHT*.8, 32, 32)
@@ -47,7 +73,7 @@ class FlameTrail(GameObject):
         self.image = FlameTrail.FRAMES[0]
         self.rect  = pygame.Rect([0, 0], self.image.get_size())
         self.state = 1
-
+        del self.acceleration, self.velocity
         for i in self.__class__.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
 
     def animate(self):
@@ -99,7 +125,8 @@ class Ship(GameObject):
         self.position     = list(START_POS.topleft)
         self.rect         = START_POS.copy()
         self.respawn_time = 3 * 60
-        self.emitter      = ParticleEmitter(PARTICLE_POOL, self.rect, 2)
+        self.emitter      = ParticleEmitter(DEATH_POOL, self.rect, 2)
+        self.appear_emitter = ParticleEmitter(APPEAR_POOL, self.rect, 2)
         self.change_state(Ship.STATES.RESPAWN)
 
         for i in Ship.FRAMES: i.set_colorkey(color.COLOR_KEY, config.FLAGS)
@@ -116,6 +143,8 @@ class Ship(GameObject):
             bul.change_state(ShipBullet.STATES.FIRED)
 
     def respawn(self):
+        self.appear_emitter.burst(200)
+        APPEAR.stop()
         APPEAR.play()
         for i in chain(Ship.FRAMES, FlameTrail.FRAMES, {self.light_column.image}): i.set_alpha(128)
         self.respawn_time = 3 * 60

@@ -60,12 +60,12 @@ class Enemy(GameObject):
                             ]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         self.color        = choice(color.LIST[0:config.NUM_COLORS])
-        self.image        = self.current_frame_list[id(self.color)][0]
+        self.__animate()
         self.emitter.pool = color.color_particles[id(self.color)]
         self.change_state(Enemy.STATES.ACTIVE)
 
     def move(self):
-        self.image        = self.current_frame_list[id(self.color)][int(-abs(Enemy.anim - 3) + 3) % 4]
+        self.__animate()
         self.position[0] += Enemy.velocity[0]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         #self.emitter.rect = self.rect
@@ -97,7 +97,7 @@ class Enemy(GameObject):
 
     def lower(self):  #Later we'll make this smoother.
         self.amount_lowered += 1
-        self.image        = self.current_frame_list[id(self.color)][int(-abs(Enemy.anim - 3) + 3) % 4]
+        self.__animate()
         self.position[1] += 1
         self.rect.top     = self.position[1]
         if self.amount_lowered == 8:
@@ -105,7 +105,10 @@ class Enemy(GameObject):
             self.change_state(Enemy.STATES.ACTIVE)
 
     def cheer(self):
-        pass
+        self.__animate()
+    
+    def __animate(self):
+        self.image = self.current_frame_list[id(self.color)][int(-abs(Enemy.anim - 3) + 3) % 4]
 
     actions = {
                 STATES.APPEARING: 'appear',

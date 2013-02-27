@@ -39,4 +39,4 @@ STARS = ParticleEmitter(
                         8,
                         STARS_GROUP
                         )
-EARTH.rect.center = config.SCREEN_RECT.midbottom
+EARTH.rect.midbottom = config.SCREEN_RECT.midbottom

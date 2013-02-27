@@ -1,6 +1,7 @@
 from collections import namedtuple
 from functools   import partial
 from math import log1p
+import math
 from os.path     import join
 from random      import choice
 
@@ -102,7 +103,7 @@ class InGameState(GameState):
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._ship          = Ship()
-        self._time          = self._mode * 60
+        self._time          = self._mode * 60 #In frames
         self._ufo           = UFO()
 
         PLAYER.add(self._ship, self._ship.flames, self._ship.my_bullet, self._ship.light_column)
@@ -142,7 +143,8 @@ class InGameState(GameState):
 
     def __del__(self):
         GameState.__del__(self)
-
+        del self._ufo, self._ship, self._collision_grid
+        pygame.mixer.stop()
         for i in MODULE_CLEANUP:
             i.clean_up()
 
@@ -159,7 +161,7 @@ class InGameState(GameState):
                 if e.button < 4:
                     self.__make_block(e.pos[0], MOUSE_ACTIONS[e.button])
                 else:
-                    self.__make_block(e.pos[0],None,True)
+                    self.__make_block(e.pos[0], None, True)
             elif e.type == pygame.KEYDOWN and e.key in key_actions:
             #If a key is pressed...
                 if self._game_running or (not self._game_running and e.key == pygame.K_SPACE):
@@ -206,7 +208,7 @@ class InGameState(GameState):
 
         if self._time >= 0:
         #If we haven't run out of time...
-            time_left  = (self._time // 100 // 60, (self._time // 100) % 60)
+            time_left  = (round(self._time / 100 / 60), (self._time // 60) % 60)
             self.hud_text.time.image = hud(TIME_FORMAT.format(*time_left))
 
         GameState.render(self)
