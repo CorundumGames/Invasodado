@@ -1,12 +1,10 @@
-from base64   import b64encode, b64decode
-from binascii import Error as binascii_Error
+from contextlib import closing
 from datetime import datetime
 from json     import load
 from platform import platform
-import dbm.dumb as shelve
+import shelve
 
 from core import geolocation
-from core import config
 
 ### Constants ##################################################################
 PATTERN      = '%Y-%m-%d %H:%M:%S.%f'
@@ -14,18 +12,15 @@ SCORE_FORMAT = '{0.name}|{0.score}|{0.mode}|{0.country}|{0.platform}|{0.time}'
 ################################################################################
 
 ### Functions ##################################################################
-def encode(text):
+def load_defaults(filename):
     '''
-    Returns the base64 encoding of the given string-like as a string, instead
-    of as a byte array
-    '''
-    return b64encode(str(text).encode('utf-8','ignore')).decode('utf-8','ignore')
+    @param filename: name/location of the default scores to load
 
-def decode(text):
+    Takes in a JSON file and loads default scores from there.
+    This is meant to be used for default high score tables, and NOT for storage.
     '''
-    Same as encode(), but returns the text behind a base64 encoding.
-    '''
-    return b64decode(str(text).encode('utf-8','ignore')).decode('utf-8','ignore')
+    return load(open(filename))
+
 
 ################################################################################
 
@@ -62,45 +57,6 @@ class HighScoreEntry:
                 self.time = datetime.strptime(fields[5], PATTERN)
             except ValueError:
                 self.time = fields[5]
-                
-        try:
-        #First see if our data is scrambled...
-            self.unscramble()
-        except binascii_Error:
-        #Well apparently it's not.
-            pass
-        except ValueError:
-            pass
-
-    def scramble(self):
-        '''
-        @precondition: self is unscrambled and thus intelligible
-        @postcondition: self is scrambled and thus cannot be changed
-
-        @return: self
-        '''
-        self.name     = encode(self.name)
-        self.score   ^= self.mode
-        self.mode    ^= self.score
-        self.country  = encode(self.country)
-        self.platform = encode(self.platform)
-        self.time     = encode(self.time)
-        return self
-
-    def unscramble(self):
-        '''
-        @precondition: self is scrambled and thus cannot be changed
-        @postcondition: self is unscrambled and thus can be displayed
-
-        @return: self
-        '''
-        self.time     = datetime.strptime(decode(self.time), PATTERN)
-        self.platform = decode(self.platform)
-        self.country  = decode(self.country)
-        self.mode    ^= self.score
-        self.score   ^= self.mode
-        self.name     = decode(self.name)
-        return self
 
     def __lt__(self, other):
         '''
@@ -136,41 +92,26 @@ class HighScoreTable:
         @param default: Location of default high scores if filename is new
         '''
 
-        self.mode      = mode
-        self.path      = path
-        self.scorefile = shelve.open(path, db_flag)
-        self.size      = size
-        self.title     = title
+        self.db_flag = db_flag
+        self.mode    = mode
+        self.path    = path
+        self.scores  = []
+        self.size    = size
+        self.title   = title
 
-        if len(self.scorefile) < size:
-        #If our high score table has missing entries...
-            a = self.set_to_default(default)
+        a = None
+        with closing(shelve.open(self.path)) as scorefile:
+            if len(scorefile) < self.size:
+            #If our high score table is the wrong size...
+                a = load_defaults(default)
+                
+        if a is not None:
             self.add_scores([HighScoreEntry(i, a[i], mode) for i in a])
-
+        else:    
+            self.read_scores()
+        
     def __del__(self):
-        self.scorefile.close()
-
-    def add_score(self, score_object):
-        '''
-        @param score_object: The score entry to add
-        '''
-
-        if not isinstance(score_object, HighScoreEntry):
-        #If we weren't given a high score entry...
-            raise TypeError("Expected HighScoreEntry, got %s" % score_object)
-        elif score_object.mode != self.mode:
-        #If this score entry is for the wrong game mode...
-            raise ValueError("Expected mode %i, got mode %i" % (self.mode, score_object.mode))
-
-        #TODO: This is kinda messy, I should fix it
-        if len(self.scorefile) < self.size or score_object.score > self.lowest_score():
-        #If our score doesn't rank out...
-            if len(self.scorefile) >= self.size:
-            #If we have more scores than we're allowed...
-                lowest = self.get_scores()[-1].scramble()
-                del self.scorefile[encode(lowest)]
-
-            self.scorefile[encode(score_object)] = str(score_object.scramble())
+        self.write_scores()
 
     def add_scores(self, iterable):
         '''
@@ -178,37 +119,49 @@ class HighScoreTable:
 
         Adds all scores in iterable to self.scorefile, or at least tries
         '''
-        for i in iterable:
-            self.add_score(i)
 
-    def get_scores(self):
+        for i in iterable:
+        #For all scores to add...
+            if not isinstance(i, HighScoreEntry):
+            #If we weren't given a high score entry...
+                raise TypeError("Expected HighScoreEntry, got %s" % i)
+            elif i.mode != self.mode:
+            #If this score entry is for the wrong game mode...
+                raise ValueError("Expected mode %i, got mode %i" % (self.mode, i.mode))
+
+            self.scores.append(i)
+        
+        self.scores.sort(reverse=True)
+        while len(self.scores) > self.size:
+            self.scores.pop()
+            
+        self.write_scores()
+                    
+    def write_scores(self):
+        with closing(shelve.open(self.path)) as scorefile:
+            scorefile.clear()
+            for i in self.scores:
+                scorefile[str(i)] = i
+        
+    def read_scores(self):
         '''
-        @return: sorted list of all HighScoreEntrys
+        Reads scores from the file
         '''
-        scores = [HighScoreEntry(entry=i.decode()) for i in self.scorefile.values()]
-        scores.sort(reverse = True)
-        return scores
+        with closing(shelve.open(self.path)) as scorefile:
+            self.scores = list(scorefile.values())
+            self.scores.sort(reverse=True)
 
     def highest_score(self):
         '''
         Returns the highest-valued score on this table.
         '''
-        return self.get_scores()[0].score
+        return self.scores[0].score
 
     def lowest_score(self):
         '''
         Returns the lowest-valued score on this table.
         '''
-        return self.get_scores()[-1].score
-
-    def set_to_default(self, filename):
-        '''
-        @param filename: name/location of the default scores to load
-
-        Takes in a JSON file and loads default scores from there.
-        This is meant to be used for default high score tables, and NOT for storage.
-        '''
-        return load(open(filename))
+        return self.scores[-1].score
 
     def __len__(self):
         return self.size

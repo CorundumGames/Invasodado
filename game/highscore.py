@@ -54,7 +54,7 @@ def make_score_table(table, pos, vspace, width, surfaces=False):
     @param vspace: The vertical space between each line in pixels
     @param width: The width of the table in characters
     '''
-    scores = [SCORE_FORMAT.format(i.name, i.score) for i in table.get_scores()]
+    scores = [SCORE_FORMAT.format(i.name, i.score) for i in table.scores]
     return HudObject.make_text(scores, TABLE_CORNER, color.WHITE, config.FONT, V_SPACE, surfaces)
 ################################################################################
 
@@ -75,6 +75,7 @@ class HighScoreState(GameState):
         self.group_list = (bg.STARS_GROUP, BG, MENU)
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1
         self.current_table = score_table_dict[self._mode]
+        
         if 'score' in self.kwargs:
         #If we just finished a game...
             if self.kwargs['score'] > score_tables[score_table_dict[self._mode]].lowest_score():
@@ -155,7 +156,7 @@ class HighScoreState(GameState):
         config.CURSOR_SELECT.play()
         self.entering_name = False
         self.hud_name.kill()#Get rid of the name entry characters
-        score_tables[self.current_table].add_score(HighScoreEntry(self.entry_name.decode(), self.kwargs['score'], self._mode))#add the entry to the leaderboard
+        score_tables[self.current_table].add_scores([HighScoreEntry(self.entry_name.decode(), self.kwargs['score'], self._mode)])#add the entry to the leaderboard
         MENU.remove(self.hud_scores)#remove the menu from the screen
         self.hud_scores = make_score_table(score_tables[self.current_table], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
         MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
