@@ -73,7 +73,7 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False):
             COLOR_BLIND_SYMBOLS[id(c)].set_colorkey(COLOR_KEY)
         for c in LIST:
             for i in colored[id(c)]:
-                i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(),(2,2))
+                i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(),(0, 0))
     return colored
 
 def _rand_color_appear(self):
