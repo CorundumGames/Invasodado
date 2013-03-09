@@ -15,16 +15,16 @@ from game.gameobject import GameObject
 
 ### Constants ##################################################################
 ENEMY_STATES = ('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'CHEERING')
-FRAMES       = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4)]
+FRAMES       = tuple(pygame.Rect(32 * i, 32, 32, 32) for i in range(4))
 START_POS    = (32.0, 32.0)
 
 ENEMY_FRAMES = color.get_colored_objects(FRAMES)
 ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES, True, True)
+del FRAMES
 ################################################################################
 
 ### Globals ####################################################################
 _hurt = config.load_sound('enemyhit.wav')
-_hurt.set_volume(.5)
 ################################################################################
 
 class Enemy(GameObject):

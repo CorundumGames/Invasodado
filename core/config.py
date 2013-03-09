@@ -3,12 +3,13 @@ Contains a whole bunch of game-specific miscellaneous constants, functions,
 utilities, etc.  It's a Python convention to call this sort of file config.py.
 '''
 
+from functools import lru_cache
 from os.path import join
 from sys     import argv
 
 from pygame.display import set_caption
 import pygame.image
-from pygame import ASYNCBLIT, FULLSCREEN, DOUBLEBUF, HWACCEL, HWSURFACE, RLEACCEL
+from pygame.constants import *
 
 from core import settings
 
@@ -42,6 +43,7 @@ tracking = __debug__ and 'track' in argv
 
 
 ### Functions ##################################################################
+@lru_cache(maxsize=16)
 def difficulty_string():
     return _difficulties[_current_difficulty]
 
@@ -56,18 +58,20 @@ def load_sound(name):
     _sounds.append(sound)
     return sound
 
+@lru_cache(maxsize=4)
 def on_off(condition):
     '''
     Primarily for the Settings menu.
     '''
     return "On" if condition else "Off"
 
+@lru_cache(maxsize=16)
 def percent_str(var):
     return "%d%%" % (var * 100)
 
 def play_music(name):
     '''
-    Plays a music fil
+    Plays a music file
     '''
     global _music_playing
     if name != _music_playing:
@@ -123,10 +127,14 @@ def toggle_pause():
     '''
     Pauses the game.
     '''
+
     global _pause
     _pause = not _pause
-
+    pygame.mixer.pause()
+    PAUSE.play()
     #TODO: Make the pausing user-friendly.  No game these days just freezes.
+    pygame.mixer.music.pause()
+    
     while _pause:
     #While the game is paused...
         for event in pygame.event.get():
@@ -134,6 +142,9 @@ def toggle_pause():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
             #If the P key is pressed...
                 _pause = not _pause
+                PAUSE.play()
+                pygame.mixer.unpause()
+                pygame.mixer.music.unpause()
                 break
 
 ################################################################################
@@ -148,7 +159,7 @@ FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
 
 NUM_COLORS = 5
 #The color depth used, in bits
-
+PAUSE = load_sound('pause.wav')
 SCREEN_DIMS   = tuple(pygame.display.list_modes()) #Available screen resolutions
 SCREEN_HEIGHT = screen.get_height() #480 15 cells 32
 SCREEN_RECT   = pygame.Rect((0, 0), screen.get_size())
