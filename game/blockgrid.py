@@ -69,7 +69,7 @@ def clear_row(row):
     for i in (j for j in blocks if any(j)):
     #For all blocks in this row...
         i[SIZE[1] - 1].change_state(BLOCK_TYPE.STATES.DYING)
-        
+
 def get_empty_block_array():
     '''
     Returns an empty 2D array to reset the block grid

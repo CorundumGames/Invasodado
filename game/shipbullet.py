@@ -59,4 +59,4 @@ class ShipBullet(Bullet):
     collisions = {
                   Enemy: kill_enemy,
                   UFO  : kill_enemy,
-                  }
+                 }

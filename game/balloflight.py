@@ -9,8 +9,8 @@ from game.gameobject import GameObject
 
 ### Constants ##################################################################
 BALL_STATES  = ('IDLE', 'APPEARING', 'MOVING', 'DYING', 'RESET')
-FRAMES       = [pygame.Rect(32 * i, 96, 32, 32) for i in range(5)]
-TIME_TO_MOVE = 30 #In frames; remember, our target is 60FPS
+FRAMES       = tuple(pygame.Rect(32 * i, 96, 32, 32) for i in range(5))
+TIME_TO_MOVE = 30  #In frames; remember, our target is 60FPS
 ################################################################################
 
 ### Globals ####################################################################
@@ -99,7 +99,7 @@ class BallOfLight(GameObject):
         #If we've reached our target location...
             self.change_state(BallOfLight.STATES.DYING)
         else:
-            dx                = (percent**2)*(3-2*percent)
+            dx                = (percent ** 2) * (3 - 2 * percent)
             ddx               = 1 - dx
             position[0]       = (startpos[0] * dx ) + (target[0] * self.image.get_width() * ddx)
             position[1]       = (startpos[1] * ddx) + (target[1] * dx )

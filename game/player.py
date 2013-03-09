@@ -64,7 +64,7 @@ class FlameTrail(GameObject):
     FlameTrail is the jet left by the Ship's engines.  This is purely a
     graphical effect.
     '''
-    FRAMES = [config.get_sprite(pygame.Rect(32*i, 0, 32, 32)) for i in range(6)]
+    FRAMES = tuple(config.get_sprite(pygame.Rect(32*i, 0, 32, 32)) for i in range(6))
     GROUP  = None
 
     def __init__(self):
@@ -103,7 +103,7 @@ class LightColumn(GameObject):
 ################################################################################
 
 class Ship(GameObject):
-    FRAMES = [config.get_sprite(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5)]
+    FRAMES = tuple(config.get_sprite(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5))
     STATES = config.Enum(*SHIP_STATES)
     GROUP  = None
 

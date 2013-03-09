@@ -26,7 +26,7 @@ LIST   = (RED, BLUE, GREEN, YELLOW, PURPLE) # THESE are used by blocks.
 COLOR_KEY = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 
 #Holds the frames for the symbols
-COLOR_BLIND_FRAMES  = [pygame.Rect(32 * i, 32, 32, 32) for i in range(4,9)]
+COLOR_BLIND_FRAMES  = tuple(pygame.Rect(32 * i, 32, 32, 32) for i in range(4,9))
 #Holds the symbols.
 COLOR_BLIND_SYMBOLS = {
                         id(RED)    : config.get_sprite(COLOR_BLIND_FRAMES[0]),

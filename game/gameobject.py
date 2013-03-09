@@ -17,7 +17,7 @@ def update():
         i.next_state = None
         
     _state_changes.clear()
-    
+
 ################################################################################
 
 class GameObject(Sprite, object):
