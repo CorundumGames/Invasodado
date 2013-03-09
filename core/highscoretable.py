@@ -1,7 +1,10 @@
 from contextlib import closing
 from datetime import datetime
+from functools import lru_cache
 from json     import load
-from platform import platform
+from sys import platform
+from os import environ, mkdir
+from os.path import isdir, join
 import shelve
 
 from core import geolocation
@@ -9,9 +12,11 @@ from core import geolocation
 ### Constants ##################################################################
 PATTERN      = '%Y-%m-%d %H:%M:%S.%f'
 SCORE_FORMAT = '{0.name}|{0.score}|{0.mode}|{0.country}|{0.platform}|{0.time}'
+DATA_PATH    = join(environ['APPDATA' if 'win' in platform else 'HOME'], 'Invasodado')
 ################################################################################
 
 ### Functions ##################################################################
+@lru_cache(maxsize=4)
 def load_defaults(filename):
     '''
     @param filename: name/location of the default scores to load
@@ -23,6 +28,19 @@ def load_defaults(filename):
 
 
 ################################################################################
+
+### Preparation ###############################################################
+try:
+    mkdir(DATA_PATH)
+except OSError:
+#Whoops, a file or directory with this name exists!
+    if isdir(DATA_PATH):
+    #Oh, it's a directory, we can use it
+        pass
+    else:
+    #No, it's a file.  Abort!
+        raise
+###############################################################################
 
 class HighScoreEntry:
     def __init__(self, name='', score=0, mode=0, entry=None):
@@ -42,7 +60,7 @@ class HighScoreEntry:
             self.country  = str(geolocation.get_country('countryCode'))
             self.mode     = int(mode) #Can represent game modes or difficulty
             self.name     = name
-            self.platform = platform(True, True).split('-')[0]
+            self.platform = platform
             self.score    = int(score)
             self.time     = datetime.today()
         else:
@@ -58,6 +76,7 @@ class HighScoreEntry:
             except ValueError:
                 self.time = fields[5]
 
+    @lru_cache(maxsize=8)
     def __lt__(self, other):
         '''
         @param other: The other HighScoreEntry to compare to
@@ -91,14 +110,13 @@ class HighScoreTable:
         @param db_flag: Flags for the shelve module
         @param default: Location of default high scores if filename is new
         '''
-
         self.db_flag = db_flag
         self.mode    = mode
-        self.path    = path
+        self.path    = join(DATA_PATH, path)
         self.scores  = []
         self.size    = size
         self.title   = title
-
+        
         a = None
         with closing(shelve.open(self.path)) as scorefile:
             if len(scorefile) < self.size:
