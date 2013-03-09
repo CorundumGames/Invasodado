@@ -115,7 +115,7 @@ class InGameState(GameState):
                                K_ESCAPE: partial(self.change_state, MainMenu),
                                K_F1    : config.toggle_fullscreen ,
                                K_SPACE : self.__ship_fire         ,
-                               K_c     : blockgrid.clean_up       ,
+                               K_c     : blockgrid.clean_up if __debug__ else lambda: None,
                                K_f     : config.toggle_frame_limit,
                                K_p     : config.toggle_pause      ,
                                K_u     : self.__add_ufo           ,
@@ -236,13 +236,14 @@ class InGameState(GameState):
         @param position: Position to release the Block (it'll snap to the grid)
         @param color: Color of the Block that will be released
         '''
-        if not special:
-            BLOCKS.add(block.get_block([position, 0.0], color))
-        else:
-            UFO.BLOCK_GROUP.add(block.get_block([position, 0.0], special=True))
+        if __debug__:
+            if not special:
+                BLOCKS.add(block.get_block([position, 0.0], color))
+            else:
+                UFO.BLOCK_GROUP.add(block.get_block([position, 0.0], special=True))
 
     def __add_ufo(self):
-        if self._ufo.state == UFO.STATES.IDLE:
+        if __debug__ and self._ufo.state == UFO.STATES.IDLE:
         #If the UFO_GROUP is not currently on-screen...
             UFO_GROUP.add(self._ufo)
             self._ufo.change_state(UFO.STATES.APPEARING)
