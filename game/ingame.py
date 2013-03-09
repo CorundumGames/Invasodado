@@ -63,6 +63,15 @@ TYPES_IGNORED  = (Block, BallOfLight, HudObject, Particle, ParticleEmitter)
 del rect
 ################################################################################
 
+### Functions ##################################################################
+def null_if_debug(function):
+    '''
+    Returns function if we're in debug mode, returns the empty function (which
+    does nothing) if we're not.
+    '''
+    return function if __debug__ else lambda: None
+################################################################################
+
 ### Preparation ################################################################
 collisions.dont_check_type(*TYPES_IGNORED)
 
@@ -112,15 +121,15 @@ class InGameState(GameState):
                                        )
         self._ship          = Ship()
         self.key_actions    = {
-                               K_ESCAPE: partial(self.change_state, MainMenu),
-                               K_F1    : config.toggle_fullscreen ,
-                               K_SPACE : self.__ship_fire         ,
-                               K_c     : blockgrid.clean_up if __debug__ else lambda: None,
-                               K_f     : config.toggle_frame_limit,
-                               K_p     : config.toggle_pause      ,
-                               K_u     : self.__add_ufo           ,
+                               K_ESCAPE: partial(self.change_state, MainMenu)    ,
+                               K_F1    : config.toggle_fullscreen                ,
+                               K_SPACE : self.__ship_fire                        ,
+                               K_c     : null_if_debug(blockgrid.clean_up)       ,
+                               K_f     : null_if_debug(config.toggle_frame_limit),
+                               K_p     : config.toggle_pause                     ,
+                               K_u     : null_if_debug(self.__add_ufo)           ,
                                K_k     : partial(self._ship.change_state, Ship.STATES.DYING),
-                               K_e     : self.__game_over         ,
+                               K_e     : null_if_debug(self.__game_over)         ,
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._time          = self._mode * 60 + 60 #In frames
@@ -236,14 +245,13 @@ class InGameState(GameState):
         @param position: Position to release the Block (it'll snap to the grid)
         @param color: Color of the Block that will be released
         '''
-        if __debug__:
-            if not special:
-                BLOCKS.add(block.get_block([position, 0.0], color))
-            else:
-                UFO.BLOCK_GROUP.add(block.get_block([position, 0.0], special=True))
+        if not special:
+            BLOCKS.add(block.get_block([position, 0.0], color))
+        else:
+            UFO.BLOCK_GROUP.add(block.get_block([position, 0.0], special=True))
 
     def __add_ufo(self):
-        if __debug__ and self._ufo.state == UFO.STATES.IDLE:
+        if self._ufo.state == UFO.STATES.IDLE:
         #If the UFO_GROUP is not currently on-screen...
             UFO_GROUP.add(self._ufo)
             self._ufo.change_state(UFO.STATES.APPEARING)
