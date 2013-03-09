@@ -97,7 +97,7 @@ class ParticleEmitter:
     should call emit().
     '''
 
-    def __init__(self, pool, rect, period, group=Particle.GROUP):
+    def __init__(self, pool, rect, period=1, group=Particle.GROUP):
         '''
         @ivar period: Frames between emits, e.g. 4 = 1 Particle per 4 frames
         @ivar pool: The ParticlePool where Particles are drawn from
