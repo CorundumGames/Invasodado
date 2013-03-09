@@ -3,6 +3,7 @@ from os.path   import join
 from string    import ascii_letters, digits
 
 import pygame
+from pygame.constants import *
 from pygame.sprite import Group, OrderedUpdates
 
 from core                import color
@@ -34,9 +35,9 @@ V_SPACE        = 24
 ### Globals ####################################################################
 f = partial(join, 'save')
 score_tables  = (
-                 HighScoreTable(f('0.wtf'),  -1, 10, TITLES[0], f(DEFAULTS[0])),
-                 HighScoreTable(f('2.wtf'), 120, 10, TITLES[1], f(DEFAULTS[1])),
-                 HighScoreTable(f('5.wtf'), 300, 10, TITLES[2], f(DEFAULTS[2])),
+                 HighScoreTable('0.wtf',  -1, 10, TITLES[0], f(DEFAULTS[0])),
+                 HighScoreTable('2.wtf', 120, 10, TITLES[1], f(DEFAULTS[1])),
+                 HighScoreTable('5.wtf', 300, 10, TITLES[2], f(DEFAULTS[2])),
                 )
 score_table_dict = {-1:0, 120:1, 300:2}
 del f
@@ -65,12 +66,12 @@ class HighScoreState(GameState):
         self.entering_name = False
         self.kwargs        = kwargs
         self.key_actions = {
-                            pygame.K_LEFT  : partial(self.__switch_table, -1),
-                            pygame.K_RIGHT : partial(self.__switch_table,  1),
-                            pygame.K_UP    : partial(self.__char_move   ,  1),
-                            pygame.K_DOWN  : partial(self.__char_move   , -1),
-                            pygame.K_RETURN: self.__enter_char               ,
-                            pygame.K_ESCAPE: partial(self.change_state, kwargs['next']),
+                            K_LEFT  : partial(self.__switch_table, -1),
+                            K_RIGHT : partial(self.__switch_table,  1),
+                            K_UP    : partial(self.__char_move   ,  1),
+                            K_DOWN  : partial(self.__char_move   , -1),
+                            K_RETURN: self.__enter_char               ,
+                            K_ESCAPE: partial(self.change_state, kwargs['next']),
                            }
         self.hud_titles = tuple(make_text(score_tables[i].title, SCORE_TABLE_X) for i in range(3))
         self.hud_scores = tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
