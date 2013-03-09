@@ -1,5 +1,5 @@
 '''
-Invasodado alpha 2
+Invasodado beta 1
 
 Invasodado is a mix between Space Invaders and Columns.
 
@@ -15,6 +15,7 @@ pygame.mixer.init()
 pygame.display.init()
 pygame.font.init()
 
+from core import settings
 from core import gsm
 
 def main():
@@ -22,6 +23,7 @@ def main():
     Meant to be executed only once.  main() exists to facilitate profiling, as
     cProfile wants a function, not a module.
     '''
+    settings.load_settings()
     pygame.display.set_caption("Invasodado")
     while True:
     #Until the game is closed...
@@ -40,12 +42,12 @@ def profile():
         
     cProfile.run('main()', 'profile.out')
     data = pstats.Stats('profile.out')
-    data.sort_stats('cumulative')
+    data.sort_stats('calls')
     data.print_stats()
 
 if __name__ == '__main__':
     #If this script is being executed directly...
-    if 'profile' in argv:
+    if __debug__ and 'profile' in argv:
     #If we're not profiling the game...
         profile()
     else:
