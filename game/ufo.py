@@ -1,6 +1,7 @@
 from math import sin
 import os.path
 from random import choice, uniform
+from functools import lru_cache
 
 import pygame
 
@@ -12,12 +13,11 @@ from game.block import get_block
 from game.gameobject import GameObject
 
 ### Constants ##################################################################
-BLOCK      = config.load_sound('ufo_block.wav')
 DEATH      = config.load_sound('ufo_explosion.wav')
-FRAMES     = [
+FRAMES     = tuple(
               pygame.Rect(64 * (i % 4), 192 + 32 * (i // 4), 64, 32)
               for i in range(10, -1, -1)
-             ]
+             )
 INVADE     = config.load_sound('ufo.wav')
 START_POS  = (640, 16)
 UFO_FRAMES = color.get_colored_objects(FRAMES)
@@ -28,7 +28,6 @@ class UFO(GameObject):
     STATES      = config.Enum(*UFO_STATES)
     GROUP       = None
     BLOCK_GROUP = None
-    #The sound the UFO makes as it flies across the screen
 
     def __init__(self):
         super().__init__()
@@ -79,7 +78,6 @@ class UFO(GameObject):
         self.emitter.rect = self.rect
         self.emitter.burst(30)
         DEATH.play()
-        BLOCK.play()
         UFO.BLOCK_GROUP.add(get_block([self.rect.centerx, 0], special=True))
         self.change_state(UFO.STATES.LEAVING)
 

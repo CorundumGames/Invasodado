@@ -1,5 +1,6 @@
 import os.path
 from random import choice
+from functools import lru_cache
 
 import pygame.mixer
 
@@ -12,9 +13,10 @@ from game            import blockgrid
 
 ### Constants ##################################################################
 BLOCK_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
-FRAMES       = [pygame.Rect(32 * i, 160, 32, 32) for i in range(8)]
+FRAMES       = tuple(pygame.Rect(32 * i, 160, 32, 32) for i in range(8))
 GRAVITY      =  0.5
 MAX_SPEED    = 12.0
+UFO_BLOCK    = config.load_sound('ufo_block.wav')
 ################################################################################
 
 ### Globals ####################################################################
@@ -172,9 +174,9 @@ class Block(GameObject):
             assert isinstance(below, Block) or below is None, \
             "A %s is trying to collide with a stray %s!" % (self, below)
         
-        assert rect.colliderect(blockgrid.RECT) \
-        and blockgrid.RECT.collidepoint(position) \
-        and self.state == Block.STATES.FALLING, \
+        assert self.state == Block.STATES.FALLING \
+        and rect.colliderect(blockgrid.RECT) \
+        and blockgrid.RECT.collidepoint(position), \
         "An active %s has somehow left the field!" % self
 
     def wait(self):
@@ -215,6 +217,7 @@ class Block(GameObject):
         
         if self._special:
         #If this is a special block...
+            UFO_BLOCK.play()
             self.emitter.pool = color.random_color_particles
             if self.gridcell[1] < blockgrid.SIZE[1] - 1:
             #If we're not at the bottom of the grid...
