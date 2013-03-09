@@ -5,8 +5,10 @@ Not really special compared to any other main menu.
 
 from functools import partial
 from os.path import join
+from sys import exit
 
 import pygame.event
+from pygame.constants import *
 from pygame        import display
 from pygame.sprite import Group, OrderedUpdates
 
@@ -16,7 +18,7 @@ from core.gamestate import GameState
 from game              import bg
 from game.ingame       import InGameState
 from game.highscore    import HighScoreState
-from game.hudobject    import HudObject
+from game.hudobject    import make_text
 from game.settingsmenu import SettingsMenu
 
 ### Groups #####################################################################
@@ -36,8 +38,6 @@ TITLE_POS    = (config.SCREEN_RECT.centerx - 96, 32)
 
 class MainMenu(GameState):
     def __init__(self):
-        make_text = HudObject.make_text
-        
         self.cursor_index = 0
         self.group_list   = (bg.STARS_GROUP, BG, HUD, MENU)
 
@@ -53,14 +53,14 @@ class MainMenu(GameState):
                              partial(self.change_state, InGameState, time=300),
                              partial(self.change_state, HighScoreState, next = MainMenu),
                              partial(self.change_state, SettingsMenu         ),
-                             quit                                             ,
+                             exit                                             ,
                             )
 
         self.key_actions  = {
-                             pygame.K_RETURN : self.__enter_selection         ,
-                             pygame.K_UP     : partial(self.__move_cursor, -1),
-                             pygame.K_DOWN   : partial(self.__move_cursor,  1),
-                             pygame.K_ESCAPE : quit                           ,
+                             K_RETURN : self.__enter_selection         ,
+                             K_UP     : partial(self.__move_cursor, -1),
+                             K_DOWN   : partial(self.__move_cursor,  1),
+                             K_ESCAPE : exit                           ,
                             }
         
         HUD.add(self.hud_title, self.hud_cursor)

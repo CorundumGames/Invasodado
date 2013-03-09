@@ -1,5 +1,5 @@
+from functools import lru_cache, partial
 from os.path   import join
-from functools import partial
 from string    import ascii_letters, digits
 
 import pygame
@@ -10,7 +10,7 @@ from core                import config
 from core.gamestate      import GameState
 from core.highscoretable import HighScoreTable, HighScoreEntry
 from game                import bg
-from game.hudobject      import HudObject
+from game.hudobject      import make_text
 
 ### Groups #####################################################################
 BG   = OrderedUpdates()
@@ -40,9 +40,11 @@ score_tables  = (
                 )
 score_table_dict = {-1:0, 120:1, 300:2}
 del f
+del DEFAULTS, TITLES
 ################################################################################
 
 ### Functions ##################################################################
+@lru_cache(maxsize=16)
 def make_score_table(table, pos, vspace, width, surfaces=False):
     '''
     Creates a visual representation of a high score table.
@@ -54,8 +56,8 @@ def make_score_table(table, pos, vspace, width, surfaces=False):
     @param vspace: The vertical space between each line in pixels
     @param width: The width of the table in characters
     '''
-    scores = [SCORE_FORMAT.format(i.name, i.score) for i in table.scores]
-    return HudObject.make_text(scores, TABLE_CORNER, color.WHITE, config.FONT, V_SPACE, surfaces)
+    scores = tuple(SCORE_FORMAT.format(i.name, i.score) for i in table.scores)
+    return make_text(scores, TABLE_CORNER, font=config.FONT, vspace=V_SPACE, surfaces=surfaces)
 ################################################################################
 
 class HighScoreState(GameState):
@@ -70,7 +72,7 @@ class HighScoreState(GameState):
                             pygame.K_RETURN: self.__enter_char               ,
                             pygame.K_ESCAPE: partial(self.change_state, kwargs['next']),
                            }
-        self.hud_titles = tuple(HudObject.make_text(score_tables[i].title, SCORE_TABLE_X) for i in range(3))
+        self.hud_titles = tuple(make_text(score_tables[i].title, SCORE_TABLE_X) for i in range(3))
         self.hud_scores = tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
         self.group_list = (bg.STARS_GROUP, BG, MENU)
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1
@@ -83,7 +85,7 @@ class HighScoreState(GameState):
                 self.alphanum_index = 0
                 self.entering_name  = True
                 self.entry_name     = bytearray('A', config.ENCODING)
-                self.hud_name       = HudObject.make_text(self.entry_name.decode(), ENTRY_NAME_POS)
+                self.hud_name       = make_text(self.entry_name.decode(), ENTRY_NAME_POS)
                 self.name_index     = 0
                 MENU.add(self.hud_name)
             config.play_music('score.ogg')
@@ -94,7 +96,7 @@ class HighScoreState(GameState):
     def render(self):  
         if self.entering_name:
         #If we're entering our name for a high score...
-            self.hud_name.image = HudObject.make_text(self.entry_name.decode(config.ENCODING), surfaces=True)
+            self.hud_name.image = make_text(self.entry_name.decode(config.ENCODING), surfaces=True)
 
         GameState.render(self)
         pygame.display.flip()

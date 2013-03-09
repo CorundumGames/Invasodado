@@ -1,8 +1,12 @@
+from functools import lru_cache
+
 import pygame.sprite
 
 from core            import config
 from core            import color
 from game.gameobject import GameObject
+
+
 
 class HudObject(GameObject):
     '''
@@ -16,7 +20,7 @@ class HudObject(GameObject):
     
     def __init__(self, image, pos):
         super().__init__()
-        self.image = image#
+        self.image = image
         self.rect  = pygame.Rect(pos, image.get_size())
         del self.velocity, self.acceleration, self.position, self.next_state
 
@@ -26,8 +30,8 @@ class HudObject(GameObject):
         '''
         pass
 
-    @staticmethod
-    def make_text(text, pos=(0, 0), col=color.WHITE, font=fonts[0], vspace=8, surfaces=False):
+@lru_cache(maxsize=64)
+def make_text(text, pos=(0, 0), col=color.WHITE, font=HudObject.fonts[0], vspace=8, surfaces=False):
         '''
         @param text: The text we want visible to the user. If a list, one element per line
         @param pos: The topleft corner of the position rect
