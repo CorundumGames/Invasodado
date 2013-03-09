@@ -6,6 +6,7 @@ from collections import namedtuple
 from functools import partial
 
 import pygame
+from pygame.locals import *
 from pygame.sprite import Group, OrderedUpdates
 
 from core           import config
@@ -14,7 +15,7 @@ from core           import settings
 
 
 from game           import bg
-from game.hudobject import HudObject
+from game.hudobject import make_text
 
 ### Groups #####################################################################
 HUD  = Group()
@@ -31,30 +32,32 @@ DIST_APART_STATUS = 320
 
 MENU_CORNER    = (32, 64)
 #The location of the top-left corner of the menu
-SETTINGS_FIELDS    = 'fullscreen colorblind difficulty musicvolume effectsvolume back'
-SETTINGS_KEYS      = namedtuple('Settings', SETTINGS_FIELDS)
-SETTINGS_NAMES = ("Full-Screen", "Colorblind Mode", "Difficulty", "Music Volume", "Effects Volume", "Back")
-TITLE_LOCATION = (config.SCREEN_RECT.centerx - 64, 32)
+SETTINGS_FIELDS = 'fullscreen colorblind difficulty musicvolume effectsvolume back'
+SETTINGS_KEYS   = namedtuple('Settings', SETTINGS_FIELDS)
+SETTINGS_NAMES  = ("Full-Screen", "Colorblind Mode", "Difficulty", "Music Volume", "Effects Volume", "Back")
+TITLE_LOCATION  = (config.SCREEN_RECT.centerx - 64, 32)
+################################################################################
+
+### Preparation ################################################################
+del SETTINGS_FIELDS
 ################################################################################
 
 class SettingsMenu(GameState):
     def __init__(self):
         from game.mainmenu import MainMenu
-        make_text = HudObject.make_text
         
         self.cursor_index = 0
         self.group_list   = (bg.STARS_GROUP, BG, HUD, MENU)
-
-        self.hud_title  = make_text("Settings", TITLE_LOCATION)
-        self.hud_cursor = make_text("->"      , (0, 0)        )
+        self.hud_title    = make_text("Settings", TITLE_LOCATION)
+        self.hud_cursor   = make_text("->"      , (0, 0)        )
 
         a = make_text(SETTINGS_NAMES, pos=MENU_CORNER, vspace=DIST_APART)
 
         b = make_text(
-                      [config.on_off(settings.fullscreen), config.on_off(settings.color_blind), config.difficulty_string(),
+                      (config.on_off(settings.fullscreen), config.on_off(settings.color_blind), config.difficulty_string(),
                        config.percent_str(settings.music_volume),
-                       config.percent_str(settings.sound_volume), ""],
-                      pos=[MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]],
+                       config.percent_str(settings.sound_volume), ""),
+                      pos=(MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]),
                       vspace=DIST_APART
                      )
 
@@ -72,17 +75,21 @@ class SettingsMenu(GameState):
                             )
 
         self.key_actions  = {
-                             pygame.K_RETURN: partial(self.__enter_selection, 1)  ,
-                             pygame.K_LEFT  : partial(self.__enter_selection, -.1) ,
-                             pygame.K_RIGHT : partial(self.__enter_selection, .1)  ,
-                             pygame.K_UP    : partial(self.__move_cursor, -1)     ,
-                             pygame.K_DOWN  : partial(self.__move_cursor,  1)     ,
-                             pygame.K_ESCAPE: partial(self.change_state, MainMenu),
+                             K_RETURN: partial(self.__enter_selection,   1),
+                             K_LEFT  : partial(self.__enter_selection, -.1),
+                             K_RIGHT : partial(self.__enter_selection,  .1),
+                             K_UP    : partial(self.__move_cursor    ,  -1),
+                             K_DOWN  : partial(self.__move_cursor    ,   1),
+                             K_ESCAPE: partial(self.change_state     , MainMenu),
                             }
 
         HUD.add(self.hud_cursor, self.hud_title)
-        MENU.add((a, b))
+        MENU.add(a, b)
         BG.add(bg.EARTH, bg.GRID)
+        
+    def __del__(self):
+        super().__del__()
+        settings.save_settings()
 
     def render(self):
         self.hud_cursor.rect.midright = self.menu[self.cursor_index][0].rect.midleft
@@ -107,26 +114,26 @@ class SettingsMenu(GameState):
     def __toggle_fullscreen(self, toggle):
         #toggle doesn't really matter because it's the same both ways
         config.toggle_fullscreen()
-        self.menu.fullscreen[1].image = HudObject.make_text(config.on_off(settings.fullscreen), surfaces=True)
+        self.menu.fullscreen[1].image = make_text(config.on_off(settings.fullscreen), surfaces=True)
 
     def __toggle_color_blind_mode(self, toggle):
         #toggle doesn't really matter because it's the same both ways
         config.toggle_color_blind_mode();
-        self.menu.colorblind[1].image = HudObject.make_text(config.on_off(settings.color_blind), surfaces=True)
+        self.menu.colorblind[1].image = make_text(config.on_off(settings.color_blind), surfaces=True)
 
     def __toggle_difficulty(self, toggle):
         config.toggle_difficulty(int(toggle * 10))
-        self.menu.difficulty[1].image = HudObject.make_text(config.difficulty_string(), surfaces=True)
+        self.menu.difficulty[1].image = make_text(config.difficulty_string(), surfaces=True)
 
     def __toggle_music_volume(self, delta_volume):
         settings.music_volume += delta_volume
         settings.music_volume = round(settings.music_volume % 1.1, 1)
         pygame.mixer.music.set_volume(settings.music_volume)
-        self.menu.musicvolume[1].image = HudObject.make_text(config.percent_str(settings.music_volume), surfaces=True)
+        self.menu.musicvolume[1].image = make_text(config.percent_str(settings.music_volume), surfaces=True)
         
     def __toggle_sound_volume(self, delta_volume):
         settings.sound_volume += delta_volume
         settings.sound_volume = round(settings.sound_volume % 1.1, 1)
         config.set_volume()
         
-        self.menu.effectsvolume[1].image = HudObject.make_text(config.percent_str(settings.sound_volume), surfaces=True)
+        self.menu.effectsvolume[1].image = make_text(config.percent_str(settings.sound_volume), surfaces=True)
