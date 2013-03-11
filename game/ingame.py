@@ -47,7 +47,7 @@ UFO_GROUP     = Group()
 
 ### Constants ##################################################################
 rect = config.SCREEN_RECT
-DEBUG_KEYS     = (K_u, K_c, K_f, K_F1, K_e, K_k)
+DEBUG_KEYS     = (K_u, K_c, K_f, K_F1, K_e, K_k, K_i)
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
 FIRE_MESSAGE   = "Press fire to continue"
 GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
@@ -130,6 +130,7 @@ class InGameState(GameState):
                                K_u     : null_if_debug(self.__add_ufo)           ,
                                K_k     : partial(self._ship.change_state, Ship.STATES.DYING),
                                K_e     : null_if_debug(self.__game_over)         ,
+                               K_i     : null_if_debug(self.__ship_life),
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._time          = self._mode * 60 + 60 #In frames
@@ -232,6 +233,7 @@ class InGameState(GameState):
         GameState.render(self)
         
         if not self._ship.image.get_alpha():
+        #If our ship is invisible...
             pygame.draw.circle(config.screen,
                                color.WHITE,
                                self._ship.rect.center,
@@ -245,6 +247,8 @@ class InGameState(GameState):
         @param position: Position to release the Block (it'll snap to the grid)
         @param color: Color of the Block that will be released
         '''
+        if not __debug__: return
+        
         if not special:
             BLOCKS.add(block.get_block([position, 0.0], color))
         else:
@@ -258,6 +262,9 @@ class InGameState(GameState):
 
     def __ship_fire(self):
         self._ship.on_fire_bullet()
+        
+    def __ship_life(self):
+        gamedata.lives += 30
 
     def __game_over(self):
         from game.mainmenu  import MainMenu
