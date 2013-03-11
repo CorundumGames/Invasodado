@@ -15,7 +15,7 @@ from game import gamedata
 BLOCK_TYPE = None
 CELL_SIZE  = (32, 32)
 COMBOS     = tuple(config.load_sound('combo%d.wav' % i) for i in range(1, 6))
-MAX_COMBO_TIME = 60  #In frames
+
 SIZE       = (20, 12) #(width, height)
 RECT       = pygame.rect.Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL_SIZE[1]))
 ################################################################################
@@ -141,7 +141,7 @@ def update():
         if gamedata.combo_time:
             COMBOS[min(gamedata.combo, len(COMBOS)) - 1].play()
         
-        gamedata.combo_time     = MAX_COMBO_TIME
+        gamedata.combo_time     = gamedata.MAX_COMBO_TIME
         gamedata.combo += 1
         gamedata.score += len(_blocks_to_clear) * (gamedata.combo)
 

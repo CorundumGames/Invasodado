@@ -7,14 +7,12 @@ import pygame.key
 from core            import color
 from core            import config
 from core.particles  import ParticleEmitter, ParticlePool, Particle
+from game            import gamedata
 from game.gameobject import GameObject
 from game.shipbullet import ShipBullet
+from game.combocounter import get_combo_counter
 
-'''
-The Ship is the player character.  There's only going to be one instance of it,
-but it has to inherit from pygame.sprite.Sprite, so we can't make it a true
-Python singleton.
-'''
+
 
 ### Functions ##################################################################
 def _burst_appear(self):
@@ -103,6 +101,11 @@ class LightColumn(GameObject):
 ################################################################################
 
 class Ship(GameObject):
+    '''
+    The Ship is the player character.  There's only going to be one instance of
+    it, but it has to inherit from pygame.sprite.Sprite, so we can't make it a
+    true Python singleton (i.e. a module).
+    '''
     FRAMES = tuple(config.get_sprite(pygame.Rect(32 * i, 128, 32, 32)) for i in range(5))
     STATES = config.Enum(*SHIP_STATES)
     GROUP  = None
@@ -179,13 +182,21 @@ class Ship(GameObject):
             for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
             
         if self.anim != 4:
-            self.anim  = self.anim + 1.0/3 * (0 < self.anim < len(Ship.FRAMES) - 1)
+            self.anim  = self.anim + (0 < self.anim < len(Ship.FRAMES) - 1) / 3
         else:
             self.anim = 0.0
         self.image = Ship.FRAMES[int(self.anim)]
+        
+        if gamedata.combo_time == gamedata.MAX_COMBO_TIME and gamedata.combo > 1:
+            counter = get_combo_counter(gamedata.combo, self.rect.topleft)
+            counter.rect.midbottom = self.rect.midtop
+            counter.position = list(counter.rect.topleft)
+            counter.change_state(counter.__class__.STATES.APPEARING)
+            Ship.GROUP.add(counter)
+            
 
     def die(self):
-        for i in chain(Ship.FRAMES, FlameTrail.FRAMES, {self.light_column.image}): i.set_alpha(0)
+        for i in chain(Ship.FRAMES, FlameTrail.FRAMES, (self.light_column.image,)): i.set_alpha(0)
         self.emitter.rect = self.rect
         DEATH.play()
         self.emitter.burst(100)
