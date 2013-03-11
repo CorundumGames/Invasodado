@@ -1,31 +1,35 @@
+'''
+This module contains common game data for things like lives, score, etc.  It
+stores both the current values and the previous, so we can see if the score
+changed at all.  This way we can save on creating new HUD graphics.
+'''
+
 ### Constants ##################################################################
-DEFAULT_MULTIPLIER = 10
+DEFAULT_LIVES = 3
 ################################################################################
 
 ### Globals ####################################################################
-multiplier         = DEFAULT_MULTIPLIER
-COMBO_LENGTH       = 50
+combo      = 0
+combo_time = 0
 
-combo              = False
-combo_counter      = 0
+score      = 0
+prev_score = None
 
-score              = 0
-prev_score         = None
-
-lives              = 3
-prev_lives         = None
+lives      = DEFAULT_LIVES
+prev_lives = None
 ################################################################################
 
 ### Functions ##################################################################
 def clean_up():
+    '''
+    Resets all the game data to the default values, in time for the next game.
+    '''
     global score, prev_score
     global lives, prev_lives
-    global combo, combo_counter
-    global multiplier
+    global combo
 
-    score, prev_score    = 0, None
-    lives, prev_lives    = 3, None
-    combo, combo_counter = False, 0
-    multiplier           = DEFAULT_MULTIPLIER
+    score, prev_score =             0, None
+    lives, prev_lives = DEFAULT_LIVES, None
+    combo             = 0
 
 ################################################################################

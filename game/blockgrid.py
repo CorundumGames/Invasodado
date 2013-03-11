@@ -14,6 +14,8 @@ from game import gamedata
 ### Constants ##################################################################
 BLOCK_TYPE = None
 CELL_SIZE  = (32, 32)
+COMBOS     = tuple(config.load_sound('combo%d.wav' % i) for i in range(1, 6))
+MAX_COMBO_TIME = 60  #In frames
 SIZE       = (20, 12) #(width, height)
 RECT       = pygame.rect.Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL_SIZE[1]))
 ################################################################################
@@ -128,13 +130,24 @@ def update():
         #If at least 3 blocks are aligned...
             _blocks_to_clear.update(match_set) #Mark these blocks for removal      
 
+    if gamedata.combo_time:
+        gamedata.combo_time -= 1
+    else:
+        gamedata.combo = 0
+        
     if len(_blocks_to_clear) >= 3:
     #If we're clearing any blocks...
         _block_clear.play()
-        gamedata.score     += len(_blocks_to_clear) ** (gamedata.combo_counter + 1)
-        gamedata.combo      = True
-        gamedata.multiplier *= 2
+        if gamedata.combo_time:
+            COMBOS[min(gamedata.combo, len(COMBOS)) - 1].play()
+        
+        gamedata.combo_time     = MAX_COMBO_TIME
+        gamedata.combo += 1
+        gamedata.score += len(_blocks_to_clear) * (gamedata.combo)
+
         for k in _blocks_to_clear:
         #For every block marked for clearing...
             k.change_state(BLOCK_TYPE.STATES.DYING)
+        
         _blocks_to_clear.clear()
+
