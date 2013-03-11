@@ -45,7 +45,7 @@ del DEFAULTS, TITLES
 ################################################################################
 
 ### Functions ##################################################################
-@lru_cache(maxsize=16)
+#@lru_cache(maxsize=16)
 def make_score_table(table, pos, vspace, width, surfaces=False):
     '''
     Creates a visual representation of a high score table.
@@ -121,7 +121,7 @@ class HighScoreState(GameState):
             scores, titles = self.hud_scores, self.hud_titles
             MENU.remove(scores[self.current_table], titles[self.current_table])
             self.current_table += index
-            self.current_table %= len(self.hud_scores)
+            self.current_table %= len(score_tables)
             MENU.add(scores[self.current_table], titles[self.current_table])
 
     def __enter_char(self):
@@ -135,7 +135,7 @@ class HighScoreState(GameState):
                 self.entry_name.pop()
                 self.name_index = max(self.name_index - 1, 0)
             elif ALPHANUMERIC[self.alphanum_index] == '_':
-                self.entry_name[self.name_index] = ' '
+                self.entry_name[self.name_index] = ord(' ')
                 self.name_index = min(self.name_index + 1, CHAR_LIMIT - 1)
             elif ALPHANUMERIC[self.alphanum_index] == '#':
                 if self.entry_name:
@@ -161,5 +161,5 @@ class HighScoreState(GameState):
         self.hud_name.kill()#Get rid of the name entry characters
         score_tables[self.current_table].add_scores([HighScoreEntry(self.entry_name.decode(), self.kwargs['score'], self._mode)])#add the entry to the leaderboard
         MENU.remove(self.hud_scores)#remove the menu from the screen
-        self.hud_scores = make_score_table(score_tables[self.current_table], (0, 0), 8, ROW_WIDTH)#update the menu with the new entry
-        MENU.add(self.hud_scores)#add the menu back to the screen with the updated entry
+        self.hud_scores = tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
+        MENU.add(self.hud_scores[self.current_table])#add the menu back to the screen with the updated entry
