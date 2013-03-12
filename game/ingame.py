@@ -6,6 +6,7 @@ from os.path     import join
 from random      import choice
 
 import pygame
+import pygame.mixer
 from pygame.constants import *
 from pygame.sprite import Group, OrderedUpdates
 
@@ -48,6 +49,7 @@ UFO_GROUP     = Group()
 ### Constants ##################################################################
 rect = config.SCREEN_RECT
 DEBUG_KEYS     = (K_u, K_c, K_f, K_F1, K_e, K_k, K_i)
+FADE_TIME      = 2500  #In milliseconds
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
 FIRE_MESSAGE   = "Press fire to continue"
 GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
@@ -56,6 +58,7 @@ LIVES_LOCATION = (rect.width - 160, 16)
 MODULE_CLEANUP = (balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata)
 MOUSE_ACTIONS  = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
 MUSIC_PATHS    = {-1:'music.ogg', 120:'2.ogg', 300:'5.ogg'}
+GAME_OVER_PATH = 'gameover.ogg'
 SCORE_LOCATION = (16, 16)
 TIME_FORMAT    = "{}:{:0>2}"
 TIME_LOCATION  = (rect.centerx, 32)
@@ -202,14 +205,18 @@ class InGameState(GameState):
 
         if self._game_running and (not gamedata.lives or Block.block_full):
         #If we run out of lives or the blocks go past the top of the screen...
+            pygame.mixer.music.fadeout(FADE_TIME)
             self.__game_over()
             enemysquadron.celebrate()
             self._game_running = False
+            
         elif not self._game_running:
             #If we've gotten a Game Over...
             if not self._ship.respawn_time:
             #Once the ship's been destroyed...
                 for i in (self._ship, self._ship.flames, self._ship.light_column): i.kill()
+            if not pygame.mixer.music.get_busy():
+                config.play_music(GAME_OVER_PATH)
                 
 
     def render(self):
