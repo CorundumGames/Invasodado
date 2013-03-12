@@ -1,5 +1,5 @@
 import os.path
-from math import copysign
+from math import copysign, sin
 from random import choice, uniform
 
 import pygame.mixer
@@ -16,6 +16,7 @@ from game.gameobject import GameObject
 ### Constants ##################################################################
 ENEMY_STATES = ('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'CHEERING')
 FRAMES       = tuple(pygame.Rect(32 * i, 32, 32, 32) for i in range(4))
+LOWER_INCREMENT = 8
 START_POS    = (32.0, 32.0)
 
 ENEMY_FRAMES = color.get_colored_objects(FRAMES)
@@ -100,12 +101,14 @@ class Enemy(GameObject):
         self.__animate()
         self.position[1] += 1
         self.rect.top     = self.position[1]
-        if self.amount_lowered == 8:
+        if self.amount_lowered == LOWER_INCREMENT:
             self.amount_lowered = 0
             self.change_state(Enemy.STATES.ACTIVE)
 
     def cheer(self):
         self.__animate()
+        self.position[1] -= 2 * sin((Enemy.anim / 2) - self._form_position[0])
+        self.rect.top = self.position[1] + .5
     
     def __animate(self):
         self.image = self.current_frame_list[id(self.color)][int(-abs(Enemy.anim - 3) + 3) % 4]
