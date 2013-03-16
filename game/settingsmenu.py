@@ -4,9 +4,10 @@ This is a menu that lets the user change settings within the game.
 
 from collections import namedtuple
 from functools import partial
+from os.path import join
 
 import pygame
-from pygame.locals import *
+from pygame.constants import *
 from pygame.sprite import Group, OrderedUpdates
 
 from core           import config
@@ -20,7 +21,7 @@ from game.hudobject import make_text
 ### Groups #####################################################################
 HUD  = Group()
 MENU = Group()
-BG   = OrderedUpdates()
+GRID_BG   = OrderedUpdates()
 ################################################################################
 
 ### Constants ##################################################################
@@ -34,7 +35,7 @@ MENU_CORNER    = (32, 64)
 #The location of the top-left corner of the menu
 SETTINGS_FIELDS = 'fullscreen colorblind difficulty musicvolume effectsvolume back'
 SETTINGS_KEYS   = namedtuple('Settings', SETTINGS_FIELDS)
-SETTINGS_NAMES  = ("Full-Screen", "Colorblind Mode", "Difficulty", "Music Volume", "Effects Volume", "Back")
+SETTINGS_NAMES  = config.load_text('settings')
 TITLE_LOCATION  = (config.SCREEN_RECT.centerx - 64, 32)
 ################################################################################
 
@@ -47,7 +48,7 @@ class SettingsMenu(GameState):
         from game.mainmenu import MainMenu
         
         self.cursor_index = 0
-        self.group_list   = (bg.STARS_GROUP, BG, HUD, MENU)
+        self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
         self.hud_title    = make_text("Settings", TITLE_LOCATION)
         self.hud_cursor   = make_text("->"      , (0, 0)        )
 
@@ -85,11 +86,11 @@ class SettingsMenu(GameState):
 
         HUD.add(self.hud_cursor, self.hud_title)
         MENU.add(a, b)
-        BG.add(bg.EARTH, bg.GRID)
+        GRID_BG.add(bg.EARTH, bg.GRID)
         
     def __del__(self):
         super().__del__()
-        settings.save_settings()
+        settings.save_settings(join(config.DATA_STORE, 'settings.wtf'))
 
     def render(self):
         self.hud_cursor.rect.midright = self.menu[self.cursor_index][0].rect.midleft
@@ -116,8 +117,13 @@ class SettingsMenu(GameState):
         config.toggle_fullscreen()
         self.menu.fullscreen[1].image = make_text(config.on_off(settings.fullscreen), surfaces=True)
 
-    def __toggle_color_blind_mode(self, toggle):
-        #toggle doesn't really matter because it's the same both ways
+    def __toggle_color_blind_mode(self, toggle=None):
+        '''
+        Turns Colorblind Mode on or off.  By default it inverts the current
+        boolean value, pass in toggle to explicitly assign a value.
+        
+        @param toggle: The state to change Colorblind mode to.  If None, just
+        '''
         config.toggle_color_blind_mode();
         self.menu.colorblind[1].image = make_text(config.on_off(settings.color_blind), surfaces=True)
 

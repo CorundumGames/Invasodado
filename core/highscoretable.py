@@ -1,40 +1,43 @@
 from contextlib import closing
-from datetime import datetime
-from functools import lru_cache
-from json     import load
-from sys import platform
-from os import environ, mkdir
-from os.path import isdir, join
+from datetime   import datetime
+from functools  import lru_cache
+from json       import dumps, load, loads
+from sys        import platform
+from os         import mkdir
+from os.path    import isdir  , join
 import shelve
 
+from core import config
 from core import geolocation
 
 ### Constants ##################################################################
 PATTERN      = '%Y-%m-%d %H:%M:%S.%f'
 SCORE_FORMAT = '{0.name}|{0.score}|{0.mode}|{0.country}|{0.platform}|{0.time}'
-DATA_PATH    = join(environ['APPDATA' if 'win' in platform else 'HOME'], 'Invasodado')
 ################################################################################
 
 ### Functions ##################################################################
-@lru_cache(maxsize=4)
-def load_defaults(filename):
+def load_defaults(scores):
     '''
-    @param filename: name/location of the default scores to load
+    @param scores: Either a file-like object or a string, either of which must
+                   hold JSON-formatted data.
 
     Takes in a JSON file and loads default scores from there.
     This is meant to be used for default high score tables, and NOT for storage.
     '''
-    return load(open(filename))
-
+    if isinstance(scores, str):
+        return load(open(scores))
+    else:
+        return loads(dumps(scores))
 
 ################################################################################
 
 ### Preparation ###############################################################
 try:
-    mkdir(DATA_PATH)
+#Let's try to make a directory...
+    mkdir(config.DATA_STORE)
 except OSError:
 #Whoops, a file or directory with this name exists!
-    if isdir(DATA_PATH):
+    if isdir(config.DATA_STORE):
     #Oh, it's a directory, we can use it
         pass
     else:
@@ -112,11 +115,12 @@ class HighScoreTable:
         '''
         self.db_flag = db_flag
         self.mode    = mode
-        self.path    = join(DATA_PATH, path)
+        self.path    = join(config.DATA_STORE, path)
         self.scores  = []
         self.size    = size
         self.title   = title
         
+        #TODO: Hard-code default scores (to deter cheating)
         a = None
         with closing(shelve.open(self.path)) as scorefile:
             if len(scorefile) < self.size:
@@ -124,6 +128,7 @@ class HighScoreTable:
                 a = load_defaults(default)
                 
         if a is not None:
+        #If we actually needed to load default scores...
             self.add_scores([HighScoreEntry(i, a[i], mode) for i in a])
         else:    
             self.read_scores()
@@ -134,6 +139,9 @@ class HighScoreTable:
     def add_scores(self, iterable):
         '''
         @param iterable: An iterable holding a bunch of HighScoreEntrys
+        
+        @raise TypeError: If any element in iterable is not a HighScoreEntry
+        @raise ValueError: If any element in iterable has a different mode than self
 
         Adds all scores in iterable to self.scorefile, or at least tries
         '''
@@ -151,11 +159,15 @@ class HighScoreTable:
         
         self.scores.sort(reverse=True)
         while len(self.scores) > self.size:
+        #While we have excess scores stored in the table...
             self.scores.pop()
             
         self.write_scores()
                     
     def write_scores(self):
+        '''
+        Writes all scores to the file
+        '''
         with closing(shelve.open(self.path)) as scorefile:
             scorefile.clear()
             for i in self.scores:

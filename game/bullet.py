@@ -25,7 +25,7 @@ class Bullet(GameObject):
         self.position = list(self.rect.topleft)
         self.state    = self.__class__.STATES.IDLE
 
-        self.image.set_colorkey(color.COLOR_KEY, config.FLAGS)
+        self.image.set_colorkey(color.COLOR_KEY, config.BLIT_FLAGS)
 
     def start_moving(self):
         '''

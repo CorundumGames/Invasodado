@@ -1,27 +1,27 @@
-from functools import lru_cache, partial
+from functools import partial
 from os.path   import join
 from string    import ascii_letters, digits
 
 import pygame
 from pygame.constants import *
-from pygame.sprite import Group, OrderedUpdates
+from pygame.sprite    import Group, OrderedUpdates
 
-from core                import color
 from core                import config
 from core.gamestate      import GameState
 from core.highscoretable import HighScoreTable, HighScoreEntry
 from game                import bg
+from game.default_scores import DEFAULT_HIGH_SCORES
 from game.hudobject      import make_text
 
 ### Groups #####################################################################
-BG   = OrderedUpdates()
+GRID_BG   = OrderedUpdates()
 MENU = Group()
 ################################################################################
 
 ### Constants ##################################################################
 ALPHANUMERIC   = ''.join((ascii_letters, digits, '_-\'#<'))
 CHAR_LIMIT     = 20
-DEFAULTS       = ('norm_default.json', '2_default.json', '5_default.json')
+DEFAULTS       = DEFAULT_HIGH_SCORES
 ENTRY_NAME_POS = (0, config.SCREEN_HEIGHT - 32)
 NO_ENTRY       = "Loser"
 ROW_WIDTH      = 32
@@ -33,19 +33,16 @@ V_SPACE        = 24
 ################################################################################
 
 ### Globals ####################################################################
-f = partial(join, 'save')
 score_tables  = (
-                 HighScoreTable('0.wtf',  -1, 10, TITLES[0], f(DEFAULTS[0])),
-                 HighScoreTable('2.wtf', 120, 10, TITLES[1], f(DEFAULTS[1])),
-                 HighScoreTable('5.wtf', 300, 10, TITLES[2], f(DEFAULTS[2])),
+                 HighScoreTable('0.wtf',  -1, 10, TITLES[0], DEFAULTS[0]),
+                 HighScoreTable('2.wtf', 120, 10, TITLES[1], DEFAULTS[1]),
+                 HighScoreTable('5.wtf', 300, 10, TITLES[2], DEFAULTS[2]),
                 )
 score_table_dict = {-1:0, 120:1, 300:2}
-del f
 del DEFAULTS, TITLES
 ################################################################################
 
 ### Functions ##################################################################
-#@lru_cache(maxsize=16)
 def make_score_table(table, pos, vspace, width, surfaces=False):
     '''
     Creates a visual representation of a high score table.
@@ -71,11 +68,12 @@ class HighScoreState(GameState):
                             K_UP    : partial(self.__char_move   ,  1),
                             K_DOWN  : partial(self.__char_move   , -1),
                             K_RETURN: self.__enter_char               ,
+                            K_SPACE : self.__enter_char               ,
                             K_ESCAPE: partial(self.change_state, kwargs['next']),
                            }
         self.hud_titles = tuple(make_text(score_tables[i].title, SCORE_TABLE_X) for i in range(3))
         self.hud_scores = tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
-        self.group_list = (bg.STARS_GROUP, BG, MENU)
+        self.group_list = (bg.STARS_GROUP, GRID_BG, MENU)
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1
         self.current_table = score_table_dict[self._mode]
         
@@ -92,7 +90,7 @@ class HighScoreState(GameState):
             config.play_music('score.ogg')
             
         MENU.add(self.hud_scores[score_table_dict[self._mode]], self.hud_titles[score_table_dict[self._mode]])
-        BG.add(bg.EARTH, bg.GRID)
+        GRID_BG.add(bg.EARTH, bg.GRID)
 
     def render(self):  
         if self.entering_name:
@@ -157,6 +155,7 @@ class HighScoreState(GameState):
             
     def __enter_score(self):
         config.CURSOR_SELECT.play()
+        self.key_actions[K_SPACE] = self.key_actions[K_ESCAPE]
         self.entering_name = False
         self.hud_name.kill()#Get rid of the name entry characters
         score_tables[self.current_table].add_scores([HighScoreEntry(self.entry_name.decode(), self.kwargs['score'], self._mode)])#add the entry to the leaderboard

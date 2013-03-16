@@ -56,6 +56,7 @@ excludes     = [
                 'multiprocessing.synchronize',
                 'numpy',
                 'pkg_resources',
+                'platform',
                 'plistlib',
                 'pstats',
                 'pydoc',
@@ -85,9 +86,9 @@ excludes     = [
                 'zipfile',
                 ]
 
-include_files = [join('save', i) for i in listdir('save') if 'json'     in i] + \
-                [join('sfx' , j) for j in listdir('sfx' ) if 'bfxr' not in j] + \
-                [join('gfx' , k) for k in listdir('gfx' )]
+include_files = [join('sfx' , j) for j in listdir('sfx' ) if 'bfxr' not in j] + \
+                [join('gfx' , k) for k in listdir('gfx' )                   ] + \
+                [join('text', m) for m in listdir('text')]
 
 
 build_options = {

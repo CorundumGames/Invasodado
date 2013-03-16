@@ -4,11 +4,13 @@ utilities, etc.  It's a Python convention to call this sort of file config.py.
 '''
 
 from functools import lru_cache
-from os.path import join
-from sys     import argv
+from os        import environ
+from os.path   import join
+import sys
+from sys       import argv, platform
 
-from pygame.display import set_caption
 import pygame.image
+from pygame.display import set_caption
 from pygame.constants import *
 
 from core import settings
@@ -31,6 +33,8 @@ _pause = False
 
 _sounds = []
 
+_sound_looping = None
+
 fps_timer = pygame.time.Clock()
 
 screen = pygame.display.set_mode(settings.resolution, DOUBLEBUF)
@@ -51,12 +55,26 @@ def get_sprite(frame):
     return SPRITES.subsurface(frame).copy()
 
 def load_image(name):
-    return pygame.image.load(join('gfx', name)).convert(DEPTH, FLAGS)
+    return pygame.image.load(join('gfx', name)).convert(DEPTH, BLIT_FLAGS)
 
 def load_sound(name):
     sound = pygame.mixer.Sound(join('sfx', name))
     _sounds.append(sound)
     return sound
+
+def load_text(name):
+    with open(join('text', '%s-%s.wtf' % (name, 'en'))) as text_file:
+        return tuple(i.strip() for i in text_file)
+
+def loop_sound(sound):
+    global _sound_looping
+    if sound is None:
+        if _sound_looping is not None:
+            _sound_looping.stop()
+        _sound_looping = None
+    elif sound != _sound_looping:
+        _sound_looping = sound
+        _sound_looping.play(-1)
 
 @lru_cache(maxsize=4)
 def on_off(condition):
@@ -139,7 +157,7 @@ def toggle_pause():
     #While the game is paused...
         for event in pygame.event.get():
         #For all received events...
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            if event.type == KEYDOWN and event.key == K_p:
             #If the P key is pressed...
                 _pause = not _pause
                 PAUSE.play()
@@ -150,32 +168,52 @@ def toggle_pause():
 ################################################################################
 
 ### Constants ##################################################################
+'''
+@var APP_DATA_WIN: Environment variable holding the path of the Appdata folder
+@var APP_DATA_LIN: Environment variable holding the path of the user's home directory
+@var BLIT_FLAGS: The flags used by Pygame to render images a certain way
+@var CURSOR_BEEP: The sound made when the player moves the menu cursor
+@var CURSOR_SELECT: The sound made when the player selects a menu option
+@var DATA_STORE: The directory we're storing Invasodado's save data
+@var DEBUG: True if we're playing in debug mode
+@var DEPTH: The color depth of the screen, in bits
+@var EARTH: The image of the Earth in the background
+@var ENCODING: The text encoding for Invasodado
+@var FONT: The font used in this game
+@var GRID_BG: The image for the grid that shows where blocks can fall
+@var PAUSE: The sound played when the player pauses
+@var SCREEN_DIMS: Tuple of all possible display resolutions
+@var SCREEN_HEIGHT: Height of the screen, in pixels
+@var SCREEN_RECT: pygame.Rect that represents screen's area
+@var SCREEN_WIDTH: Width of the screen, in pixels
+@var SPRITES: The spritesheet for the game
+'''
+            
+APP_DATA_WIN = 'APPDATA'
+APP_DATA_LIN = 'HOME'
+BLIT_FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
 CURSOR_BEEP   = load_sound('cursor.wav')
 CURSOR_SELECT = load_sound('select.wav')
-DEPTH    = screen.get_bitsize()
-ENCODING = 'utf-8'
-FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
-#The flags used to create all Surfaces; these are best for performance.
-
-NUM_COLORS = 5
-#The color depth used, in bits
-PAUSE = load_sound('pause.wav')
-SCREEN_DIMS   = tuple(pygame.display.list_modes()) #Available screen resolutions
-SCREEN_HEIGHT = screen.get_height() #480 15 cells 32
+DATA_STORE    = join(environ[APP_DATA_WIN if 'win' in platform else APP_DATA_LIN], 'Invasodado')
+DEBUG         =  __debug__ and not hasattr(sys, 'frozen') #cx_freeze adds 'frozen' to the sys module
+DEPTH         = screen.get_bitsize()
+EARTH         = load_image('earth.png')
+ENCODING      = 'utf-8'
+FONT          = pygame.font.Font(join('gfx', 'font.ttf'), 18)
+GRID_BG       = load_image('bg.png')
+PAUSE         = load_sound('pause.wav')
+SCREEN_DIMS   = tuple(pygame.display.list_modes())
+SCREEN_HEIGHT = screen.get_height()
 SCREEN_RECT   = pygame.Rect((0, 0), screen.get_size())
-SCREEN_WIDTH  = screen.get_width()  #640 20 cells 32
-#Screen width and height, in pixels
-SPRITES = load_image('sprites.png')
-EARTH   = load_image('earth.png')
-BG      = load_image('bg.png')
-FONT    = pygame.font.Font(join('gfx', 'font.ttf'), 18)
+SCREEN_WIDTH  = screen.get_width()
+SPRITES       = load_image('sprites.png')
 ################################################################################
 
 ### Preparation ################################################################
-for i in (EARTH, BG):
+for i in (EARTH, GRID_BG):
     i.set_colorkey(pygame.Color('#000000'))
 
-BG.set_alpha(128)
+GRID_BG.set_alpha(128)
 EARTH = EARTH.subsurface(pygame.Rect(0, 0, EARTH.get_width(), EARTH.get_height()/2))
 
 if not __debug__:

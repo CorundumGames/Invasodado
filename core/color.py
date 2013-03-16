@@ -4,7 +4,8 @@ objects in Invasodado to use.  Nothing too special here.
 '''
 from random import uniform, choice
 
-import pygame
+from pygame.constants import *
+from pygame import Color, Rect
 
 from core import config
 from core import settings
@@ -13,20 +14,20 @@ from core.particles import ParticlePool
 ### Constants #################################################################
 
 # Common colors we would refer to; not all of these are used by blocks!
-RED    = pygame.Color('#FF3333')
-GREEN  = pygame.Color('#4FFF55')
-BLUE   = pygame.Color('#585EFF')
-YELLOW = pygame.Color('#EBFF55')
-PURPLE = pygame.Color('#FF55D5')
-WHITE  = pygame.Color('#FFFFFF')
-BLACK  = pygame.Color('#000000')
+RED    = Color('#FF3333')
+GREEN  = Color('#4FFF55')
+BLUE   = Color('#585EFF')
+YELLOW = Color('#EBFF55')
+PURPLE = Color('#FF55D5')
+WHITE  = Color('#FFFFFF')
+BLACK  = Color('#000000')
 LIST   = (RED, BLUE, GREEN, YELLOW, PURPLE) # THESE are used by blocks.
 
 # The color that will be transparent, taken from the bottom-left corner
 COLOR_KEY = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 
 #Holds the frames for the symbols
-COLOR_BLIND_FRAMES  = tuple(pygame.Rect(32 * i, 32, 32, 32) for i in range(4,9))
+COLOR_BLIND_FRAMES  = tuple(Rect(32 * i, 32, 32, 32) for i in range(4,9))
 #Holds the symbols.
 COLOR_BLIND_SYMBOLS = {
                         id(RED)    : config.get_sprite(COLOR_BLIND_FRAMES[0]),
@@ -45,7 +46,7 @@ def blend_color(surface, color):
     @param surface: The graphic to be tinted
     @param color: The color to tint surface with
     '''
-    surface.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
+    surface.fill(color, special_flags=BLEND_RGBA_MULT)
     return surface
 
 def get_colored_objects(frames, has_alpha=True, color_blind=False):
@@ -66,14 +67,14 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False):
         for i in colored.values():
         #For all given frames...
             for j in i:
-                j.set_colorkey(j.get_at([0, 0]), config.FLAGS)
+                j.set_colorkey(j.get_at([0, 0]), config.BLIT_FLAGS)
                 
     if color_blind:
         for c in LIST:
             COLOR_BLIND_SYMBOLS[id(c)].set_colorkey(COLOR_KEY)
         for c in LIST:
             for i in colored[id(c)]:
-                i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(),(0, 0))
+                i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(), (0, 0))
     return colored
 
 def _rand_color_appear(self):
@@ -83,7 +84,7 @@ def _rand_color_appear(self):
 ################################################################################
 
 ### Globals ####################################################################
-_parts = get_colored_objects([pygame.Rect(4, 170, 4, 4)], False)
-color_particles = dict([(id(c), ParticlePool(_parts[id(c)][0])) for c in LIST])
+_parts                 = get_colored_objects([Rect(4, 170, 4, 4)], False)
+color_particles        = dict([(id(c), ParticlePool(_parts[id(c)][0])) for c in LIST])
 random_color_particles = ParticlePool(_parts[id(RED)][0], appear_func=_rand_color_appear)
 ################################################################################
