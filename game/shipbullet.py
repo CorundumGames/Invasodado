@@ -14,6 +14,9 @@ from game.ufo    import UFO
 from game        import gamedata
 
 ### Constants ##################################################################
+'''
+@var SHOOT: The sound that plays when the player fires
+'''
 SHOOT = config.load_sound('shoot.wav')
 ################################################################################
 
@@ -24,13 +27,13 @@ class ShipBullet(Bullet):
 
     def __init__(self):
         super().__init__()
-        self.column = 0
+        self.column    = 0
         self.hit_enemy = False
         
     def start_moving(self):
         SHOOT.play()
         super().start_moving()
-        self.column = round(self.position[0] / 32)
+        self.column    = round(self.position[0] / 32)
         self.hit_enemy = False
 
     def move(self):

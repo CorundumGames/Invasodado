@@ -2,22 +2,24 @@
 This module is a system for collision between Axis-Aligned Bounding Boxes.
 It's meant to be reused in other games, so I tried to keep this as general as
 possible.
-
-@var _do_not_check: Game object types that don't collide (for performance)
-@var _do_not_compare: Object type pairings that don't collide with each other
 '''
-
 from itertools import chain, combinations, filterfalse
 
-import pygame.display
-import pygame.sprite
-import pygame.time
+from pygame import Rect
+from pygame import display
+from pygame import sprite
+from pygame import time
 
 ### Globals ####################################################################
+'''
+@var _do_not_check: Set of all game object types that are not to be checked by
+                    the collision system, because by design there's no need to.
+                    
+@var _do_not_compare: Set of all pairings of object types that shouldn't be
+                      checked for collision with each other (e.g. bullets on
+                      bullets).  Shouldn't include anything in _do_not_check.
+'''
 _do_not_compare = set()
-#Contains 2-tuples of types.  Don't check for collisions between objects
-#with these type pairings.
-
 _do_not_check   = set()
 ################################################################################
 
@@ -30,6 +32,13 @@ def dont_check_type(*types):
     @postcondition: The classes in types are no longer capable of collisions.
     '''
     _do_not_check.update(types)
+
+def dont_check_pair(*pairs):
+    '''
+    Pass in 2-tuples of classes that shouldn't be compared to each other
+    '''
+    _do_not_compare.update(pairs)
+
 ################################################################################
 
 class CollisionGrid:
@@ -54,18 +63,20 @@ class CollisionGrid:
         @ivar layer: Only objects of the same layer may collide
         @ivar spare_collisions: Spare Collisions, so we don't keep creating them
         '''
-        size = pygame.display.get_surface().get_size()
+        size      = display.get_surface().get_size()
         cell_size = (size[0] / width, size[1] / height)
-        
-        def get_pos(i, j):
-            return (i*cell_size[0], j*cell_size[1])
 
+        def get_rect(i, j):
+            '''
+            Small helper function for cleaner code.
+            '''
+            return Rect((i * cell_size[0], j * cell_size[1]), cell_size)
+        
         self.collisions = []
-        self.grid       = [[GridCell(pygame.Rect(get_pos(i, j), cell_size), self)
-                                    for i in range(width)
-                            ]
+        self.grid       = tuple(
+                            tuple(GridCell(get_rect(i, j), self) for i in range(width))
                             for j in range(height)
-                          ]
+                          )
         self.group_list = group_list
         self.layer      = layer
         self.spare_collisions = []
@@ -128,9 +139,7 @@ class GridCell:
         '''
         objects_to_remove = self.objects_to_remove
 
-        for i in filterfalse(self.rect.colliderect, self.objects):
-            objects_to_remove.add(i)
-
+        objects_to_remove.update(filterfalse(self.rect.colliderect, self.objects))
         self.objects -= objects_to_remove
         objects_to_remove.clear()
 
@@ -159,13 +168,12 @@ class GridCell:
 
         for i, j in combinations(self.objects, 2):
         #For all possible combinations of objects that can touch...
-            if pygame.sprite.collide_rect(i, j):
+            if (i.__class__, j.__class__) not in _do_not_compare and sprite.collide_rect(i, j):
             #If these two objects touch...
                 if not grid.spare_collisions:
                 #If we don't have any spare Collision objects...
                     grid.spare_collisions.append(Collision())
                 grid.collisions.append(grid.spare_collisions.pop().update(i, j))
-
 
 ################################################################################
 
@@ -199,7 +207,7 @@ class Collision:
         @return: self
         '''
         self.obj1, self.obj2 = obj1, obj2
-        self._time           = pygame.time.get_ticks()
+        self._time           = time.get_ticks()
         return self
 
     def reset(self):

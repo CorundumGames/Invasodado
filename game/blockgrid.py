@@ -5,19 +5,18 @@ refitted for other match-3 games like Bejewelled or Puzzle League.
 '''
 
 from pygame.display import get_surface
-import pygame.rect
-import pygame.mixer
+from pygame import Rect
 
 from core import config
 from game import gamedata
 
 ### Constants ##################################################################
+ALARM_LINE = 2
 BLOCK_TYPE = None
 CELL_SIZE  = (32, 32)
 COMBOS     = tuple(config.load_sound('combo%d.wav' % i) for i in range(1, 6))
-
 SIZE       = (20, 12) #(width, height)
-RECT       = pygame.rect.Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL_SIZE[1]))
+RECT       = Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL_SIZE[1]))
 ################################################################################
 
 ### Globals ####################################################################
@@ -33,7 +32,6 @@ def check_block(block, should_check=True):
         _blocks_to_check.add(block)
     else:
         _blocks_to_check.discard(block)
-        
 
 def clean_up():
     '''
@@ -78,10 +76,17 @@ def get_empty_block_array():
     
     Outer list is the list of columns
     Inner list is the list of rows
+    
+    So (x, y)
     '''
     return tuple([None for i in range(SIZE[1])] for j in range(SIZE[0]))
 
-blocks = get_empty_block_array()
+def is_above_threshold():
+    for i in blocks:
+        for j in i[:3]:
+            if j and j.gridcell[1] <= ALARM_LINE:
+                return True
+    return False
 
 def update():
     '''
@@ -98,7 +103,7 @@ def update():
         blocks[i.gridcell[0]][i.gridcell[1]] = i
     
     for b in _blocks_to_check:
-    #For all blocks to check for matches...
+    #For all blocks to check for matches... 
         match_set = {b}  #Start with a match of one
         next_blocks = ([], [], [], []) #Respectively holds blocks down, down-right, right, up-right
         for j in (1, 2):
@@ -128,7 +133,8 @@ def update():
 
         if len(match_set) >= 3:
         #If at least 3 blocks are aligned...
-            _blocks_to_clear.update(match_set) #Mark these blocks for removal      
+            _blocks_to_clear.update(match_set) #Mark these blocks for removal
+            
 
     if gamedata.combo_time:
         gamedata.combo_time -= 1

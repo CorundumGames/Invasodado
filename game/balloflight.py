@@ -42,6 +42,7 @@ def get_ball(startpos, target, newcolor):
     ball            = _balls.pop()  #Teehee
     ball.color      = newcolor
     ball.startpos   = tuple(startpos)
+
     ball._target[0] = target
     ball.change_state(BallOfLight.STATES.APPEARING)
     return ball
@@ -63,9 +64,9 @@ class BallOfLight(GameObject):
         self.image              = self.current_frame_list[id(newcolor)][0]
         size                    = self.image.get_size()
         self.rect               = pygame.Rect(startpos, size)
-        self.position           = list(startpos)
-        self.progress           = 0.0
-        self._target            = [None, 0.0]
+        self.position           = list(self.rect.topleft)
+        self.progress           = 0
+        self._target            = [None, 0]
         self.startpos           = startpos
         self.state              = BallOfLight.STATES.IDLE
 
@@ -73,10 +74,9 @@ class BallOfLight(GameObject):
 
     def appear(self):
         self.image        = self.current_frame_list[id(self.color)][0]
-        size = self.image.get_size()
         self.position     = list(self.startpos)
-        self.progress     = 0.0
-        self.rect.topleft = self.startpos
+        self.progress     = -1
+        self.rect.topleft = (self.startpos[0] + .5, self.startpos[1] + .5) 
         self.change_state(BallOfLight.STATES.MOVING)
         
         assert config.SCREEN_RECT.collidepoint(self._target), \
@@ -86,23 +86,23 @@ class BallOfLight(GameObject):
         position = self.position
         startpos = self.startpos
         target   = self._target
-
+        
         self.progress += 1
-        percent        = self.progress/TIME_TO_MOVE
+        percent        = self.progress / TIME_TO_MOVE
 
         if self._anim < len(FRAMES) - 1:
         #If we haven't finished animating...
             self._anim += 1
             self.image  = self.current_frame_list[id(self.color)][self._anim]
 
-        if percent == 1:
+        if percent >= 1:
         #If we've reached our target location...
             self.change_state(BallOfLight.STATES.DYING)
         else:
-            dx                = (percent ** 2) * (3 - 2 * percent)
-            ddx               = 1 - dx
-            position[0]       = (startpos[0] * dx ) + (target[0] * self.image.get_width() * ddx)
-            position[1]       = (startpos[1] * ddx) + (target[1] * dx )
+            dx                = (percent * percent) * (3 - 2 * percent)
+            dp                = 1 - dx
+            position[0]       = (startpos[0] * dx) + (target[0] * self.image.get_width() * dp)
+            position[1]       = (startpos[1] * dp) + (target[1] * dx)
             self.rect.topleft = (position[0] + .5, position[1] + .5)
 
         assert self.rect.colliderect(config.SCREEN_RECT), \
@@ -114,7 +114,7 @@ class BallOfLight(GameObject):
         self.kill()
         self._anim        = 0
         self.position     = [-300.0, -300.0]
-        self.rect.topleft = self.position
+        self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         
         self.change_state(BallOfLight.STATES.IDLE)
 

@@ -1,8 +1,6 @@
 from collections import namedtuple
 from functools   import partial
-from math import log1p
-import math
-from os.path     import join
+from math        import log1p
 from random      import choice
 
 import pygame
@@ -22,6 +20,7 @@ from game             import bg
 from game             import block
 from game.block       import Block
 from game             import blockgrid
+from game.combocounter import ComboCounter
 from game.enemy       import Enemy
 from game             import enemybullet
 from game.enemybullet import EnemyBullet
@@ -29,11 +28,11 @@ from game             import enemysquadron
 from game             import gamedata
 from game.highscore   import HighScoreState
 from game.hudobject   import HudObject, make_text
-from game.player      import Ship
+from game.player      import Ship, FlameTrail, LightColumn
 from game.shipbullet  import ShipBullet
 from game.ufo         import UFO
 
-#if __debug__: import core.vartracker
+#if config.DEBUG: import core.vartracker
 
 ### Groups #####################################################################
 BG            = OrderedUpdates()
@@ -48,6 +47,7 @@ UFO_GROUP     = Group()
 
 ### Constants ##################################################################
 rect = config.SCREEN_RECT
+ALARM          = config.load_sound('alarm.wav')
 DEBUG_KEYS     = (K_u, K_c, K_f, K_F1, K_e, K_k, K_i)
 FADE_TIME      = 2500  #In milliseconds
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
@@ -62,7 +62,19 @@ GAME_OVER_PATH = 'gameover.ogg'
 SCORE_LOCATION = (16, 16)
 TIME_FORMAT    = "{}:{:0>2}"
 TIME_LOCATION  = (rect.centerx, 32)
-TYPES_IGNORED  = (Block, BallOfLight, HudObject, Particle, ParticleEmitter)
+TYPES_IGNORED  = (Block, BallOfLight, ComboCounter, FlameTrail, LightColumn, HudObject, Particle, ParticleEmitter)
+TYPE_PAIRS_IGNORED = (
+                      (Enemy, EnemyBullet),
+                      (EnemyBullet, Enemy),
+                      (Ship, ShipBullet),
+                      (ShipBullet, Ship),
+                      (Ship, UFO),
+                      (UFO, Ship),
+                      (EnemyBullet, EnemyBullet),
+                      (Enemy, Enemy),
+                      (ShipBullet, EnemyBullet),
+                      (EnemyBullet, ShipBullet),
+                      )
 del rect
 ################################################################################
 
@@ -72,13 +84,14 @@ def null_if_debug(function):
     Returns function if we're in debug mode, returns the empty function (which
     does nothing) if we're not.
     '''
-    return function if __debug__ else lambda: None
+    return function if config.DEBUG else lambda: None
 ################################################################################
 
 ### Preparation ################################################################
-collisions.dont_check_type(*TYPES_IGNORED)
+collisions.dont_check_type(*TYPES_IGNORED     )
+collisions.dont_check_pair(*TYPE_PAIRS_IGNORED)
 
-if not __debug__:
+if not config.DEBUG:
     del MOUSE_ACTIONS
 
 BallOfLight.BLOCK_GROUP   = BLOCKS
@@ -105,7 +118,7 @@ class InGameState(GameState):
         @ivar group_list: list of pygame.Groups, rendered in ascending order
         @ivar hud_text: dict of HUD items that give info to the player
         @ivar key_actions: dict of functions to call when a given key is pressed
-        @ivar _mouse_actions: dict of Blocks to drop on mouse click, only if __debug__
+        @ivar _mouse_actions: dict of Blocks to drop on mouse click, only if config.DEBUG
         @ivar _ship: The player character
         @ivar _time: Time limit for the game in seconds (no limit if 0)
         @ivar _ufo: The UFO_GROUP object that, when shot, can destroy many blocks
@@ -116,24 +129,24 @@ class InGameState(GameState):
         self.group_list      = (bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD)
         self._collision_grid = CollisionGrid(4, 4, 1, self.group_list)
         self.hud_text        = HUD_TEXT(
-                                        make_text('', SCORE_LOCATION),
-                                        make_text('', LIVES_LOCATION),
-                                        make_text('', TIME_LOCATION ),
-                                        make_text("GAME OVER", GAME_OVER_LOC),
-                                        make_text(FIRE_MESSAGE, FIRE_LOCATION),
+                                        make_text(''          , SCORE_LOCATION),
+                                        make_text(''          , LIVES_LOCATION),
+                                        make_text(''          , TIME_LOCATION ),
+                                        make_text("GAME OVER" , GAME_OVER_LOC ),
+                                        make_text(FIRE_MESSAGE, FIRE_LOCATION ),
                                        )
         self._ship          = Ship()
         self.key_actions    = {
                                K_ESCAPE: partial(self.change_state, MainMenu)    ,
                                K_F1    : config.toggle_fullscreen                ,
-                               K_SPACE : self.__ship_fire                        ,
+                               K_SPACE : self._ship.on_fire_bullet                  ,
                                K_c     : null_if_debug(blockgrid.clean_up)       ,
+                               K_e     : null_if_debug(partial(self._ship.instadie, None))         ,
                                K_f     : null_if_debug(config.toggle_frame_limit),
+                               K_i     : null_if_debug(self.__ship_life),
+                               K_k     : partial(self._ship.change_state, Ship.STATES.DYING),
                                K_p     : config.toggle_pause                     ,
                                K_u     : null_if_debug(self.__add_ufo)           ,
-                               K_k     : partial(self._ship.change_state, Ship.STATES.DYING),
-                               K_e     : null_if_debug(self.__game_over)         ,
-                               K_i     : null_if_debug(self.__ship_life),
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._time          = self._mode * 60 + 60 #In frames
@@ -150,7 +163,7 @@ class InGameState(GameState):
             HUD.add(self.hud_text.lives)
 
         global DEBUG_KEYS
-        if not __debug__ and DEBUG_KEYS:
+        if not config.DEBUG and DEBUG_KEYS:
         #If this is a release build...
             for i in DEBUG_KEYS:
             #For every debug action...
@@ -176,7 +189,7 @@ class InGameState(GameState):
 
         for e in events:
         #For all events passed in...
-            if __debug__ and e.type == MOUSEBUTTONDOWN:
+            if config.DEBUG and e.type == MOUSEBUTTONDOWN:
             #If a mouse button is clicked and we're in debug mode...
                 if e.button < 4:
                     self.__make_block(e.pos[0], MOUSE_ACTIONS[e.button])
@@ -189,7 +202,7 @@ class InGameState(GameState):
                     key_actions[e.key]()
 
     def logic(self):
-        #if __debug__ and len(ENEMIES) == 0: vartracker.update()
+        #if config.DEBUG and len(ENEMIES) == 0: vartracker.update()
         enemysquadron.update()
         blockgrid.update()
         self._collision_grid.update()
@@ -202,21 +215,33 @@ class InGameState(GameState):
             #If we run out of time...
                 gamedata.lives = 0
             enemysquadron.increase_difficulty()
+        
+        
+        
+        if self._game_running:
+            gamedata.alarm = blockgrid.is_above_threshold()
+            config.loop_sound(ALARM if gamedata.alarm else None)
+        else:
+            config.loop_sound(None)
 
         if self._game_running and (not gamedata.lives or Block.block_full):
         #If we run out of lives or the blocks go past the top of the screen...
             pygame.mixer.music.fadeout(FADE_TIME)
-            self.__game_over()
+            self._ship.change_state(Ship.STATES.DYING)
             enemysquadron.celebrate()
             self._game_running = False
-            
+            gamedata.alarm = False
         elif not self._game_running:
-            #If we've gotten a Game Over...
+        #If we've gotten a Game Over...
             if not self._ship.respawn_time:
             #Once the ship's been destroyed...
-                for i in (self._ship, self._ship.flames, self._ship.light_column): i.kill()
+                for i in (self._ship, self._ship.flames, self._ship.light_column):
+                    i.kill()
             if not pygame.mixer.music.get_busy():
+            #If the song has faded out...
+                HUD.add(self.hud_text.game_over, self.hud_text.press_fire)
                 config.play_music(GAME_OVER_PATH)
+                self.__game_over()
                 
 
     def render(self):
@@ -249,14 +274,14 @@ class InGameState(GameState):
         
         pygame.display.flip()
 
-    def __make_block(self, position, color = choice(color.LIST), special = False):
+    def __make_block(self, position, color=choice(color.LIST), special=False):
         '''
         @param position: Position to release the Block (it'll snap to the grid)
         @param color: Color of the Block that will be released
         '''
-        if not __debug__: return
-        
+
         if not special:
+        #If we're not adding a special block...
             BLOCKS.add(block.get_block([position, 0.0], color))
         else:
             UFO.BLOCK_GROUP.add(block.get_block([position, 0.0], special=True))
@@ -266,9 +291,6 @@ class InGameState(GameState):
         #If the UFO_GROUP is not currently on-screen...
             UFO_GROUP.add(self._ufo)
             self._ufo.change_state(UFO.STATES.APPEARING)
-
-    def __ship_fire(self):
-        self._ship.on_fire_bullet()
         
     def __ship_life(self):
         gamedata.lives += 30
@@ -280,13 +302,8 @@ class InGameState(GameState):
                 'score': gamedata.score,
                 'mode' : self._mode    ,
                                         }
-        self.key_actions[pygame.K_SPACE] = partial(self.change_state,
-                                                   HighScoreState,
-                                                   **kwargs
-                                                   )
-
-        HUD.add(self.hud_text.game_over, self.hud_text.press_fire)
-        self._ship.change_state(Ship.STATES.DYING)
+            
+        self.key_actions[K_SPACE] = partial(self.change_state, HighScoreState, **kwargs)
 
     def __begin_tracking(self):
         pass

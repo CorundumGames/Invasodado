@@ -1,6 +1,7 @@
 import os.path
 from random import choice
 from functools import lru_cache
+from itertools import chain
 
 import pygame.mixer
 
@@ -10,6 +11,7 @@ from core            import settings
 from core.particles  import ParticlePool, ParticleEmitter
 from game.gameobject import GameObject
 from game            import blockgrid
+from game import gamedata
 
 ### Constants ##################################################################
 BLOCK_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'START_FALLING', 'FALLING', 'IMPACT', 'DYING')
@@ -17,6 +19,7 @@ FRAMES       = tuple(pygame.Rect(32 * i, 160, 32, 32) for i in range(8))
 GRAVITY      =  0.5
 MAX_SPEED    = 12.0
 UFO_BLOCK    = config.load_sound('ufo_block.wav')
+
 ################################################################################
 
 ### Globals ####################################################################
@@ -75,13 +78,12 @@ class Block(GameObject):
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position = position
         self.rect     = pygame.Rect(position, self.image.get_size()) #(x, y)
-        self._target  = None
         self._special = special
         self.state    = Block.STATES.IDLE
 
     def __str__(self):
-        return ("<Block - color: %s, cell: %s, position: %s, rect: %s, target: %s, state: %i>" %
-               (self.color, self.gridcell, self.position, self.rect, self._target, self.state))
+        return ("<Block - color: %s, cell: %s, position: %s, rect: %s, state: %i>" %
+               (self.color, self.gridcell, self.position, self.rect, self.state))
         
     def __repr__(self):
         return self.__str__()
@@ -94,7 +96,6 @@ class Block(GameObject):
                              self.rect.centerx // self.rect.width,
                              self.rect.centery // self.rect.height,
                             ] #(x, y)
-        self._target      = self.__set_target()
         self.emitter      = ParticleEmitter(color.color_particles[id(self.color)], self.rect, 5, Block.particle_group)
         self.change_state(Block.STATES.START_FALLING)
         self.add(Block.GROUP)
@@ -107,7 +108,6 @@ class Block(GameObject):
         '''
         self.acceleration[1] = GRAVITY
         blockgrid.check_block(self, False)
-        self.__set_target()
 
         if self.gridcell[1]:
         #If we're not at the top of the grid...
@@ -143,20 +143,7 @@ class Block(GameObject):
         gridcell[1]      = self.rect.centery // self.rect.height
         self.emitter.rect.topleft = rect.topleft
 
-        if self._anim < len(FRAMES) - 1:
-        #If we haven't hit the last frame of animation...
-            self._anim += 1
-            self.image  = self.current_frame_list[id(self.color)][self._anim]
-
-        if self._special:
-        #If this is a _special block...
-            self.image = self.current_frame_list[id(choice(color.LIST))][self._anim]
-
-        self.__set_target()
-
-        if self._target is not None and self._target < 1:
-        #If we go past the top of the screen...
-            Block.block_full = True
+        self.__animate()
         
         if rect.bottom >= blockgrid.RECT.bottom:
         #If we've hit the bottom of the grid...
@@ -184,7 +171,6 @@ class Block(GameObject):
         Constantly checks to see if this block can fall.
         '''
         gridcell = self.gridcell
-
         if self.rect.bottom < blockgrid.RECT.bottom:
         #If we're not at the bottom of the grid...
             block_below = blockgrid.blocks[gridcell[0]][gridcell[1] + 1]
@@ -207,10 +193,9 @@ class Block(GameObject):
         self.position        = self.__get_snap()
         self.rect.topleft    = self.position
         self.gridcell[1]     = self.rect.centery // self.rect.height #(row, col)
-        self._target         = None
         self.state           = Block.STATES.ACTIVE
         blockgrid.blocks[self.gridcell[0]][self.gridcell[1]] = self
-
+            
         blockgrid.check_block(self, True)
         _bump.play()
         #blockgrid.update()
@@ -225,7 +210,11 @@ class Block(GameObject):
                 blockgrid.clear_color(self.color)
             else:
                 blockgrid.clear_row(self.gridcell[1])
-                
+        elif not self.gridcell[1]:
+        #If we go past the the playing field...
+            self._anim = len(FRAMES) - 2  #Bring us to the second-to-last frame
+            self.__animate()              #And let the animation system finish
+            gamedata.lives = 0
 
     def vanish(self):
         blockgrid.check_block(self, False)
@@ -237,7 +226,6 @@ class Block(GameObject):
         self.position                              = [-300.0, -300.0]
         self.rect.topleft                          = self.position
         self.gridcell                              = None
-        self._target                               = None
         self.change_state(Block.STATES.IDLE)
         self.__replace()
         
@@ -249,19 +237,15 @@ class Block(GameObject):
         '''
         _blocks_set.add(self)
         
-    def __set_target(self):
-        '''
-        Determines which row this block should fall down to.
-        '''
-        for i in range(self.gridcell[1] + 1, blockgrid.SIZE[1]):
-        #For all grid cells below this one...
-            other = blockgrid.blocks[self.gridcell[0]][i]
-            if other and not other.velocity[1]:
-            #If this grid cell is occupied...
-                self._target = i - 1
-                break
-        
-        return self._target
+    def __animate(self):
+        if self._anim < len(FRAMES) - 1:
+        #If we haven't hit the last frame of animation...
+            self._anim += 1
+            self.image  = self.current_frame_list[id(self.color)][self._anim]
+
+        if self._special:
+        #If this is a _special block...
+            self.image = self.current_frame_list[id(choice(color.LIST))][self._anim]
     
     def __get_snap(self):
         '''
@@ -270,7 +254,7 @@ class Block(GameObject):
         size = self.image.get_size()
         return [
                 round(self.position[0] / size[0]) * size[0],
-                round(self.position[1] / size[1]) * size[1]
+                round(self.position[1] / size[1]) * size[1],
                ]
         
     actions = {

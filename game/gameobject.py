@@ -1,6 +1,15 @@
+'''
+A class for pretty much any object in the game to inherit from.  Provides
+facilities for motion, display, and the like.
+'''
+
 from pygame.sprite import Sprite
 
 ### Globals ####################################################################
+'''
+@var _state_changes: Module-private.  Set of all objects that will change state
+                     on the next frame.
+'''
 _state_changes = set()
 ################################################################################
 
@@ -15,12 +24,17 @@ def update():
     #For all state changes we have lined up...
         i.state      = i.next_state
         i.next_state = None
+        #Change the object's state.
         
     _state_changes.clear()
 
 ################################################################################
 
 class GameObject(Sprite, object):
+    '''
+    @invariant: self.state in self.__class__.STATES
+    @
+    '''
     actions    = None
     collisions = None
 
@@ -38,6 +52,7 @@ class GameObject(Sprite, object):
         Reacts based on the type of the other object.
         
         @param other: The object that we collided with.
+        @type other: A subclass of GameObject
         '''
         other_type = other.__class__
         collisions = self.collisions
@@ -65,6 +80,9 @@ class GameObject(Sprite, object):
     def change_state(self, next_state):
         '''
         Queues this object for a state change in the next frame.
+        
+        @param next_state: The state to switch to, in type(self).STATES.
+        @type next_state: The values used in config.Enum to represent constants
         '''
         self.next_state = next_state
         _state_changes.add(self)

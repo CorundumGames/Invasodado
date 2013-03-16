@@ -10,6 +10,8 @@ MAX_COMBO_TIME = 60  #In frames
 ################################################################################
 
 ### Globals ####################################################################
+alarm      = False
+
 combo      = 0
 combo_time = 0
 
@@ -28,9 +30,11 @@ def clean_up():
     global score, prev_score
     global lives, prev_lives
     global combo
+    global alarm
 
     score, prev_score =             0, None
     lives, prev_lives = DEFAULT_LIVES, None
     combo             = 0
+    alarm             = False
 
 ################################################################################

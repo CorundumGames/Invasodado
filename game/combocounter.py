@@ -3,10 +3,10 @@ ComboCounter is a number that briefly floats up whenever the player makes a
 combo in clearing blocks.  This is a user feedback thing.
 '''
 import pygame
-from core import config
+from core            import config
 from game.gameobject import GameObject
-from game import hudobject
-from game.hudobject import HudObject
+from game            import hudobject
+from game.hudobject  import HudObject
 
 ### Constants ##################################################################
 TIME_MOVING = 30
@@ -21,6 +21,16 @@ _counters = set()
 
 ### Functions ##################################################################
 def get_combo_counter(num, pos):
+    '''
+    Returns a ComboCounter object, creating a new one if need be.
+    
+    @param num: The number to display
+    @param pos: Position on-screen this ComboCounter should appear
+    @type num: int
+    @type pos: [float, float]
+    @return: A new ComboCounter
+    @rtype: ComboCounter
+    '''
     if not _counters:
         _counters.add(ComboCounter(num, pos))
         
@@ -69,9 +79,9 @@ class ComboCounter(HudObject):
         self.change_state(ComboCounter.STATES.MOVING)
         
     actions = {
-               STATES.IDLE: None,
-               STATES.APPEARING: 'appear',
-               STATES.MOVING: 'move',
-               STATES.STANDING: 'stand',
-               STATES.LEAVING: 'vanish',
+               STATES.IDLE      : None    ,
+               STATES.APPEARING : 'appear',
+               STATES.MOVING    : 'move'  ,
+               STATES.STANDING  : 'stand' ,
+               STATES.LEAVING   : 'vanish',
                }

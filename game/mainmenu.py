@@ -24,22 +24,22 @@ from game.settingsmenu import SettingsMenu
 ### Groups #####################################################################
 HUD  = Group()
 MENU = Group()
-BG   = OrderedUpdates()
+GRID_BG   = OrderedUpdates()
 ################################################################################
 
 ### Constants ##################################################################
-DIST_APART = 48
+DIST_APART = 40
 #How far apart, vertically, the menu entries are (in pixels)
 
-MENU_CORNER  = (config.SCREEN_RECT.centerx-112, config.SCREEN_RECT.centery-64)
-MENU_ENTRIES = ("Normal Mode", "2 Minutes", "5 Minutes", "High Scores", "Settings", "Quit")
+MENU_CORNER  = (config.SCREEN_RECT.centerx-112, config.SCREEN_RECT.centery-80)
+MENU_ENTRIES = config.load_text('menu')
 TITLE_POS    = (config.SCREEN_RECT.centerx - 96, 32)
 ################################################################################
 
 class MainMenu(GameState):
     def __init__(self):
         self.cursor_index = 0
-        self.group_list   = (bg.STARS_GROUP, BG, HUD, MENU)
+        self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
 
         self.hud_title  = make_text("Invasodado", TITLE_POS)
         self.cursor_moving = False
@@ -52,12 +52,15 @@ class MainMenu(GameState):
                              partial(self.change_state, InGameState, time=120),
                              partial(self.change_state, InGameState, time=300),
                              partial(self.change_state, HighScoreState, next = MainMenu),
+                             lambda: None,
                              partial(self.change_state, SettingsMenu         ),
+                             lambda: None,
                              exit                                             ,
                             )
 
         self.key_actions  = {
                              K_RETURN : self.__enter_selection         ,
+                             K_SPACE  : self.__enter_selection         ,
                              K_UP     : partial(self.__move_cursor, -1),
                              K_DOWN   : partial(self.__move_cursor,  1),
                              K_ESCAPE : exit                           ,
@@ -65,7 +68,7 @@ class MainMenu(GameState):
         
         HUD.add(self.hud_title, self.hud_cursor)
         MENU.add(self.menu)
-        BG.add(bg.EARTH, bg.GRID)
+        GRID_BG.add(bg.EARTH, bg.GRID)
         
         config.play_music('title.ogg')
 

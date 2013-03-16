@@ -4,11 +4,11 @@ An interface for representing game screens.
 
 import pygame
 
-from core import color
-from core import config
-from core.config import screen, _limit_frame
-from game import bg
-from game import gameobject
+from core        import color
+from core        import config
+from core.config import screen
+from game        import bg
+from game        import gameobject
 
 class GameState:
     '''
@@ -27,10 +27,10 @@ class GameState:
 
     def __init__(self, *args, **kwargs):
         '''
-        Initialization logic is normally executed once here.
-        We can pass in arguments so our game state can run a certain way.  This
-        way, rather than creating a new object or subclass for a state that's
-        slightly different than another, we can just pass in an argument.
+        Initialization logic is normally executed once here.  We can pass in
+        arguments so our game state can run a certain way.  Thus, rather than
+        creating a new object or subclass for a state that's slightly different
+        than another, we can just pass in an argument.
         '''
         pass
     
@@ -69,12 +69,13 @@ class GameState:
         bg.STARS.emit()
         
         for i in self.group_list:
+        #For all sprite groups this GameState holds...
             i.draw(screen)
 
         assert not config.show_fps()
         #^ So this statement is stripped in Release mode.
 
-        config.fps_timer.tick_busy_loop(60 * _limit_frame)
+        config.fps_timer.tick_busy_loop(60 * config._limit_frame)
 
     def change_state(self, state_type, *args, **kwargs):
         '''

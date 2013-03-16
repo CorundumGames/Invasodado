@@ -2,7 +2,7 @@ from functools import partial
 from itertools import filterfalse
 from random    import uniform
 
-import pygame.time
+from pygame import Rect
 
 from core            import config
 from game.gameobject import GameObject
@@ -56,7 +56,7 @@ class Particle(GameObject):
         self.image       = image
         self.move_func   = partial(move_func, self)
         self.position    = list(Particle.START_POS)
-        self.rect        = pygame.Rect(self.position, self.image.get_size())
+        self.rect        = Rect(self.position, self.image.get_size())
         self.state       = Particle.STATES.IDLE
 
     def appear(self):
@@ -188,9 +188,6 @@ class ParticlePool:
         Removes all particles that are off-screen from the game, but not from
         memory.
         '''
-        particles_to_remove = set()
-        for i in filterfalse(config.SCREEN_RECT.colliderect, self.particles_out):
-            particles_to_remove.add(i)
-
+        particles_to_remove = set(filterfalse(config.SCREEN_RECT.colliderect, self.particles_out))
         self.particles_in.update(particles_to_remove)
         self.particles_out -= particles_to_remove

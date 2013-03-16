@@ -1,20 +1,17 @@
-from functools import partial
-from os.path   import join
-
-import pygame
-from pygame.sprite import Group
+from pygame.constants import *
+from pygame           import display
+from pygame.sprite    import Group
 
 from core import color
 from core import config
 
-from core.config import screen, _limit_frame
+from core.config    import screen, _limit_frame
 from core.gamestate import GameState
 from game.hudobject import HudObject
-from game.mainmenu import MainMenu
+from game.mainmenu  import MainMenu
 
 ### Groups #####################################################################
 DIAMOND = Group()
-LETTERS = Group()
 ################################################################################
 
 ### Constants ##################################################################
@@ -28,15 +25,15 @@ BOOT = config.load_sound('boot.wav')
 
 class SplashScreen(GameState):
     def __init__(self):
-        self.group_list    = (DIAMOND, LETTERS)
-        self.logo          = HudObject(LOGO, [0, 0])
-        self.start_time    = 5 * 60
         self.alpha_percent = 0.0
+        self.group_list    = (DIAMOND,)
+        self.logo          = HudObject(LOGO, [0, 0])
+        self.start_time    = 5 * 60  #In frames
         
+        BOOT.play()
         self.logo.rect.center = config.SCREEN_RECT.center
         self.logo.image.set_alpha(0)
         DIAMOND.add(self.logo)
-        BOOT.play()
         
     def __del__(self):
         BOOT.stop()
@@ -44,14 +41,17 @@ class SplashScreen(GameState):
         
     def events(self, events):
         for e in events:
-            if e.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+        #For all input events received...
+            if e.type in {KEYDOWN, MOUSEBUTTONDOWN}:
+            #If the user presses any button...
                 self.change_state(MainMenu)
         
     def logic(self):
-        self.start_time -= 1
+        self.start_time    -= 1
         self.alpha_percent += 1
         self.logo.image.set_alpha(self.alpha_percent)
         if not self.start_time:
+        #Once the logo's finished fading in...
             self.change_state(MainMenu)
     
     def render(self):
@@ -60,7 +60,7 @@ class SplashScreen(GameState):
         for i in self.group_list:
             i.draw(screen)
 
-        pygame.display.flip()
+        display.flip()
         assert not config.show_fps()
         #^ So this statement is stripped in Release mode.
 
