@@ -41,10 +41,10 @@ nosetests.xml
 pygame.display
 .settings
 profile.out
-*.wtf
 git.sh
 lint_results.txt
 lint.sh
 *.dir
 *.dat
 *.bak
+*.bfxrsound
