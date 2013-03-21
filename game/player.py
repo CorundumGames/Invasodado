@@ -172,10 +172,10 @@ class Ship(GameObject):
         width = self.image.get_width()
         
         if self.state not in {Ship.STATES.DYING, Ship.STATES.DEAD, Ship.STATES.IDLE}:
-            if keys[K_LEFT] and rect.left > 0:
+            if (keys[K_LEFT] or keys[K_a]) and rect.left > 0:
             #If we're pressing left and not at the left edge of the screen...
                 self.position[0] -= SPEED
-            elif keys[K_RIGHT] and rect.right < config.SCREEN_RECT.right:
+            elif (keys[K_RIGHT] or keys[K_d]) and rect.right < config.SCREEN_RECT.right:
             #If we're pressing right and not at the right edge of the screen...
                 self.position[0] += SPEED
 
