@@ -126,7 +126,7 @@ class InGameState(GameState):
         from game.mainmenu import MainMenu
         rect = config.SCREEN_RECT
         self._game_running   = True
-        self.group_list      = (bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD)
+        self.group_list      = [bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD]
         self._collision_grid = CollisionGrid(4, 4, 1, self.group_list)
         self.hud_text        = HUD_TEXT(
                                         make_text(''          , SCORE_LOCATION),
@@ -246,6 +246,12 @@ class InGameState(GameState):
 
     def render(self):
         hud = partial(make_text, surfaces=True)
+        
+        if blockgrid.any_active():
+            self.group_list[2] = BLOCKS
+        else:
+            blockgrid.cache_block_image()
+            self.group_list[2] = blockgrid.block_buffer
 
         if gamedata.score != gamedata.prev_score:
         #If our score has changed since the last frame...

@@ -6,8 +6,11 @@ refitted for other match-3 games like Bejewelled or Puzzle League.
 
 from pygame.display import get_surface
 from pygame import Rect
+from pygame import Surface
+from pygame.sprite import GroupSingle, Sprite
 
 from core import config
+from core import color
 from game import gamedata
 
 ### Constants ##################################################################
@@ -21,10 +24,29 @@ RECT       = Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL_SIZE[1]))
 
 ### Globals ####################################################################
 blocks           = None
+block_buffer     = GroupSingle(Sprite())
 _blocks_to_check = set()
 _blocks_to_clear = set()
 _block_clear     = config.load_sound('clear.wav')
+
+
+block_buffer.sprite.rect = Rect(0, 0, 0, 0)
 ################################################################################
+
+def any_active():
+    s = BLOCK_TYPE.STATES
+    
+    for i in BLOCK_TYPE.GROUP:
+        if i.state not in {s.IDLE, s.ACTIVE}:
+        #If this block is moving...
+            return True
+    return False
+
+def cache_block_image():
+    global block_buffer
+    block_buffer.sprite.image = Surface([640, 384], config.BLIT_FLAGS, config.DEPTH)
+    block_buffer.sprite.image.set_colorkey(color.BLACK)
+    BLOCK_TYPE.GROUP.draw(block_buffer.sprite.image)
 
 def check_block(block, should_check=True):
     if should_check:
@@ -39,8 +61,10 @@ def clean_up():
 
     @postcondition: No more objects of BLOCK_TYPE exist in memory.
     '''
-    global blocks
+    global blocks, block_buffer
     blocks = get_empty_block_array()
+    block_buffer = GroupSingle(Sprite())
+    block_buffer.sprite.rect = Rect(0, 0, 0, 0)
     _blocks_to_check.clear()
     _blocks_to_clear.clear()
     

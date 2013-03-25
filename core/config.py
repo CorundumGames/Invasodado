@@ -47,7 +47,6 @@ tracking = __debug__ and 'track' in argv
 
 
 ### Functions ##################################################################
-@lru_cache(maxsize=16)
 def difficulty_string():
     return _difficulties[_current_difficulty]
 
@@ -55,7 +54,9 @@ def get_sprite(frame):
     return SPRITES.subsurface(frame).copy()
 
 def load_image(name):
-    return pygame.image.load(join('gfx', name)).convert(DEPTH, BLIT_FLAGS)
+    a = pygame.image.load(join('gfx', name)).convert(DEPTH, BLIT_FLAGS)
+    a.set_alpha(None)
+    return a
 
 def load_sound(name):
     sound = pygame.mixer.Sound(join('sfx', name))
@@ -76,7 +77,6 @@ def loop_sound(sound):
         _sound_looping = sound
         _sound_looping.play(-1)
 
-@lru_cache(maxsize=4)
 def on_off(condition):
     '''
     Primarily for the Settings menu.
@@ -179,6 +179,7 @@ def toggle_pause():
 @var DEPTH: The color depth of the screen, in bits
 @var EARTH: The image of the Earth in the background
 @var ENCODING: The text encoding for Invasodado
+@var EVENTS_OK: The events that this game will handle
 @var FONT: The font used in this game
 @var GRID_BG: The image for the grid that shows where blocks can fall
 @var PAUSE: The sound played when the player pauses
@@ -196,9 +197,10 @@ CURSOR_BEEP   = load_sound('cursor.wav')
 CURSOR_SELECT = load_sound('select.wav')
 DATA_STORE    = join(environ[APP_DATA_WIN if 'win' in platform else APP_DATA_LIN], 'Invasodado')
 DEBUG         =  __debug__ and not hasattr(sys, 'frozen') #cx_freeze adds 'frozen' to the sys module
-DEPTH         = screen.get_bitsize()
+DEPTH         = 8
 EARTH         = load_image('earth.png')
 ENCODING      = 'utf-8'
+EVENTS_OK     = (KEYDOWN, MOUSEBUTTONDOWN, QUIT)
 FONT          = pygame.font.Font(join('gfx', 'font.ttf'), 18)
 GRID_BG       = load_image('bg.png')
 PAUSE         = load_sound('pause.wav')
@@ -216,9 +218,12 @@ for i in (EARTH, GRID_BG):
 GRID_BG.set_alpha(128)
 EARTH = EARTH.subsurface(pygame.Rect(0, 0, EARTH.get_width(), EARTH.get_height()/2))
 
-if not __debug__:
+if not DEBUG:
     del show_fps
     del tracking
+
+pygame.event.set_allowed(None)
+pygame.event.set_allowed(EVENTS_OK)
 ################################################################################
 
 class Enum:
