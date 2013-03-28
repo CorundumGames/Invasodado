@@ -27,7 +27,7 @@ LIST   = (RED, BLUE, GREEN, YELLOW, PURPLE) # THESE are used by blocks.
 COLOR_KEY = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 
 #Holds the frames for the symbols
-COLOR_BLIND_FRAMES  = tuple(Rect(32 * i, 32, 32, 32) for i in range(4,9))
+COLOR_BLIND_FRAMES  = tuple(Rect(32 * i, 32, 32, 32) for i in range(4,10))
 #Holds the symbols.
 COLOR_BLIND_SYMBOLS = {
                         id(RED)    : config.get_sprite(COLOR_BLIND_FRAMES[0]),
@@ -35,6 +35,7 @@ COLOR_BLIND_SYMBOLS = {
                         id(GREEN)  : config.get_sprite(COLOR_BLIND_FRAMES[2]),
                         id(YELLOW) : config.get_sprite(COLOR_BLIND_FRAMES[3]),
                         id(PURPLE) : config.get_sprite(COLOR_BLIND_FRAMES[4]),
+                        id(WHITE)  : config.get_sprite(COLOR_BLIND_FRAMES[5])
                        }
 ################################################################################
 
@@ -49,7 +50,7 @@ def blend_color(surface, color):
     surface.fill(color, special_flags=BLEND_RGBA_MULT)
     return surface
 
-def get_colored_objects(frames, has_alpha=True, color_blind=False):
+def get_colored_objects(frames, has_alpha=True, color_blind=False, pause_frame = False):
     '''
     @param frames: List of sprites we want to create colored versions of
     @param has_alpha: True if we want transparency
@@ -61,6 +62,8 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False):
                     for c in LIST
                    ]
                   )
+    if pause_frame:
+        colored[id(WHITE)] = [blend_color(config.get_sprite(f), WHITE) for f in frames]
 
     if has_alpha:
     #If we want these frames to have transparency...

@@ -17,8 +17,8 @@ FRAMES          = tuple(pygame.Rect(32 * i, 32, 32, 32) for i in range(4))
 LOWER_INCREMENT = 16
 START_POS       = (32.0, 32.0)
 
-ENEMY_FRAMES             = color.get_colored_objects(FRAMES)
-ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES, True, True)
+ENEMY_FRAMES             = color.get_colored_objects(FRAMES, True, False, True)
+ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES, True, True, True)
 del FRAMES
 ################################################################################
 
@@ -40,6 +40,7 @@ class Enemy(GameObject):
         super().__init__()
         self.amount_lowered     = 0
         self.color              = choice(color.LIST)
+        self.temp_color          = self.color #Holds the color of the enemy when the game is paused.
         self.column             = None
         self._form_position     = form_position
         self.current_frame_list = ENEMY_FRAMES_COLOR_BLIND if settings.color_blind else ENEMY_FRAMES

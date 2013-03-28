@@ -137,16 +137,16 @@ class InGameState(GameState):
                                        )
         self._ship          = Ship()
         self.key_actions    = {
-                               K_ESCAPE: partial(self.change_state, MainMenu)    ,
-                               K_F1    : config.toggle_fullscreen                ,
-                               K_SPACE : self._ship.on_fire_bullet                  ,
-                               K_c     : null_if_debug(blockgrid.clean_up)       ,
-                               K_e     : null_if_debug(partial(self._ship.instadie, None))         ,
-                               K_f     : null_if_debug(config.toggle_frame_limit),
-                               K_i     : null_if_debug(self.__ship_life),
+                               K_ESCAPE: partial(self.change_state, MainMenu)               ,
+                               K_F1    : config.toggle_fullscreen                           ,
+                               K_SPACE : self._ship.on_fire_bullet                          ,
+                               K_c     : null_if_debug(blockgrid.clean_up)                  ,
+                               K_e     : null_if_debug(partial(self._ship.instadie, None))  ,
+                               K_f     : null_if_debug(config.toggle_frame_limit)           ,
+                               K_i     : null_if_debug(self.__ship_life)                    ,
                                K_k     : partial(self._ship.change_state, Ship.STATES.DYING),
-                               K_p     : config.toggle_pause                     ,
-                               K_u     : null_if_debug(self.__add_ufo)           ,
+                               K_p     : self._pause_game                                   ,
+                               K_u     : null_if_debug(self.__add_ufo)                      , 
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._time          = self._mode * 60 + 60 #In frames
@@ -310,6 +310,22 @@ class InGameState(GameState):
                                         }
             
         self.key_actions[K_SPACE] = partial(self.change_state, HighScoreState, **kwargs)
+
+    def _pause_game(self):
+        for e in ENEMIES:
+            e.color = color.WHITE
+        for b in BLOCKS:
+            b.color = color.WHITE
+            b.image  = b.current_frame_list[id(b.color)][b._anim]#Block doesn't call animate like enemy so this is needed
+        BLOCKS.update()
+        ENEMIES.update()
+        self.render()
+        config.toggle_pause()
+        for e in ENEMIES:
+            e.color = e.temp_color
+        for b in BLOCKS:
+            b.color = b.temp_color
+            b.image  = b.current_frame_list[id(b.color)][b._anim]
 
     def __begin_tracking(self):
         pass

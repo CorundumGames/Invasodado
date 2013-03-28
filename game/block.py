@@ -25,8 +25,8 @@ UFO_BLOCK    = config.load_sound('ufo_block.wav')
 ### Globals ####################################################################
 _blocks_set = set()
 _bump       = config.load_sound('bump.wav')
-_block_frames    = color.get_colored_objects(FRAMES)
-_block_frames_color_blind = color.get_colored_objects(FRAMES,True,True)
+_block_frames    = color.get_colored_objects(FRAMES, True, False, True)
+_block_frames_color_blind = color.get_colored_objects(FRAMES, True, True, True)
 ################################################################################
 
 ### Functions ##################################################################
@@ -72,8 +72,9 @@ class Block(GameObject):
 
     def __init__(self, position, newcolor=choice(color.LIST), special=False):
         GameObject.__init__(self)
-        self._anim    = 0
-        self.color    = newcolor
+        self._anim      = 0
+        self.color      = newcolor
+        self.temp_color = self.color
         self.current_frame_list = _block_frames_color_blind if settings.color_blind else _block_frames
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position = position
