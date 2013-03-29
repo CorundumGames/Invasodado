@@ -1,6 +1,7 @@
 from random import choice
 
 import pygame
+from pygame import Rect
 
 from core            import color
 from core            import config
@@ -9,13 +10,13 @@ from game.gameobject import GameObject
 
 ### Constants ##################################################################
 BALL_STATES  = ('IDLE', 'APPEARING', 'MOVING', 'DYING', 'RESET')
-FRAMES       = tuple(pygame.Rect(32 * i, 96, 32, 32) for i in range(5))
+FRAMES       = tuple(Rect(32 * i, 96, 32, 32) for i in range(5))
 TIME_TO_MOVE = 30  #In frames; remember, our target is 60FPS
 ################################################################################
 
 ### Globals ####################################################################
 _ball_frames             = color.get_colored_objects(FRAMES)
-_ball_frames_color_blind = color.get_colored_objects(FRAMES, True, True)
+_ball_frames_color_blind = color.get_colored_objects(FRAMES, True, True, True)
 _balls                   = set()
 ################################################################################
 
@@ -63,7 +64,7 @@ class BallOfLight(GameObject):
         self.current_frame_list = _ball_frames_color_blind if settings.color_blind else _ball_frames
         self.image              = self.current_frame_list[id(newcolor)][0]
         size                    = self.image.get_size()
-        self.rect               = pygame.Rect(startpos, size)
+        self.rect               = Rect(startpos, size)
         self.position           = list(self.rect.topleft)
         self.progress           = 0
         self._target            = [None, 0]

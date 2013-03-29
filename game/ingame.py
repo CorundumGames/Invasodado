@@ -1,5 +1,6 @@
 from collections import namedtuple
 from functools   import partial
+from itertools import chain
 from math        import log1p
 from random      import choice
 
@@ -307,25 +308,20 @@ class InGameState(GameState):
                 'next' : MainMenu      ,
                 'score': gamedata.score,
                 'mode' : self._mode    ,
-                                        }
+                }
             
         self.key_actions[K_SPACE] = partial(self.change_state, HighScoreState, **kwargs)
 
     def _pause_game(self):
-        for e in ENEMIES:
-            e.color = color.WHITE
-        for b in BLOCKS:
-            b.color = color.WHITE
-            b.image  = b.current_frame_list[id(b.color)][b._anim]#Block doesn't call animate like enemy so this is needed
-        BLOCKS.update()
-        ENEMIES.update()
+            
+        for i in chain(BLOCKS, ENEMIES):
+            i.image = i.current_frame_list[id(color.WHITE)][i._anim]
+
         self.render()
         config.toggle_pause()
-        for e in ENEMIES:
-            e.color = e.temp_color
-        for b in BLOCKS:
-            b.color = b.temp_color
-            b.image  = b.current_frame_list[id(b.color)][b._anim]
+            
+        for i in chain(BLOCKS, ENEMIES):
+            i.image = i.current_frame_list[id(i.color)][i._anim]
 
     def __begin_tracking(self):
         pass

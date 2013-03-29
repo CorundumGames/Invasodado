@@ -39,6 +39,7 @@ class Enemy(GameObject):
     def __init__(self, form_position):
         super().__init__()
         self.amount_lowered     = 0
+        self._anim              = 0.0
         self.color              = choice(color.LIST)
         self.temp_color          = self.color #Holds the color of the enemy when the game is paused.
         self.column             = None
@@ -109,7 +110,8 @@ class Enemy(GameObject):
         self.rect.top = self.position[1] + .5
     
     def __animate(self):
-        self.image = self.current_frame_list[id(self.color)][int(3 - abs(Enemy.anim - 3)) % 4]
+        self._anim = int(3 - abs(Enemy.anim - 3)) % 4
+        self.image = self.current_frame_list[id(self.color)][self._anim]
 
     actions = {
                 STATES.APPEARING: 'appear',
