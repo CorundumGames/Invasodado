@@ -22,6 +22,12 @@ sound_volume = 0.5
 
 music_volume = 0.5
 
+def toggle_color_blind_mode():
+    '''
+    Toggles color-blind mode.
+    '''
+    global color_blind
+    color_blind = not color_blind
 
 def save_settings(path):
     with closing(shelve.open(path)) as settings_file:

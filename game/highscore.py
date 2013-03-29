@@ -7,19 +7,21 @@ from pygame.constants import *
 from pygame.sprite    import Group, OrderedUpdates
 
 from core                import config
-from core.gamestate      import GameState
 from core.highscoretable import HighScoreTable, HighScoreEntry
 from game                import bg
 from game.default_scores import DEFAULT_HIGH_SCORES
 from game.hudobject      import make_text
+from game.menustate import MenuState
 
 ### Groups #####################################################################
 GRID_BG   = OrderedUpdates()
 MENU = Group()
+
 ################################################################################
 
 ### Constants ##################################################################
-ALPHANUMERIC   = ''.join((ascii_letters, digits, '_-\'#<'))
+ALPHABET       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+ALPHANUMERIC   = ''.join((ALPHABET, digits, '_-\'#<'))
 CHAR_LIMIT     = 20
 DEFAULTS       = DEFAULT_HIGH_SCORES
 ENTRY_NAME_POS = (0, config.SCREEN_HEIGHT - 32)
@@ -58,8 +60,9 @@ def make_score_table(table, pos, vspace, width, surfaces=False):
     return make_text(scores, TABLE_CORNER, font=config.FONT, vspace=V_SPACE, surfaces=surfaces)
 ################################################################################
 
-class HighScoreState(GameState):
+class HighScoreState(MenuState):
     def __init__(self, *args, **kwargs):
+        super().__init__()
         self.entering_name = False
         self.kwargs        = kwargs
         self.key_actions = {
@@ -97,8 +100,7 @@ class HighScoreState(GameState):
         #If we're entering our name for a high score...
             self.hud_name.image = make_text(self.entry_name.decode(config.ENCODING), surfaces=True)
 
-        GameState.render(self)
-        pygame.display.flip()
+        super().render()
 
     def __char_move(self, index):
         if self.entering_name:
@@ -112,7 +114,6 @@ class HighScoreState(GameState):
         '''
         Move between the three tables, but not if you're entering a high score.
         '''
-        
         if not self.entering_name:
         #If we're not currently entering our name...
             config.CURSOR_BEEP.play()
@@ -137,8 +138,8 @@ class HighScoreState(GameState):
                 self.name_index = min(self.name_index + 1, CHAR_LIMIT - 1)
             elif ALPHANUMERIC[self.alphanum_index] == '#':
                 if self.entry_name:
-                    #Pops off the #
-                    self.entry_name.pop()
+                    
+                    self.entry_name.pop() #Pops off the '#'
                     self.__enter_score()
                 else:
                     self.entry_name = bytearray(NO_ENTRY)
@@ -155,10 +156,11 @@ class HighScoreState(GameState):
             
     def __enter_score(self):
         config.CURSOR_SELECT.play()
-        self.key_actions[K_SPACE] = self.key_actions[K_ESCAPE]
+        score = [HighScoreEntry(self.entry_name.decode(), self.kwargs['score'], self._mode)]
         self.entering_name = False
-        self.hud_name.kill()#Get rid of the name entry characters
-        score_tables[self.current_table].add_scores([HighScoreEntry(self.entry_name.decode(), self.kwargs['score'], self._mode)])#add the entry to the leaderboard
+        self.key_actions[K_SPACE] = self.key_actions[K_ESCAPE]
+        self.hud_name.kill()  #Get rid of the name entry characters
+        score_tables[self.current_table].add_scores(score)#add the entry to the leaderboard
         MENU.remove(self.hud_scores)#remove the menu from the screen
         self.hud_scores = tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
         MENU.add(self.hud_scores[self.current_table])#add the menu back to the screen with the updated entry

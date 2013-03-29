@@ -12,16 +12,14 @@ from sys       import argv, platform
 import pygame.image
 from pygame.display import set_caption
 from pygame.constants import *
+from pygame import Color
+from pygame import Rect
 
 from core import settings
 
 ### Globals ####################################################################
 
 #The window we blit graphics onto.
-
-_current_difficulty = 1
-
-_difficulties = ["Easy", "Normal", "Hard"]
 
 _limit_frame = True
 #True if we're restricting framerate to 60FPS
@@ -47,9 +45,6 @@ tracking = __debug__ and 'track' in argv
 
 
 ### Functions ##################################################################
-def difficulty_string():
-    return _difficulties[_current_difficulty]
-
 def get_sprite(frame):
     return SPRITES.subsurface(frame).copy()
 
@@ -103,22 +98,14 @@ def set_volume():
         i.set_volume(settings.sound_volume)
 
 def show_fps():
+    '''
+    Displays the game's framerate on the window caption.  Meant to be called
+    in Debug mode with assert statements so that this is effortlessly stripped
+    out in Release mode.
+    
+    @invariant: MUST return an object that evaluates to False.
+    '''
     set_caption("FPS: %3g" % round(fps_timer.get_fps(), 3))
-    
-def toggle_color_blind_mode():
-    '''
-    Toggles color-blind mode.
-    '''
-    settings.color_blind = not settings.color_blind
-    
-def toggle_difficulty(toggle):
-    '''
-    Toggles difficulty
-    '''
-    #TODO: Improve documentation
-    global _current_difficulty
-    _current_difficulty += toggle
-    _current_difficulty %= len(_difficulties)
     
 def toggle_frame_limit():
     '''
@@ -136,10 +123,7 @@ def toggle_fullscreen():
     '''
     global screen
     settings.fullscreen = not settings.fullscreen
-    screen = pygame.display.set_mode(settings.resolution,
-                                     (FULLSCREEN | HWSURFACE | DOUBLEBUF)
-                                     * settings.fullscreen
-                                    )
+    screen = pygame.display.set_mode(settings.resolution, FULL_FLAGS * settings.fullscreen)
 
 def toggle_pause():
     '''
@@ -181,6 +165,7 @@ def toggle_pause():
 @var ENCODING: The text encoding for Invasodado
 @var EVENTS_OK: The events that this game will handle
 @var FONT: The font used in this game
+@var FULL_FLAGS: Flags used for rendering in full-screen mode
 @var GRID_BG: The image for the grid that shows where blocks can fall
 @var PAUSE: The sound played when the player pauses
 @var SCREEN_DIMS: Tuple of all possible display resolutions
@@ -202,21 +187,22 @@ EARTH         = load_image('earth.png')
 ENCODING      = 'utf-8'
 EVENTS_OK     = (KEYDOWN, MOUSEBUTTONDOWN, QUIT)
 FONT          = pygame.font.Font(join('gfx', 'font.ttf'), 18)
+FULL_FLAGS    = FULLSCREEN | HWSURFACE | DOUBLEBUF
 GRID_BG       = load_image('bg.png')
 PAUSE         = load_sound('pause.wav')
 SCREEN_DIMS   = tuple(pygame.display.list_modes())
 SCREEN_HEIGHT = screen.get_height()
-SCREEN_RECT   = pygame.Rect((0, 0), screen.get_size())
+SCREEN_RECT   = Rect((0, 0), screen.get_size())
 SCREEN_WIDTH  = screen.get_width()
 SPRITES       = load_image('sprites.png')
 ################################################################################
 
 ### Preparation ################################################################
 for i in (EARTH, GRID_BG):
-    i.set_colorkey(pygame.Color('#000000'))
+    i.set_colorkey(Color('#000000'))
 
 GRID_BG.set_alpha(128)
-EARTH = EARTH.subsurface(pygame.Rect(0, 0, EARTH.get_width(), EARTH.get_height()/2))
+EARTH = EARTH.subsurface(Rect(0, 0, EARTH.get_width(), EARTH.get_height() / 2))
 
 if not DEBUG:
     del show_fps

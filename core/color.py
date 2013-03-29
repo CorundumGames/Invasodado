@@ -8,7 +8,6 @@ from pygame.constants import *
 from pygame import Color, Rect
 
 from core import config
-from core import settings
 from core.particles import ParticlePool
 
 ### Constants #################################################################
@@ -29,6 +28,7 @@ COLOR_KEY = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 #Holds the frames for the symbols
 COLOR_BLIND_FRAMES  = tuple(Rect(32 * i, 32, 32, 32) for i in range(4,10))
 #Holds the symbols.
+
 COLOR_BLIND_SYMBOLS = {
                         id(RED)    : config.get_sprite(COLOR_BLIND_FRAMES[0]),
                         id(BLUE)   : config.get_sprite(COLOR_BLIND_FRAMES[1]),
@@ -50,18 +50,14 @@ def blend_color(surface, color):
     surface.fill(color, special_flags=BLEND_RGBA_MULT)
     return surface
 
-def get_colored_objects(frames, has_alpha=True, color_blind=False, pause_frame = False):
+def get_colored_objects(frames, has_alpha=True, color_blind=False, pause_frame=True):
     '''
     @param frames: List of sprites we want to create colored versions of
     @param has_alpha: True if we want transparency
 
     @rtype: dict of {color: [frames_list]}
     '''
-    colored = dict([
-                    (id(c), [blend_color(config.get_sprite(f), c) for f in frames])
-                    for c in LIST
-                   ]
-                  )
+    colored = {id(c):tuple(blend_color(config.get_sprite(f), c) for f in frames) for c in LIST}
     if pause_frame:
         colored[id(WHITE)] = [blend_color(config.get_sprite(f), WHITE) for f in frames]
 
@@ -77,7 +73,7 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False, pause_frame =
             COLOR_BLIND_SYMBOLS[id(c)].set_colorkey(COLOR_KEY)
         for c in LIST:
             for i in colored[id(c)]:
-                i.blit(COLOR_BLIND_SYMBOLS[id(c)].copy(), (0, 0))
+                i.blit(COLOR_BLIND_SYMBOLS[id(c)], (0, 0))
     return colored
 
 def _rand_color_appear(self):
@@ -87,7 +83,7 @@ def _rand_color_appear(self):
 ################################################################################
 
 ### Globals ####################################################################
-_parts                 = get_colored_objects([Rect(4, 170, 4, 4)], False)
-color_particles        = dict([(id(c), ParticlePool(_parts[id(c)][0])) for c in LIST])
+_parts                 = get_colored_objects((Rect(4, 170, 4, 4),), False)
+color_particles        = {id(c):ParticlePool(_parts[id(c)][0]) for c in LIST}
 random_color_particles = ParticlePool(_parts[id(RED)][0], appear_func=_rand_color_appear)
 ################################################################################
