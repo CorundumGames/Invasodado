@@ -3,11 +3,12 @@ An interface for representing game screens.
 '''
 
 import pygame
+from pygame.constants import *
 
 from core        import color
 from core        import config
 from core.config import screen
-from game        import bg
+from game.bg     import STARS
 from game        import gameobject
 
 class GameState:
@@ -36,7 +37,6 @@ class GameState:
     
     def __del__(self):
         for i in self.group_list: i.empty()
-        del self.group_list
 
     def events(self, events):
         '''
@@ -46,7 +46,7 @@ class GameState:
         '''
         for e in events:
         #For all input we've received...
-            if e.type == pygame.KEYDOWN and e.key in self.key_actions:
+            if e.type == KEYDOWN and e.key in self.key_actions:
             #If a key was pressed...
                 self.key_actions[e.key]()
 
@@ -66,7 +66,7 @@ class GameState:
         assign Sprites to groups by layer, then call Group.blit() sequentially.
         '''
         screen.fill(color.BLACK)
-        bg.STARS.emit()
+        STARS.emit()
         
         for i in self.group_list:
         #For all sprite groups this GameState holds...

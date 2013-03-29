@@ -19,6 +19,10 @@ FILE    = join('save', 'country.wtf')
 REQUEST = ''.join((URL, '?', PARAMS))
 ################################################################################
 
+### Preparation ################################################################
+del API_KEY, FORMAT, PARAMS, URL
+################################################################################
+
 ### Functions ##################################################################
 #TODO: Figure something out for if the connection failed or the server's down
 def get_country(attribute=None):

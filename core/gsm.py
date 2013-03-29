@@ -32,7 +32,7 @@ def update():
         else:
             temp = _current_state.next_state
             _current_state.next_state = None
-            _current_state.__del__()
+            _current_state.__del__()  #Dunno why 'del _current_state' doesn't work
             _current_state = temp
 
 ################################################################################
