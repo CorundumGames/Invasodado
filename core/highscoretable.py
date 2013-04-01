@@ -120,7 +120,6 @@ class HighScoreTable:
         self.size    = size
         self.title   = title
         
-        #TODO: Hard-code default scores (to deter cheating)
         a = None
         with closing(shelve.open(self.path)) as scorefile:
             if len(scorefile) < self.size:

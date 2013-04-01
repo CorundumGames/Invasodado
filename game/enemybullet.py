@@ -52,7 +52,7 @@ class EnemyBullet(Bullet):
     SPEED     = 2
     START_POS = pygame.Rect(30, config.screen.get_height() * 2, 5, 5)
     STATES    = config.Enum(*BULLET_STATES)
-    FRAME     = pygame.Rect(262, 6, 20, 18)
+    FRAME     = pygame.Rect(262, 6, 20, 19)
     GROUP     = None
     halt      = False
 

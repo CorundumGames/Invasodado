@@ -14,7 +14,7 @@ DEFAULT_NORMAL = {
     "Karl"     :  4,
     "Hugo"     :  3,
     "Aristotle":  2,
-    "Kamal"    :  1
+    "Kamal"    :  1,
 }
 
 DEFAULT_2 = {

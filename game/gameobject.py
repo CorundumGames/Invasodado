@@ -37,6 +37,7 @@ class GameObject(Sprite, object):
     '''
     actions    = None
     collisions = None
+    group      = None
 
     def __init__(self):
         Sprite.__init__(self)

@@ -44,7 +44,6 @@ class Particle(GameObject):
     '''
     START_POS = (-100.0, -100.0)
     STATES    = config.Enum(*PARTICLE_STATES)
-    GROUP     = None
 
     def __init__(self, image, move_func=_p_move, appear_func=_p_appear):
         '''
@@ -97,7 +96,7 @@ class ParticleEmitter:
     should call emit().
     '''
 
-    def __init__(self, pool, rect, period=1, group=Particle.GROUP):
+    def __init__(self, pool, rect, period=1, group=Particle.group):
         '''
         @ivar period: Frames between emits, e.g. 4 = 1 Particle per 4 frames
         @ivar pool: The ParticlePool where Particles are drawn from
@@ -146,7 +145,7 @@ class ParticleEmitter:
         '''
         pool     = self.pool
         _release = self._release
-        self.group = Particle.GROUP
+        self.group = Particle.group
         for i in range(amount):
             _release(pool.get_particle())
 

@@ -1,6 +1,6 @@
 from math import sin
 import os.path
-from random import choice, uniform
+from random import choice, uniform, expovariate
 from functools import lru_cache
 
 import pygame
@@ -13,6 +13,7 @@ from game.block import get_block
 from game.gameobject import GameObject
 
 ### Constants ##################################################################
+AVG_WAIT   = 9000 #Expected time in frames between UFO appearance
 DEATH      = config.load_sound('ufo_explosion.wav')
 FRAMES     = tuple(
               pygame.Rect(64 * (i % 4), 192 + 32 * (i // 4), 64, 32)
@@ -35,7 +36,7 @@ class UFO(GameObject):
         self.column   = None
         self.current_frame_list = UFO_FRAMES
         self.image    = config.get_sprite(FRAMES[0])
-        self.odds     = .0001
+        self.odds     = expovariate(AVG_WAIT)
         self.position = list(START_POS)
         self.rect     = pygame.Rect(START_POS, self.image.get_size())
         self.state    = UFO.STATES.IDLE
@@ -75,7 +76,6 @@ class UFO(GameObject):
         '''
         Vanish and release a special Block that clears lots of other Blocks.
         '''
-        print(self.emitter.pool.image)
         self.emitter.rect = self.rect
         self.emitter.burst(30)
         DEATH.play()
@@ -95,6 +95,7 @@ class UFO(GameObject):
         '''
         if uniform(0, 1) < self.odds:
         #With a certain probability...
+            self.odds     = expovariate(AVG_WAIT)
             self.change_state(UFO.STATES.APPEARING)
 
     actions = {
