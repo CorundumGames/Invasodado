@@ -14,6 +14,7 @@ from pygame.sprite import Group, OrderedUpdates
 from core           import config
 
 from game              import bg
+from game.about        import AboutScreen
 from game.ingame       import InGameState
 from game.highscore    import HighScoreState
 from game.hudobject    import make_text
@@ -36,7 +37,7 @@ TITLE_POS    = (config.SCREEN_RECT.centerx - 96, 32)
 ################################################################################
 
 class MainMenu(MenuState):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         super().__init__()
         self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
 
@@ -45,14 +46,14 @@ class MainMenu(MenuState):
         self.menu = make_text(MENU_ENTRIES, pos=MENU_CORNER, vspace=DIST_APART)
 
         self.menu_actions = (
-                             partial(self.change_state, InGameState          ),
-                             partial(self.change_state, InGameState, time=120),
-                             partial(self.change_state, InGameState, time=300),
-                             partial(self.change_state, HighScoreState, next=MainMenu),
-                             lambda: None,
-                             partial(self.change_state, SettingsMenu         ),
-                             lambda: None,
-                             exit                                             ,
+                            partial(self.change_state, InGameState          ),
+                            partial(self.change_state, InGameState, time=120),
+                            partial(self.change_state, InGameState, time=300),
+                            partial(self.change_state, HighScoreState, next=MainMenu),
+                            lambda: None,
+                            partial(self.change_state, SettingsMenu         ),
+                            partial(self.change_state, AboutScreen, next=MainMenu),
+                            exit                                             ,
                             )
         
         HUD.add(self.hud_title, self.hud_cursor)
