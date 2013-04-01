@@ -59,8 +59,8 @@ def load_sound(name):
     return sound
 
 def load_text(name):
-    with open(join('text', '%s-%s.wtf' % (name, 'en'))) as text_file:
-        return tuple(i.strip() for i in text_file)
+    with open(join('text', '%s-%s.wtf' % (name, settings.language))) as text_file:
+        return tuple(i.strip('\n') for i in text_file)
 
 def loop_sound(sound):
     global _sound_looping

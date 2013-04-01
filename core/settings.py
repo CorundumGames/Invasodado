@@ -6,7 +6,8 @@ menu.  OBJECTS IN ALL CAPS are constants.
 from contextlib import closing
 import shelve
 
-SETTINGS_KEYS = ('resolution', 'fullscreen', 'color_blind', 'sound_volume', 'music_volume')
+LANGUAGES     = ('en', 'es')
+SETTINGS_KEYS = ('resolution', 'fullscreen', 'color_blind', 'language', 'sound_volume', 'music_volume')
 SETTINGS_FILE_NAME = 'settings.wtf'
 
 #The current screen settings.
@@ -17,6 +18,8 @@ fullscreen = False
 
 #Whether colorblind mode is enabled.
 color_blind = False
+
+language     = 'en'
 
 sound_volume = 0.5
 
@@ -41,3 +44,7 @@ def load_settings(path):
                 locals()[i] = settings_file[i]
     except:
         return
+    
+def set_language(lang):
+    global language
+    language = lang if lang in LANGUAGES else 'en'

@@ -27,13 +27,13 @@ GRID_BG   = OrderedUpdates()
 DIST_APART = 64
 #How far apart, vertically, the menu entries are (in pixels)
 
-DIST_APART_STATUS = 320
+DIST_APART_STATUS = 384
 #How far apart, horizontally, the status of a menu entry is from the menu entry
 
 MENU_CORNER    = (32, 64)
 
 #The location of the top-left corner of the menu
-SETTINGS_FIELDS = 'fullscreen colorblind musicvolume effectsvolume back'
+SETTINGS_FIELDS = 'fullscreen colorblind settings musicvolume effectsvolume back'
 SETTINGS_KEYS   = namedtuple('Settings', SETTINGS_FIELDS)
 SETTINGS_NAMES  = config.load_text('settings')
 TITLE_LOCATION  = (config.SCREEN_RECT.centerx - 64, 32)
@@ -57,6 +57,7 @@ class SettingsMenu(MenuState):
                       (
                        config.on_off(settings.fullscreen),
                        config.on_off(settings.color_blind),
+                       settings.language,
                        config.percent_str(settings.music_volume),
                        config.percent_str(settings.sound_volume),
                        "",
@@ -72,6 +73,7 @@ class SettingsMenu(MenuState):
         self.menu_actions = (
                              self.__toggle_fullscreen            ,
                              self.__toggle_color_blind_mode      ,
+                             lambda x: self.__change_language('es'),
                              self.__toggle_music_volume          ,
                              self.__toggle_sound_volume          ,
                              lambda x: self.change_state(MainMenu),
@@ -125,6 +127,11 @@ class SettingsMenu(MenuState):
         config.set_volume()
         
         self.__change_image(self.menu.effectsvolume, config.percent_str(settings.sound_volume))
+        
+    def __change_language(self, lang):
+        settings.set_language(lang)
+        global SETTINGS_NAMES
+        SETTINGS_NAMES = config.load_text('settings')
         
     def __change_image(self, menu_entry, new_text):
         '''
