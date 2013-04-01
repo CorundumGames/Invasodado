@@ -254,8 +254,8 @@ class Block(GameObject):
         '''
         size = self.image.get_size()
         return [
-                round(self.position[0] / size[0]) * size[0],
-                round(self.position[1] / size[1]) * size[1],
+                round(self.position[0] // size[0]) * size[0],
+                round(self.position[1] // size[1]) * size[1],
                ]
         
     actions = {

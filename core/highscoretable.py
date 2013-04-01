@@ -24,7 +24,7 @@ def load_defaults(scores):
     Takes in a JSON file and loads default scores from there.
     This is meant to be used for default high score tables, and NOT for storage.
     '''
-    if not isinstance(scores, str):
+    if isinstance(scores, str):
         return load(open(scores))
     else:
         return loads(dumps(scores))
