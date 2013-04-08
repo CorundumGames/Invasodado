@@ -12,6 +12,7 @@ import pygame
 from pygame.sprite import Group, OrderedUpdates
 
 from core           import config
+from core import settings
 
 from game              import bg
 from game.about        import AboutScreen
@@ -28,11 +29,13 @@ GRID_BG = OrderedUpdates()
 ################################################################################
 
 ### Constants ##################################################################
+'''
+@var DIST_APART: Vertical distance between menu entries, in pixels
+@var MENU_CORNER: Location of top-left corner of the main menu graphic
+@var TITLE_POS: Top-left corner of the title on-screen
+'''
 DIST_APART = 40
-#How far apart, vertically, the menu entries are (in pixels)
-
 MENU_CORNER  = (config.SCREEN_RECT.centerx-112, config.SCREEN_RECT.centery-80)
-MENU_ENTRIES = config.load_text('menu')
 TITLE_POS    = (config.SCREEN_RECT.centerx - 96, 32)
 ################################################################################
 
@@ -43,7 +46,7 @@ class MainMenu(MenuState):
 
         self.hud_title  = make_text("Invasodado", TITLE_POS)
         self.cursor_moving = False
-        self.menu = make_text(MENU_ENTRIES, pos=MENU_CORNER, vspace=DIST_APART)
+        self.menu = make_text(config.load_text('menu', settings.get_language_code()), pos=MENU_CORNER, vspace=DIST_APART)
 
         self.menu_actions = (
                             partial(self.change_state, InGameState          ),
@@ -55,6 +58,7 @@ class MainMenu(MenuState):
                             partial(self.change_state, AboutScreen, next=MainMenu),
                             exit                                             ,
                             )
+        
         
         HUD.add(self.hud_title, self.hud_cursor)
         MENU.add(self.menu)

@@ -1,6 +1,5 @@
 from functools import partial
-from os.path   import join
-from string    import ascii_letters, digits
+from string    import digits
 
 import pygame
 from pygame.constants import *
@@ -14,9 +13,8 @@ from game.hudobject      import make_text
 from game.menustate import MenuState
 
 ### Groups #####################################################################
-GRID_BG   = OrderedUpdates()
-MENU = Group()
-
+GRID_BG = OrderedUpdates()
+MENU    = Group()
 ################################################################################
 
 ### Constants ##################################################################

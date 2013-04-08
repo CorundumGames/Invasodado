@@ -2,7 +2,7 @@
 Contains a whole bunch of game-specific miscellaneous constants, functions,
 utilities, etc.  It's a Python convention to call this sort of file config.py.
 '''
-
+from time      import strftime
 from functools import lru_cache
 from os        import environ
 from os.path   import join
@@ -58,8 +58,9 @@ def load_sound(name):
     _sounds.append(sound)
     return sound
 
-def load_text(name):
-    with open(join('text', '%s-%s.wtf' % (name, settings.language))) as text_file:
+@lru_cache(maxsize=None)
+def load_text(name, lang):
+    with open(join('text', '%s-%s.wtf' % (name, lang))) as text_file:
         return tuple(i.strip('\n') for i in text_file)
 
 def loop_sound(sound):
@@ -76,7 +77,7 @@ def on_off(condition):
     '''
     Primarily for the Settings menu.
     '''
-    return "On" if condition else "Off"
+    return ON_OFF[settings.get_language_code()][condition]
 
 @lru_cache(maxsize=16)
 def percent_str(var):
@@ -106,6 +107,11 @@ def show_fps():
     @invariant: MUST return an object that evaluates to False.
     '''
     set_caption("FPS: %3g" % round(fps_timer.get_fps(), 3))
+    
+def take_screenshot():
+    print("OK!")
+    pygame.image.save(pygame.display.get_surface(), 
+                      join(DATA_STORE, 'invasodado-%s.png' % strftime('%a-%b-%d-%Y_%H-%M-%S')))
     
 def toggle_frame_limit():
     '''
@@ -189,6 +195,10 @@ EVENTS_OK     = (KEYDOWN, MOUSEBUTTONDOWN, QUIT)
 FONT          = pygame.font.Font(join('gfx', 'font.ttf'), 18)
 FULL_FLAGS    = FULLSCREEN | HWSURFACE | DOUBLEBUF
 GRID_BG       = load_image('bg.png')
+ON_OFF        = {
+                 'en' : ("Off", "On"),
+                 'es' : ("No" , "Sí"),
+                 }
 PAUSE         = load_sound('pause.wav')
 SCREEN_DIMS   = tuple(pygame.display.list_modes())
 SCREEN_HEIGHT = screen.get_height()

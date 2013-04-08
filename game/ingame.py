@@ -15,6 +15,7 @@ from core             import color
 from core             import config
 from core.gamestate   import GameState
 from core.particles   import Particle, ParticleEmitter
+from core import settings
 from game             import balloflight
 from game.balloflight import BallOfLight
 from game             import bg
@@ -52,13 +53,13 @@ ALARM          = config.load_sound('alarm.wav')
 DEBUG_KEYS     = (K_u, K_c, K_f, K_F1, K_e, K_k, K_i)
 FADE_TIME      = 2500  #In milliseconds
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
-FIRE_MESSAGE   = "Press fire to continue"
 GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
 HUD_TEXT       = namedtuple('Hud', 'score lives time game_over press_fire')
 LIVES_LOCATION = (rect.width - 160, 16)
 MODULE_CLEANUP = (balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata)
 MOUSE_ACTIONS  = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
 MUSIC_PATHS    = {-1:'music.ogg', 120:'2.ogg', 300:'5.ogg'}
+GAME_TEXT      = config.load_text('ingame', settings.get_language_code())
 GAME_OVER_PATH = 'gameover.ogg'
 SCORE_LOCATION = (16, 16)
 TIME_FORMAT    = "{}:{:0>2}"
@@ -124,6 +125,8 @@ class InGameState(GameState):
         @ivar _time: Time limit for the game in seconds (no limit if 0)
         @ivar _ufo: The UFO_GROUP object that, when shot, can destroy many blocks
         '''
+        global GAME_TEXT
+        GAME_TEXT = config.load_text('ingame', settings.get_language_code())
         from game.mainmenu import MainMenu
         rect = config.SCREEN_RECT
         self._game_running   = True
@@ -133,8 +136,8 @@ class InGameState(GameState):
                                         make_text(''          , SCORE_LOCATION),
                                         make_text(''          , LIVES_LOCATION),
                                         make_text(''          , TIME_LOCATION ),
-                                        make_text("GAME OVER" , GAME_OVER_LOC ),
-                                        make_text(FIRE_MESSAGE, FIRE_LOCATION ),
+                                        make_text(GAME_TEXT[2], GAME_OVER_LOC ),
+                                        make_text(GAME_TEXT[3], FIRE_LOCATION ),
                                        )
         self._ship          = Ship()
         self.key_actions    = {
@@ -147,7 +150,10 @@ class InGameState(GameState):
                                K_i     : null_if_debug(self.__ship_life)                    ,
                                K_k     : partial(self._ship.change_state, Ship.STATES.DYING),
                                K_p     : self._pause_game                                   ,
-                               K_u     : null_if_debug(self.__add_ufo)                      , 
+                               K_u     : null_if_debug(self.__add_ufo)                      ,
+                               K_PRINT : config.take_screenshot,
+                               K_F12   : config.take_screenshot,
+                               K_SYSREQ: config.take_screenshot,
                               }
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._time          = self._mode * 60 + 60 #In frames
@@ -178,6 +184,7 @@ class InGameState(GameState):
 
     def __del__(self):
         super().__del__()
+        BLOCKS.empty()
         pygame.mixer.stop()
         for i in MODULE_CLEANUP:
             i.clean_up()
@@ -217,8 +224,6 @@ class InGameState(GameState):
                 gamedata.lives = 0
             enemysquadron.increase_difficulty()
         
-        
-        
         if self._game_running:
             gamedata.alarm = blockgrid.is_above_threshold()
             config.loop_sound(ALARM if gamedata.alarm else None)
@@ -256,12 +261,12 @@ class InGameState(GameState):
 
         if gamedata.score != gamedata.prev_score:
         #If our score has changed since the last frame...
-            self.hud_text.score.image = hud("Score: %i" % gamedata.score)
+            self.hud_text.score.image = hud("%s: %i" % (GAME_TEXT[0], gamedata.score))
             gamedata.prev_score       = gamedata.score
 
         if gamedata.lives != gamedata.prev_lives and self.hud_text.lives.alive():
         #If we've gained or lost lives since the last frame...
-            self.hud_text.lives.image = hud("Lives: %i" % gamedata.lives)
+            self.hud_text.lives.image = hud("%s: %i" % (GAME_TEXT[1], gamedata.lives))
             gamedata.prev_lives       = gamedata.lives
 
         if self._time >= 0:

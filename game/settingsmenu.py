@@ -35,7 +35,6 @@ MENU_CORNER    = (32, 64)
 #The location of the top-left corner of the menu
 SETTINGS_FIELDS = 'fullscreen colorblind settings musicvolume effectsvolume back'
 SETTINGS_KEYS   = namedtuple('Settings', SETTINGS_FIELDS)
-SETTINGS_NAMES  = config.load_text('settings')
 TITLE_LOCATION  = (config.SCREEN_RECT.centerx - 64, 32)
 ################################################################################
 
@@ -51,29 +50,12 @@ class SettingsMenu(MenuState):
         self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
         self.hud_title    = make_text("Settings", TITLE_LOCATION)
 
-        a = make_text(SETTINGS_NAMES, pos=MENU_CORNER, vspace=DIST_APART)
-
-        b = make_text(
-                      (
-                       config.on_off(settings.fullscreen),
-                       config.on_off(settings.color_blind),
-                       settings.language,
-                       config.percent_str(settings.music_volume),
-                       config.percent_str(settings.sound_volume),
-                       "",
-                       ),
-                      pos=(MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]),
-                      vspace=DIST_APART
-                     )
-
-        self.menu = SETTINGS_KEYS(*zip(a, b))
-        #first value is the menu entry, second value is its setting
-
+        self.__make_text()
 
         self.menu_actions = (
                              self.__toggle_fullscreen            ,
                              self.__toggle_color_blind_mode      ,
-                             lambda x: self.__change_language('es'),
+                             self.__change_language,
                              self.__toggle_music_volume          ,
                              self.__toggle_sound_volume          ,
                              lambda x: self.change_state(MainMenu),
@@ -89,7 +71,7 @@ class SettingsMenu(MenuState):
                             }
 
         HUD.add(self.hud_cursor, self.hud_title)
-        MENU.add(a, b)
+
         GRID_BG.add(bg.EARTH, bg.GRID)
         
     def __del__(self):
@@ -99,6 +81,28 @@ class SettingsMenu(MenuState):
     def render(self):
         self.hud_cursor.rect.midright = self.menu[self.cursor_index][0].rect.midleft
         super().render()
+        
+    def __make_text(self):
+        a = make_text(config.load_text("settings", settings.get_language_code()), pos=MENU_CORNER, vspace=DIST_APART)
+
+        b = make_text(
+                      (
+                       config.on_off(settings.fullscreen),
+                       config.on_off(settings.color_blind),
+                       settings.get_language_name(),
+                       config.percent_str(settings.music_volume),
+                       config.percent_str(settings.sound_volume),
+                       "",
+                       ),
+                      pos=(MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]),
+                      vspace=DIST_APART
+                     )
+
+        MENU.empty()
+        MENU.add(a, b)
+        self.menu = SETTINGS_KEYS(*zip(a, b))
+        #first value is the menu entry, second value is its setting
+
 
     def __toggle_fullscreen(self, toggle):
         #toggle doesn't really matter because it's the same both ways
@@ -128,10 +132,11 @@ class SettingsMenu(MenuState):
         
         self.__change_image(self.menu.effectsvolume, config.percent_str(settings.sound_volume))
         
-    def __change_language(self, lang):
-        settings.set_language(lang)
-        global SETTINGS_NAMES
-        SETTINGS_NAMES = config.load_text('settings')
+    def __change_language(self, lang_id):
+        settings.language_id = int(settings.language_id + lang_id * 10)
+        settings.language_id %= len(settings.LANGUAGES)
+        settings.set_language(settings.get_language_code())
+        self.__make_text()
         
     def __change_image(self, menu_entry, new_text):
         '''

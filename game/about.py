@@ -16,6 +16,9 @@ TEXT    = Group()
 ################################################################################
 
 ### Constants ##################################################################
+'''
+@var DIST_APART: Vertical distance between text lines in pixels
+'''
 DIST_APART = 24
 ################################################################################
 
@@ -31,7 +34,7 @@ class AboutScreen(MenuState):
                            }
 
 
-        self.hud_text = make_text(config.load_text('about'), vspace=DIST_APART)
+        self.hud_text = make_text(config.load_text('about', settings.get_language_code()), vspace=DIST_APART)
             
         TEXT.add(self.hud_text)
         GRID_BG.add(bg.EARTH, bg.GRID)
