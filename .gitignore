@@ -48,3 +48,4 @@ lint.sh
 *.dat
 *.bak
 *.bfxrsound
+*.html

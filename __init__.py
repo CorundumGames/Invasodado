@@ -12,7 +12,7 @@ import pygame.display
 import pygame.event
 import pygame.mixer
 
-pygame.mixer.init()
+pygame.mixer.init(44100)
 pygame.display.init()
 pygame.font.init()
 

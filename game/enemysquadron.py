@@ -8,6 +8,7 @@ from game.enemy import Enemy
 ### Constants ##################################################################
 ROW_SIZE = 8
 COL_SIZE = 4
+SPEED_INCREASE = .15 #In pixels per frame
 ################################################################################
 
 ### Globals ####################################################################
@@ -87,12 +88,12 @@ def update():
     if not ENEMY_GROUP:
     #If all enemies have been killed...
         reset()
-        Enemy.velocity[0] = abs(Enemy.velocity[0]) + 0.05
+        Enemy.velocity[0] = abs(Enemy.velocity[0]) + SPEED_INCREASE
 
 def increase_difficulty():
     '''
     Increases Enemy's fire rate and speed based on time elapsed
     '''
-    Enemy.shoot_odds = log1p(pygame.time.get_ticks() - Enemy.start_time) / 1000
+    Enemy.shoot_odds = log1p(pygame.time.get_ticks() - Enemy.start_time) / 5000
     assert 0.0 <= Enemy.shoot_odds < 1.0, \
     "Expected a valid probability, got %f" % Enemy.shoot_odds
