@@ -53,7 +53,7 @@ class ShipBullet(Bullet):
         if not self.hit_enemy and other.state in {other.__class__.STATES.ACTIVE, other.__class__.STATES.LOWERING}:
         #If we hit another enemy that's alive...
             self.hit_enemy = True
-            gamedata.score += 1
+            gamedata.score += 10
             self.change_state(self.__class__.STATES.RESET)
             other.change_state(other.__class__.STATES.DYING)
             other.column = self.column

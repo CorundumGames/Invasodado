@@ -173,7 +173,7 @@ def update():
         
         gamedata.combo_time     = gamedata.MAX_COMBO_TIME
         gamedata.combo += 1
-        gamedata.score += len(_blocks_to_clear) * (gamedata.combo)
+        gamedata.score += len(_blocks_to_clear) * gamedata.combo * 10
 
         for k in _blocks_to_clear:
         #For every block marked for clearing...

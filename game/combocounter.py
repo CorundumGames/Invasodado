@@ -34,11 +34,11 @@ def get_combo_counter(num, pos):
     if not _counters:
         _counters.add(ComboCounter(num, pos))
         
-    counter = _counters.pop()
-    counter.position = list(pos)
+    counter           = _counters.pop()
+    counter.position  = list(pos)
     counter.time_left = 0
-    counter.image = hudobject.make_text(str(num), pos = pos, surfaces=True)
-    counter.rect = pygame.Rect(pos[0], pos[1], counter.image.get_width(), counter.image.get_height())
+    counter.image     = hudobject.make_text(str(num), pos=pos, surfaces=True)
+    counter.rect      = pygame.Rect(pos, counter.image.get_size())
     return counter
 ################################################################################
 
