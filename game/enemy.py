@@ -41,7 +41,6 @@ class Enemy(GameObject):
         self.amount_lowered     = 0
         self._anim              = 0.0
         self.color              = choice(color.LIST)
-        self.temp_color          = self.color #Holds the color of the enemy when the game is paused.
         self.column             = None
         self._form_position     = form_position
         self.current_frame_list = ENEMY_FRAMES_COLOR_BLIND if settings.color_blind else ENEMY_FRAMES

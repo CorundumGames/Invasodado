@@ -4,6 +4,7 @@ from random import randint
 import pygame
 
 from game.enemy import Enemy
+from game import gamedata
 
 ### Constants ##################################################################
 ROW_SIZE = 8
@@ -51,7 +52,7 @@ def reset():
     global _enemies
     ENEMY_GROUP.empty()
     _enemies       = tuple([Enemy((i, j)) for i in range(ROW_SIZE)] for j in range(COL_SIZE))
-    Enemy.velocity = [0.5, 0.0]
+    gamedata.wave += 1
     appearing      = Enemy.STATES.APPEARING
 
     for i in _enemies:
@@ -63,7 +64,8 @@ def reset():
                 ENEMY_GROUP.add(i[j], i[ROW_SIZE - 1 - j])
                 i[j].change_state(appearing)
                 i[ROW_SIZE - 1 - j].change_state(appearing)
-                
+    
+    Enemy.velocity = [(12.50344*(len(ENEMY_GROUP)**-.94071))*log1p(gamedata.wave), 0.0]    
     if not ENEMY_GROUP:
     #If for some odd reason no enemies were created...
         reset()  #...then try again.
@@ -88,7 +90,6 @@ def update():
     if not ENEMY_GROUP:
     #If all enemies have been killed...
         reset()
-        Enemy.velocity[0] = abs(Enemy.velocity[0]) + SPEED_INCREASE
 
 def increase_difficulty():
     '''
