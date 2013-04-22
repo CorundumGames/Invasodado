@@ -61,7 +61,7 @@ class BallOfLight(GameObject):
 
         self._anim              = 0
         self.color              = newcolor
-        self.current_frame_list = _ball_frames_color_blind if settings.color_blind else _ball_frames
+        self.current_frame_list = _ball_frames_color_blind if settings.SETTINGS['color_blind'] else _ball_frames
         self.image              = self.current_frame_list[id(newcolor)][0]
         size                    = self.image.get_size()
         self.rect               = Rect(startpos, size)

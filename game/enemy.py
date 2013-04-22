@@ -43,7 +43,7 @@ class Enemy(GameObject):
         self.color              = choice(color.LIST)
         self.column             = None
         self._form_position     = form_position
-        self.current_frame_list = ENEMY_FRAMES_COLOR_BLIND if settings.color_blind else ENEMY_FRAMES
+        self.current_frame_list = ENEMY_FRAMES_COLOR_BLIND if settings.SETTINGS['color_blind'] else ENEMY_FRAMES
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position           = list(START_POS)
         self.rect               = pygame.Rect(START_POS, self.image.get_size())

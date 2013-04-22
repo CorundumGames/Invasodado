@@ -35,7 +35,7 @@ _sound_looping = None
 
 fps_timer = pygame.time.Clock()
 
-screen = pygame.display.set_mode(settings.resolution, DOUBLEBUF)
+screen = pygame.display.set_mode(settings.SETTINGS['resolution'], DOUBLEBUF)
 
 tracking = __debug__ and 'track' in argv
 #True if we're outputting graphs of the player's statistics
@@ -96,7 +96,7 @@ def play_music(name):
         
 def set_volume():
     for i in _sounds:
-        i.set_volume(settings.sound_volume)
+        i.set_volume(settings.SETTINGS['sound_volume'])
 
 def show_fps():
     '''
@@ -128,8 +128,8 @@ def toggle_fullscreen():
     @postcondition: If the game wasn't in full-screen before, it is now, or vice versa.
     '''
     global screen
-    settings.fullscreen = not settings.fullscreen
-    screen = pygame.display.set_mode(settings.resolution, FULL_FLAGS * settings.fullscreen)
+    settings.SETTINGS['fullscreen'] = not settings.SETTINGS['fullscreen']
+    screen = pygame.display.set_mode(settings.SETTINGS['resolution'], FULL_FLAGS * settings.SETTINGS['fullscreen'])
 
 def toggle_pause():
     '''

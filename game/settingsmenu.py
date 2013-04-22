@@ -87,11 +87,11 @@ class SettingsMenu(MenuState):
 
         b = make_text(
                       (
-                       config.on_off(settings.fullscreen),
-                       config.on_off(settings.color_blind),
+                       config.on_off(settings.SETTINGS['fullscreen']),
+                       config.on_off(settings.SETTINGS['color_blind']),
                        settings.get_language_name(),
-                       config.percent_str(settings.music_volume),
-                       config.percent_str(settings.sound_volume),
+                       config.percent_str(settings.SETTINGS['music_volume']),
+                       config.percent_str(settings.SETTINGS['sound_volume']),
                        "",
                        ),
                       pos=(MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]),
@@ -107,7 +107,7 @@ class SettingsMenu(MenuState):
     def __toggle_fullscreen(self, toggle):
         #toggle doesn't really matter because it's the same both ways
         config.toggle_fullscreen()
-        self.__change_image(self.menu.fullscreen, config.on_off(settings.fullscreen))
+        self.__change_image(self.menu.fullscreen, config.on_off(settings.SETTINGS['fullscreen']))
 
     def __toggle_color_blind_mode(self, toggle=None):
         '''
@@ -117,24 +117,24 @@ class SettingsMenu(MenuState):
         @param toggle: The state to change Colorblind mode to.  If None, just
         '''
         settings.toggle_color_blind_mode();
-        self.__change_image(self.menu.colorblind, config.on_off(settings.color_blind))
+        self.__change_image(self.menu.colorblind, config.on_off(settings.SETTINGS['color_blind']))
 
     def __toggle_music_volume(self, delta_volume):
-        settings.music_volume += delta_volume
-        settings.music_volume = round(settings.music_volume % 1.1, 1)
-        pygame.mixer.music.set_volume(settings.music_volume)
-        self.__change_image(self.menu.musicvolume, config.percent_str(settings.music_volume))
+        settings.SETTINGS['music_volume'] += delta_volume
+        settings.SETTINGS['music_volume'] = round(settings.SETTINGS['music_volume'] % 1.1, 1)
+        pygame.mixer.music.set_volume(settings.SETTINGS['music_volume'])
+        self.__change_image(self.menu.musicvolume, config.percent_str(settings.SETTINGS['music_volume']))
         
     def __toggle_sound_volume(self, delta_volume):
-        settings.sound_volume += delta_volume
-        settings.sound_volume = round(settings.sound_volume % 1.1, 1)
+        settings.SETTINGS['sound_volume'] += delta_volume
+        settings.SETTINGS['sound_volume'] = round(settings.SETTINGS['sound_volume'] % 1.1, 1)
         config.set_volume()
         
-        self.__change_image(self.menu.effectsvolume, config.percent_str(settings.sound_volume))
+        self.__change_image(self.menu.effectsvolume, config.percent_str(settings.SETTINGS['sound_volume']))
         
     def __change_language(self, lang_id):
-        settings.language_id = int(settings.language_id + lang_id * 10)
-        settings.language_id %= len(settings.LANGUAGES)
+        settings.SETTINGS['language_id'] = int(settings.SETTINGS['language_id'] + lang_id * 10)
+        settings.SETTINGS['language_id'] %= len(settings.LANGUAGES)
         settings.set_language(settings.get_language_code())
         self.__make_text()
         

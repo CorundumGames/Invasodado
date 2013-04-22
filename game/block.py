@@ -75,7 +75,7 @@ class Block(GameObject):
         self._anim      = 0
         self.color      = newcolor
         self.temp_color = self.color
-        self.current_frame_list = _block_frames_color_blind if settings.color_blind else _block_frames
+        self.current_frame_list = _block_frames_color_blind if settings.SETTINGS['color_blind'] else _block_frames
         self.image              = self.current_frame_list[id(self.color)][0]
         self.position = position
         self.rect     = pygame.Rect(position, self.image.get_size()) #(x, y)
