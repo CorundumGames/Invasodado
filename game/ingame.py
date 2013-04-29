@@ -234,6 +234,8 @@ class InGameState(GameState):
         #If we run out of lives or the blocks go past the top of the screen...
             pygame.mixer.music.fadeout(FADE_TIME)
             self._ship.change_state(Ship.STATES.DYING)
+            self._ufo.change_state(UFO.STATES.GAMEOVER)
+            self._ufo.kill()
             enemysquadron.celebrate()
             self._game_running = False
             gamedata.alarm = False

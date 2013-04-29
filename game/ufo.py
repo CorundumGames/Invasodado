@@ -22,7 +22,7 @@ FRAMES     = tuple(
 INVADE     = config.load_sound('ufo.wav')
 START_POS  = (640, 16)
 UFO_FRAMES = color.get_colored_objects(FRAMES)
-UFO_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING', 'LOWERING')
+UFO_STATES = ('IDLE', 'APPEARING', 'ACTIVE', 'DYING', 'LEAVING', 'LOWERING', 'GAMEOVER')
 ################################################################################
 
 class UFO(GameObject):
@@ -104,4 +104,5 @@ class UFO(GameObject):
                 STATES.ACTIVE   : 'move'  ,
                 STATES.DYING    : 'die'   ,
                 STATES.LEAVING  : 'leave' ,
+                STATES.GAMEOVER : None    ,
               }
