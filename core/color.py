@@ -29,14 +29,14 @@ PURPLE = Color('#FF55D5')
 WHITE  = Color('#FFFFFF')
 BLACK  = Color('#000000')
 
-COLOR_BLIND_FRAMES  = tuple(Rect(32 * i, 32, 32, 32) for i in range(4,10))
+COLOR_BLIND_FRAMES  = tuple(Rect(32 * i, 32, 32, 32) for i in range(4, 10))
 COLOR_BLIND_SYMBOLS = {
                         id(RED)    : config.get_sprite(COLOR_BLIND_FRAMES[0]),
                         id(BLUE)   : config.get_sprite(COLOR_BLIND_FRAMES[1]),
                         id(GREEN)  : config.get_sprite(COLOR_BLIND_FRAMES[2]),
                         id(YELLOW) : config.get_sprite(COLOR_BLIND_FRAMES[3]),
                         id(PURPLE) : config.get_sprite(COLOR_BLIND_FRAMES[4]),
-                        id(WHITE)  : config.get_sprite(COLOR_BLIND_FRAMES[5])
+                        id(WHITE)  : None,
                        }
 COLOR_KEY           = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 LIST                = (RED, BLUE, GREEN, YELLOW, PURPLE)
