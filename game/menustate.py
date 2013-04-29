@@ -1,4 +1,5 @@
 from functools import partial
+import sys
 
 import pygame
 from pygame.constants import *
@@ -18,7 +19,7 @@ class MenuState(GameState):
                              K_SPACE  : self._enter_selection         ,
                              K_UP     : partial(self._move_cursor, -1),
                              K_DOWN   : partial(self._move_cursor,  1),
-                             K_ESCAPE : exit                          ,
+                             K_ESCAPE : sys.exit                      ,
                             }
         
     def render(self):

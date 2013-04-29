@@ -8,7 +8,6 @@ from os.path    import isdir  , join
 import shelve
 
 from core import config
-from core import geolocation
 
 ### Constants ##################################################################
 PATTERN      = '%Y-%m-%d %H:%M:%S.%f'
@@ -60,7 +59,6 @@ class HighScoreEntry:
 
         if not entry:
         #If we were not passed in fields high score entry string...
-            self.country  = str(geolocation.get_country('countryCode'))
             self.mode     = int(mode) #Can represent game modes or difficulty
             self.name     = name
             self.platform = platform
