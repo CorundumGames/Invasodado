@@ -67,15 +67,14 @@ class HighScoreEntry:
         else:
         #Else if we were passed fields string for entry...
             fields        = str(entry).split('|')
-            self.country  = fields[3]
             self.mode     = int(fields[2])
             self.name     = fields[0]
-            self.platform = fields[4]
+            self.platform = fields[3]
             self.score    = int(fields[1])
             try:
                 self.time = datetime.strptime(fields[5], PATTERN)
             except ValueError:
-                self.time = fields[5]
+                self.time = fields[4]
 
     @lru_cache(maxsize=8)
     def __lt__(self, other):

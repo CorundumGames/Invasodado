@@ -7,7 +7,6 @@ It's meant as a sort of factory module to return new HighScoreTables.
 
 import json
 import urllib
-import urllib2
 
 from core.highscoretable import HighScoreTable, HighScoreEntry
 
@@ -17,14 +16,14 @@ GAME_ID  = 'f6CoDo3mI'
 ORDER    = 'desc'
 ORDER_BY = 'score'
 RESPONSE = 'JSON'
-
+'''
 def test_connection():
-    '''
-    Ensures we can actually connect to Scoreoid.
+    #
+    #Ensures we can actually connect to Scoreoid.
     
-    Returns an empty string if everything went OK.
-    Returns an error message if not.
-    '''
+    #Returns an empty string if everything went OK.
+    #Returns an error message if not.
+    #
     params = urllib.urlencode({'api_key':API_KEY, 'game_id':GAME_ID})
     result_statement = ''
     try:
@@ -52,3 +51,4 @@ def get_score_table():
     
 def submit_score():
     pass
+'''
