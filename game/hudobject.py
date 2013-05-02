@@ -23,6 +23,10 @@ class HudObject(GameObject):
         self.image = image
         self.rect  = pygame.Rect(pos, image.get_size())
         del self.velocity, self.acceleration, self.position, self.next_state
+        
+    def center(self):
+        self.rect.centerx = config.SCREEN_RECT.centerx
+        return self
 
     def update(self):
         '''

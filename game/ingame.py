@@ -54,7 +54,7 @@ DEBUG_KEYS     = (K_u, K_c, K_f, K_F1, K_e, K_k, K_i)
 FADE_TIME      = 2500  #In milliseconds
 FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
 GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
-HUD_TEXT       = namedtuple('Hud', 'score lives time game_over press_fire')
+HUD_TEXT       = namedtuple('Hud', 'score lives time game_over press_fire wave')
 LIVES_LOCATION = (rect.width - 160, 16)
 MODULE_CLEANUP = (balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata)
 MOUSE_ACTIONS  = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
@@ -77,6 +77,7 @@ TYPE_PAIRS_IGNORED = (
                       (ShipBullet, EnemyBullet),
                       (EnemyBullet, ShipBullet),
                       )
+WAVE_LOCATION = (rect.centerx - 48, rect.height - 32)
 del rect
 ################################################################################
 
@@ -135,9 +136,10 @@ class InGameState(GameState):
         self.hud_text        = HUD_TEXT(
                                         make_text(''          , SCORE_LOCATION),
                                         make_text(''          , LIVES_LOCATION),
-                                        make_text(''          , TIME_LOCATION ),
-                                        make_text(GAME_TEXT[2], GAME_OVER_LOC ),
-                                        make_text(GAME_TEXT[3], FIRE_LOCATION ),
+                                        make_text(''          , TIME_LOCATION ).center(),
+                                        make_text(GAME_TEXT[2], GAME_OVER_LOC ).center(),
+                                        make_text(GAME_TEXT[3], FIRE_LOCATION ).center(),
+                                        make_text(GAME_TEXT[4], WAVE_LOCATION ).center(),
                                        )
         self._ship          = Ship()
         self.key_actions    = {
@@ -161,7 +163,7 @@ class InGameState(GameState):
 
         PLAYER.add(self._ship, self._ship.flames, self._ship.my_bullet, self._ship.light_column)
         UFO_GROUP.add(self._ufo)
-        HUD.add(self.hud_text.score)
+        HUD.add(self.hud_text.score, self.hud_text.wave)
         if self._mode > -1:
         #If this is a time attack mode...
             HUD.add(self.hud_text.time)
@@ -270,6 +272,10 @@ class InGameState(GameState):
         #If we've gained or lost lives since the last frame...
             self.hud_text.lives.image = hud("%s: %i" % (GAME_TEXT[1], gamedata.lives))
             gamedata.prev_lives       = gamedata.lives
+        
+        if gamedata.wave != gamedata.prev_wave:
+            self.hud_text.wave.image = hud("%s %i" % (GAME_TEXT[4], gamedata.wave))
+            gamedata.prev_wave       = gamedata.wave
 
         if self._time >= 0:
         #If we haven't run out of time, and we're actually in timed mode...

@@ -21,7 +21,7 @@ SETTINGS_KEYS      = (
     'resolution'  ,
     'fullscreen'  ,
     'color_blind' ,
-    'language'    ,
+    'language_id'    ,
     'sound_volume',
     'music_volume',
 )

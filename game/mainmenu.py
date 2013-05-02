@@ -34,7 +34,7 @@ GRID_BG = OrderedUpdates()
 @var MENU_CORNER: Location of top-left corner of the main menu graphic
 @var TITLE_POS: Top-left corner of the title on-screen
 '''
-DIST_APART = 40
+DIST_APART   = 40
 MENU_CORNER  = (config.SCREEN_RECT.centerx-112, config.SCREEN_RECT.centery-80)
 TITLE_POS    = (config.SCREEN_RECT.centerx - 96, 32)
 ################################################################################
@@ -44,7 +44,7 @@ class MainMenu(MenuState):
         super().__init__()
         self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
 
-        self.hud_title  = make_text("Invasodado", TITLE_POS)
+        self.hud_title  = make_text("Invasodado", TITLE_POS).center()
         self.cursor_moving = False
         self.menu = make_text(config.load_text('menu', settings.get_language_code()), pos=MENU_CORNER, vspace=DIST_APART)
 
@@ -61,7 +61,7 @@ class MainMenu(MenuState):
         
         
         HUD.add(self.hud_title, self.hud_cursor)
-        MENU.add(self.menu)
+        MENU.add(tuple(i.center() for i in self.menu))
         GRID_BG.add(bg.EARTH, bg.GRID)
         
         config.play_music('title.ogg')

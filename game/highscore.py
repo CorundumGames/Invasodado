@@ -58,7 +58,7 @@ def make_score_table(table, pos, vspace, width, surfaces=False):
     @param width: The width of the table in characters
     '''
     scores = tuple(SCORE_FORMAT.format(i.name, i.score) for i in table.scores)
-    return make_text(scores, TABLE_CORNER, font=config.FONT, vspace=V_SPACE, surfaces=surfaces)
+    return tuple(j.center() for j in make_text(scores, TABLE_CORNER, font=config.FONT, vspace=V_SPACE, surfaces=surfaces))
 ################################################################################
 
 class HighScoreState(MenuState):
@@ -75,7 +75,7 @@ class HighScoreState(MenuState):
                             K_SPACE : self.__enter_char               ,
                             K_ESCAPE: partial(self.change_state, kwargs['next']),
                            }
-        self.hud_titles = tuple(make_text(score_tables[i].title, SCORE_TABLE_X) for i in range(3))
+        self.hud_titles = tuple(make_text(score_tables[i].title, SCORE_TABLE_X).center() for i in range(3))
         self.hud_scores = tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
         self.group_list = (bg.STARS_GROUP, GRID_BG, MENU)
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1

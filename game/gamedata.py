@@ -22,6 +22,7 @@ lives      = DEFAULT_LIVES
 prev_lives = None
 
 wave       = 0
+prev_wave  = None
 ################################################################################
 
 ### Functions ##################################################################
@@ -33,12 +34,13 @@ def clean_up():
     global lives, prev_lives
     global combo
     global alarm
-    global wave
+    global wave, prev_wave
 
     score, prev_score =             0, None
     lives, prev_lives = DEFAULT_LIVES, None
     combo             = 0
     alarm             = False
     wave              = 0
+    prev_wave = None
 
 ################################################################################
