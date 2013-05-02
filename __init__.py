@@ -34,6 +34,9 @@ def main():
     '''
     settings.load_settings(join(config.DATA_STORE, 'settings.wtf'))
     pygame.display.set_caption("Invasodado")
+    #Set the sounds now that we loaded the correct volumes
+    config.set_volume()
+    config.init_music_volume()
     while True:
     #Until the game is closed...
         gsm.update()

@@ -97,6 +97,9 @@ def play_music(name):
 def set_volume():
     for i in _sounds:
         i.set_volume(settings.SETTINGS['sound_volume'])
+        
+def init_music_volume():
+    pygame.mixer.music.set_volume(settings.SETTINGS['music_volume'])
 
 def show_fps():
     '''
