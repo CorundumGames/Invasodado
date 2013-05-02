@@ -164,6 +164,7 @@ class Ship(GameObject):
         self.position     = list(START_POS.topleft)
         self.rect         = START_POS.copy()
         self.respawn_time = 3 * 60
+        
         self.change_state(Ship.STATES.ACTIVE)
 
     def move(self):
@@ -191,10 +192,7 @@ class Ship(GameObject):
         elif self.image.get_alpha() == 128:
             for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
             
-        if self.anim != 4:
-            self.anim = self.anim + (0 < self.anim < len(Ship.FRAMES) - 1) / 3
-        else:
-            self.anim = 0.0
+        self.anim = self.anim + (0 < self.anim < len(Ship.FRAMES) - 1) / 3 if self.anim != 4 else 0.0
         self.image = Ship.FRAMES[int(self.anim)]
         
         if gamedata.combo_time == gamedata.MAX_COMBO_TIME and gamedata.combo > 1:

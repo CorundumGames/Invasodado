@@ -5,6 +5,7 @@ Invasodado is a mix between Space Invaders and Columns.
 
 Copyright 2012-2013 Corundum Games
 '''
+import atexit
 from os.path import join
 from sys import argv
 
@@ -19,6 +20,12 @@ pygame.font.init()
 from core import config
 from core import settings
 from core import gsm
+
+@atexit.register
+def close():
+    pygame.display.quit()
+    pygame.mixer.quit()
+    pygame.font.quit()
 
 def main():
     '''

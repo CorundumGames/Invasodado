@@ -198,7 +198,7 @@ GRID_BG       = load_image('bg.png')
 ON_OFF        = {
                  'en' : ("Off", "On"),
                  'es' : ("No" , "Sí"),
-                 }
+                }
 PAUSE         = load_sound('pause.wav')
 SCREEN_DIMS   = tuple(pygame.display.list_modes())
 SCREEN_HEIGHT = screen.get_height()

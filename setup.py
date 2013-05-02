@@ -93,13 +93,13 @@ include_files = [join('sfx' , j) for j in listdir('sfx' ) if 'bfxr' not in j] + 
 
 build_options = {
                  'append_script_to_exe':True,
-                 'bin_excludes':excludes,
-                 'compressed':True,
-                 'excludes': excludes,
-                 'include_files': include_files,
-                 'includes': includes,
-                 'optimize':2,
-                 'packages': ['core', 'game'],
+                 'bin_excludes'        :excludes,
+                 'compressed'          :True,
+                 'excludes'            : excludes,
+                 'include_files'       : include_files,
+                 'includes'            : includes,
+                 'optimize'            :2,
+                 'packages'            : ['core', 'game'],
                  }
 
 common_exe_options = {

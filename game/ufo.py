@@ -5,11 +5,10 @@ from functools import lru_cache
 
 import pygame
 
-from core       import color
-from core       import config
-from core.particles import ParticleEmitter
-from game.block import get_block
-
+from core            import color
+from core            import config
+from core.particles  import ParticleEmitter
+from game.block      import get_block
 from game.gameobject import GameObject
 
 ### Constants ##################################################################
@@ -95,7 +94,7 @@ class UFO(GameObject):
         '''
         if uniform(0, 1) < self.odds:
         #With a certain probability...
-            self.odds     = expovariate(AVG_WAIT)
+            self.odds = expovariate(AVG_WAIT)
             self.change_state(UFO.STATES.APPEARING)
 
     actions = {

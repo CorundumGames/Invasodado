@@ -2,11 +2,11 @@ from functools import partial
 
 import pygame
 from pygame.constants import *
-from pygame.sprite import Group, OrderedUpdates
+from pygame.sprite    import Group, OrderedUpdates
 
-from core import config
-from core import settings
-from game import bg
+from core           import config
+from core           import settings
+from game           import bg
 from game.menustate import MenuState
 from game.hudobject import make_text
 
@@ -32,7 +32,6 @@ class AboutScreen(MenuState):
                             K_SPACE  : go_back,
                             K_RETURN : go_back,
                            }
-
 
         self.hud_text = make_text(config.load_text('about', settings.get_language_code()), vspace=DIST_APART)
             
