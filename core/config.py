@@ -60,9 +60,9 @@ def load_sound(name):
 
 @lru_cache(maxsize=None)
 def load_text(name, lang):
-    with open(join('text', '%s-%s.wtf' % (name, lang))) as text_file:
-        return tuple(i.strip('\n') for i in text_file)
-
+    with open(join('text', '%s-%s.wtf' % (name, lang)), encoding='utf-8') as text_file:
+            return tuple(line.strip("\n") for line in text_file)
+    
 def loop_sound(sound):
     global _sound_looping
     if sound is None:

@@ -7,6 +7,7 @@ from pygame.sprite    import Group, OrderedUpdates
 
 from core                import config
 from core.highscoretable import HighScoreTable, HighScoreEntry
+from core                import settings
 from game                import bg
 from game.default_scores import DEFAULT_HIGH_SCORES
 from game.hudobject      import make_text
@@ -18,21 +19,25 @@ MENU    = Group()
 ################################################################################
 
 ### Constants ##################################################################
-ALPHABET       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-BACK_CHAR      = '\u2190' #Left arrow
-BLANK_CHAR     = '\u2192' #Right arrow
-CHAR_LIMIT     = 20
-DEFAULTS       = DEFAULT_HIGH_SCORES
-DONE_CHAR      = '\u0180' #Normally a special b, but I modified it to say 'OK'
-ENTRY_NAME_POS = (16, config.SCREEN_HEIGHT - 64)
-NO_ENTRY       = "Loser"
-OK_CHARS       = ''.join((ALPHABET, digits, BLANK_CHAR, '-\'', DONE_CHAR, BACK_CHAR))
-ROW_WIDTH      = 32
-SCORE_FORMAT   = "{:.<24}.{:.>7}"
-SCORE_TABLE_X  = (config.SCREEN_RECT.midtop[0] - 64, 16)
-TABLE_CORNER   = (16, 64)
-TITLES         = ("Normal Mode", "2 Minutes", "5 Minutes")
-V_SPACE        = 24
+ALPHABET            = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+BACK_CHAR           = '\u2190' #Left arrow
+UP_ARROW            = '\u2191' #Up arrow
+DOWN_ARROW          = '\u2193' #Down arrow
+BLANK_CHAR          = '\u2192' #Right arrow
+DONE_CHAR           = '\u0180' #Normally a special b, but I modified it to say 'OK'
+CHAR_LIMIT          = 20
+DEFAULTS            = DEFAULT_HIGH_SCORES
+ENTRY_NAME_POS      = (32, config.SCREEN_HEIGHT - 32)
+NO_ENTRY            = "Loser"
+OK_CHARS            = ''.join((ALPHABET, digits, BLANK_CHAR, '-\'', DONE_CHAR, BACK_CHAR))
+ROW_WIDTH           = 32
+SCORE_FORMAT        = "{:.<24}.{:.>7}"
+SCORE_TABLE_X       = (config.SCREEN_RECT.midtop[0] - 64, 16)
+INSTRUCTIONS_X      = (32 , 10 * 32)
+INSTRUCT_DIST_APART = 40
+TABLE_CORNER        = (16, 64)
+TITLES              = ("Normal Mode", "2 Minutes", "5 Minutes")
+V_SPACE             = 24
 ################################################################################
 
 ### Globals ####################################################################
@@ -80,11 +85,13 @@ class HighScoreState(MenuState):
         self.group_list = (bg.STARS_GROUP, GRID_BG, MENU)
         self._mode      = kwargs['mode'] if 'mode' in kwargs else -1
         self.current_table = score_table_dict[self._mode]
-        
         if 'score' in self.kwargs:
         #If we just finished a game...
             if self.kwargs['score'] > score_tables[score_table_dict[self._mode]].lowest_score():
             #If we just got a high score...
+                self.instructions = make_text(config.load_text('highscore', settings.get_language_code()), \
+                                      pos=INSTRUCTIONS_X, vspace=INSTRUCT_DIST_APART)
+                MENU.add(self.instructions)
                 self.alphanum_index = 0
                 self.entering_name  = True
                 self.entry_name     = ['A']
@@ -136,6 +143,8 @@ class HighScoreState(MenuState):
                     self.entry_name.pop()
                 self.entry_name.pop()
                 self.name_index = max(self.name_index - 1, 0)
+                self.entry_name += [BACK_CHAR]
+                return
             elif OK_CHARS[self.alphanum_index] == BLANK_CHAR:
             #Else if we want to mark down a space...
                 self.entry_name[self.name_index] = ' '
@@ -166,5 +175,6 @@ class HighScoreState(MenuState):
         self.hud_name.kill()  #Get rid of the name entry characters
         score_tables[self.current_table].add_scores(score)#add the entry to the leaderboard
         MENU.remove(self.hud_scores)#remove the menu from the screen
+        MENU.remove(self.instructions)#remove the instructions from the screen
         self.hud_scores = tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
         MENU.add(self.hud_scores[self.current_table])#add the menu back to the screen with the updated entry
