@@ -3,7 +3,7 @@ This module just provides some useful tools for the various color-reliant
 objects in Invasodado to use.  Nothing too special here.
 '''
 from random import uniform, choice
-
+from itertools import chain, product
 from pygame.constants import *
 from pygame           import Color, Rect
 
@@ -40,6 +40,9 @@ COLOR_BLIND_SYMBOLS = {
                        }
 COLOR_KEY           = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 LIST                = (RED, BLUE, GREEN, YELLOW, PURPLE)
+
+for i in LIST:
+    COLOR_BLIND_SYMBOLS[id(i)].set_colorkey(COLOR_KEY) 
 ################################################################################
 
 ### Functions ##################################################################
@@ -70,17 +73,14 @@ def get_colored_objects(frames, has_alpha=True, color_blind=False, pause_frame=T
 
     if has_alpha:
     #If we want these frames to have transparency...
-        for i in colored.values():
-        #For all frame colors...
-            for j in i:
-            #For each frame...             
-                j.set_colorkey(j.get_at((0, 0)), config.BLIT_FLAGS)
+        for j in chain.from_iterable(colored.values()):
+            j.set_colorkey(j.get_at((0, 0)), config.BLIT_FLAGS)
+            
                 
     if color_blind:
-    #If we want a colorblind-friendly version of the sprite...                   
+    #If we want a colorblind-friendly version of the sprite...                 
         for c in LIST:
-        #For each possible game object color...                        
-            COLOR_BLIND_SYMBOLS[id(c)].set_colorkey(COLOR_KEY)                   
+        #For each possible game object color...                                          
             for i in colored[id(c)]:
             #For each colored frame of this particular color...                        
                 i.blit(COLOR_BLIND_SYMBOLS[id(c)], (0, 0))

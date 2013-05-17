@@ -3,8 +3,6 @@ This is the bullet the ship has available.  It is not meant to be created
 and deleted over and over, but to be reused by the ship (so we don't take as
 much time creating and destroying bullets).
 '''
-from os.path import join
-
 import pygame.rect
 
 from core        import config
@@ -22,18 +20,16 @@ SHOOT = config.load_sound('shoot.wav')
 
 class ShipBullet(Bullet):
     SPEED     = -8
-    START_POS = pygame.Rect(30, config.screen.get_height() * 2, 26, 19)
+    START_POS = pygame.Rect(30, config.SCREEN_HEIGHT * 2, 26, 19)
     GROUP     = None
 
     def __init__(self):
         super().__init__()
-        self.column    = 0
         self.hit_enemy = False
         
     def start_moving(self):
         SHOOT.play()
         super().start_moving()
-        self.column    = round(self.position[0] / 32)
         self.hit_enemy = False
 
     def move(self):
@@ -56,7 +52,7 @@ class ShipBullet(Bullet):
             gamedata.score += 10
             self.change_state(self.__class__.STATES.RESET)
             other.change_state(other.__class__.STATES.DYING)
-            other.column = self.column
+            other.column = round(self.position[0] / 32)
 
     
     collisions = {

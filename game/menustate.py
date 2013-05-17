@@ -18,8 +18,13 @@ class MenuState(GameState):
                              K_RETURN : self._enter_selection         ,
                              K_SPACE  : self._enter_selection         ,
                              K_UP     : partial(self._move_cursor, -1),
+                             K_w      : partial(self._move_cursor, -1),
                              K_DOWN   : partial(self._move_cursor,  1),
+                             K_s      : partial(self._move_cursor,  1),
                              K_ESCAPE : sys.exit                      ,
+                             K_PRINT  : config.take_screenshot        ,
+                             K_F12    : config.take_screenshot        ,
+                             K_SYSREQ : config.take_screenshot        ,
                             }
         
     def render(self):

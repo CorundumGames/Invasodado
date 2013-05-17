@@ -1,5 +1,5 @@
 '''
-Invasodado beta 1
+Invasodado beta 3
 
 Invasodado is a mix between Space Invaders and Columns.
 
@@ -14,8 +14,8 @@ import pygame.event
 import pygame.mixer
 
 pygame.mixer.init(44100)
-pygame.display.init()
 pygame.font.init()
+pygame.display.init()
 
 from core import config
 from core import settings
@@ -51,7 +51,7 @@ def profile():
     '''
     import cProfile
     import pstats
-        
+
     cProfile.run('main()', 'profile.out')
     data = pstats.Stats('profile.out')
     data.sort_stats('calls')

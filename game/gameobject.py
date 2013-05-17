@@ -62,9 +62,6 @@ class GameObject(Sprite, object):
             if other_type in collisions and callable(collisions[other_type]):
             #If we can interact with the other object...
                 collisions[other_type](self, other)
-        elif callable(collisions):
-        #Else if we can collide with just one other type of object...
-            collisions(other)
 
     def update(self):
         '''

@@ -99,13 +99,12 @@ class HighScoreEntry:
 ###############################################################################
 
 class HighScoreTable:
-    def __init__(self, path, mode, size, title, default, db_flag='c'):
+    def __init__(self, path, mode, size, default, db_flag='c'):
         '''
         @ivar mode: Game mode this HighScoreTable operates under
         @ivar path: Name and/or path of the database relative to the pwd
         @ivar scorefile: The actual entity that records high scores
         @ivar size: Number of entries this HighScoreTable must hold
-        @ivar title: User-visible name of this high score table
 
         @param db_flag: Flags for the shelve module
         @param default: Location of default high scores if filename is new
@@ -115,7 +114,6 @@ class HighScoreTable:
         self.path    = join(config.DATA_STORE, path)
         self.scores  = []
         self.size    = size
-        self.title   = title
         
         a = None
         with closing(shelve.open(self.path)) as scorefile:

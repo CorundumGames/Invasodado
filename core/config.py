@@ -112,8 +112,7 @@ def show_fps():
     set_caption("FPS: %3g" % round(fps_timer.get_fps(), 3))
     
 def take_screenshot():
-    print("OK!")
-    pygame.image.save(pygame.display.get_surface(), 
+    pygame.image.save(pygame.display.get_surface(),
                       join(DATA_STORE, 'invasodado-%s.png' % strftime('%a-%b-%d-%Y_%H-%M-%S')))
     
 def toggle_frame_limit():

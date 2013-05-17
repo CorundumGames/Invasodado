@@ -24,7 +24,7 @@ GRID_BG   = OrderedUpdates()
 ################################################################################
 
 ### Constants ##################################################################
-DIST_APART = 64
+DIST_APART = 36
 #How far apart, vertically, the menu entries are (in pixels)
 
 DIST_APART_STATUS = 384
@@ -33,7 +33,7 @@ DIST_APART_STATUS = 384
 MENU_CORNER    = (32, 64)
 
 #The location of the top-left corner of the menu
-SETTINGS_FIELDS = 'fullscreen colorblind settings musicvolume effectsvolume back'
+SETTINGS_FIELDS = 'fullscreen colorblind settings musicvolume effectsvolume clearscores cleardata back'
 SETTINGS_KEYS   = namedtuple('Settings', SETTINGS_FIELDS)
 TITLE_LOCATION  = (config.SCREEN_RECT.centerx - 64, 32)
 ################################################################################
@@ -48,7 +48,7 @@ class SettingsMenu(MenuState):
         super().__init__()
         self.cursor_index = 0
         self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
-        self.hud_title    = make_text("Settings", TITLE_LOCATION)
+        self.hud_title    = None
 
         self.__make_text()
 
@@ -58,6 +58,8 @@ class SettingsMenu(MenuState):
                              self.__change_language,
                              self.__toggle_music_volume          ,
                              self.__toggle_sound_volume          ,
+                             lambda x: None,
+                             lambda x: None,
                              lambda x: self.change_state(MainMenu),
                             ) #The lambda is so we can throw away the toggle parameter
 
@@ -66,11 +68,13 @@ class SettingsMenu(MenuState):
                              K_LEFT  : partial(self._enter_selection, -.1),
                              K_RIGHT : partial(self._enter_selection,  .1),
                              K_UP    : partial(self._move_cursor    ,  -1),
+                             K_w     : partial(self._move_cursor    ,  -1),
                              K_DOWN  : partial(self._move_cursor    ,   1),
+                             K_s     : partial(self._move_cursor    ,   1),
                              K_ESCAPE: partial(self.change_state    , MainMenu),
                             }
 
-        HUD.add(self.hud_cursor, self.hud_title)
+        HUD.add(self.hud_cursor)
 
         GRID_BG.add(bg.EARTH, bg.GRID)
         
@@ -83,7 +87,10 @@ class SettingsMenu(MenuState):
         super().render()
         
     def __make_text(self):
-        a = make_text(config.load_text("settings", settings.get_language_code()), pos=MENU_CORNER, vspace=DIST_APART)
+        MENU.empty()
+        
+        text = config.load_text("settings", settings.get_language_code())
+        a = make_text(text[4:], pos=MENU_CORNER, vspace=DIST_APART)
 
         b = make_text(
                       (
@@ -93,14 +100,18 @@ class SettingsMenu(MenuState):
                        config.percent_str(settings.SETTINGS['music_volume']),
                        config.percent_str(settings.SETTINGS['sound_volume']),
                        "",
+                       "",
+                       ""
                        ),
                       pos=(MENU_CORNER[0] + DIST_APART_STATUS, MENU_CORNER[1]),
                       vspace=DIST_APART
                      )
+        a[-1].center()
 
-        MENU.empty()
-        MENU.add(a, b)
+        self.hud_title = make_text(text[0], TITLE_LOCATION).center()
+        MENU.add(self.hud_title, a, b)
         self.menu = SETTINGS_KEYS(*zip(a, b))
+        
         #first value is the menu entry, second value is its setting
 
 
@@ -137,6 +148,9 @@ class SettingsMenu(MenuState):
         settings.SETTINGS['language_id'] %= len(settings.LANGUAGES)
         settings.set_language(settings.get_language_code())
         self.__make_text()
+        
+    def __confim_delete(self, position):
+        pass
         
     def __change_image(self, menu_entry, new_text):
         '''

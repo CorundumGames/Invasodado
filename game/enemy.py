@@ -55,7 +55,7 @@ class Enemy(GameObject):
         self.add(Enemy.GROUP)
         self.position     = [
                              START_POS[0] * (self._form_position[0]+1)* 1.5,
-                             START_POS[1] * (self._form_position[1]+1)* 1.5
+                             START_POS[1] * (self._form_position[1]+1)* 1.5,
                             ]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         self.color        = choice(color.LIST)
@@ -95,10 +95,10 @@ class Enemy(GameObject):
         #^ Increase the enemy squadron's speed (copysign() considers direction)
 
     def lower(self):
-        self.amount_lowered += 1
         self.__animate()
-        self.position[1] += 1
-        self.rect.top     = self.position[1]
+        self.amount_lowered += 1
+        self.position[1]    += 1
+        self.rect.top        = self.position[1]
         if self.amount_lowered == LOWER_INCREMENT:
             self.amount_lowered = 0
             self.change_state(Enemy.STATES.ACTIVE)
