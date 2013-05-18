@@ -106,6 +106,7 @@ class HighScoreState(MenuState):
                 self.entering_name   = True
                 self.entry_name      = ['A']
                 self.hud_name        = make_text(''.join(self.entry_name), ENTRY_NAME_POS)
+                self.hud_name.image  = make_text(''.join(self.entry_name), surfaces=True)
                 self.last_entry_name = self.entry_name
                 self.name_index      = 0
                 MENU.add(self.instructions, self.hud_name)
