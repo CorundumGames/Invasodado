@@ -9,8 +9,8 @@ from math import sin
 from time import time
 from sys import exit
 
+import pygame.transform
 from pygame.constants import *
-import pygame
 from pygame.sprite import Group, OrderedUpdates
 
 from core import color
@@ -20,6 +20,7 @@ from core import settings
 from game              import bg
 from game.about        import AboutScreen
 from game.ingame       import InGameState
+from game.helpscreen   import HelpScreen
 from game.highscore    import HighScoreState
 from game.hudobject    import make_text, HudObject
 from game.menustate    import MenuState
@@ -48,7 +49,7 @@ TITLE      = HudObject(config.load_image('gamelogo.png'), (0, 0))
 ### Preparation ################################################################
 TITLE.image     = pygame.transform.scale(TITLE.image, (TITLE.image.get_width() // 2, TITLE.image.get_height() // 2))
 TITLE.rect.size = TITLE.image.get_size()
-TITLE.center().image.set_colorkey(color.BLACK)
+TITLE.center().image.set_colorkey(color.BLACK, config.BLIT_FLAGS)
 ################################################################################
 
 class MainMenu(MenuState):
@@ -65,7 +66,7 @@ class MainMenu(MenuState):
                             partial(self.change_state, InGameState, time=120),
                             partial(self.change_state, InGameState, time=300),
                             partial(self.change_state, HighScoreState, next=MainMenu),
-                            lambda: None,
+                            partial(self.change_state, HelpScreen, next=MainMenu),
                             partial(self.change_state, SettingsMenu         ),
                             partial(self.change_state, AboutScreen, next=MainMenu),
                             exit                                             ,
