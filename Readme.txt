@@ -7,18 +7,22 @@
 |_____|_| |_|\_/ \__,_|___/\___/ \__,_|\__,_|\__,_|\___/              INVASOADO
 ===============================================================================
 
-Can you protect the Earth from a fabulous doom?
+In early July 2012, we set up an invite-only mixer for single retro games, kind
+of like a speed-dating thing.  Most of the games invited were still getting over
+some rather nasty divorce or separation issues.  It was a nice learning
+experience (Dear Lord, does Custer's Revenge have baggage), but it turned out to
+be something of a bust.
 
-===============================================================================
-  ___  _                 _
- / _ \| |               | |
-/ /_\ \ |__   ___  _   _| |_
-|  _  | '_ \ / _ \| | | | __|
-| | | | |_) | (_) | |_| | |_
-\_| |_/_.__/ \___/ \__,_|\__|                                             ABOUT
-===============================================================================
+For the most part.
 
-<More info soon>
+Space Invaders and Columns, as it turns out, were destined for each other.  Fast
+forward to June 2013, and their first child is born.  Much rejoicing and alcohol
+was had.  The baby was christened "Invasodado," meaning "Cube Invader" in Spanish.
+
+Put together the two halves that make this whole in a seamless alien-blasting,
+color-matching, high-scoring arcade puzzle-shooter experience!
+
+CAN YOU PROTECT THE EARTH FROM A FABULOUS DOOM?
 
 ===============================================================================
  _   _                 _         ______ _
@@ -70,7 +74,7 @@ color.  If it lands on the bottom of the grid, the bottom row is cleared.
 Jesse Talavera-Greenberg      Development, Distribution, Sound Effects
 Noah Talavera-Greenberg       Artwork
 Kyle O'Connor                 Development
-Nick Virag                    Additional support
+Nick Virag                    Original Idea
 avgvst                        Music
 Jensan                        Music
 K. Alex "FoxSynergy" Rosen    Music
