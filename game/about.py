@@ -1,6 +1,6 @@
 from functools import partial
 
-import pygame
+import pygame.display
 from pygame.constants import *
 from pygame.sprite    import Group, OrderedUpdates
 
@@ -18,8 +18,10 @@ TEXT    = Group()
 ### Constants ##################################################################
 '''
 @var DIST_APART: Vertical distance between text lines in pixels
+@var TOP_LEFT: Coordinates of the top-left of the text, in pixels
 '''
 DIST_APART = 24
+TOP_LEFT   = (16, 16)
 ################################################################################
 
 class AboutScreen(MenuState):
@@ -33,7 +35,7 @@ class AboutScreen(MenuState):
                             K_RETURN : go_back,
                            }
 
-        self.hud_text = make_text(config.load_text('about', settings.get_language_code()), vspace=DIST_APART)
+        self.hud_text = make_text(config.load_text('about', settings.get_language_code()), pos=TOP_LEFT, vspace=DIST_APART)
             
         TEXT.add(self.hud_text)
         GRID_BG.add(bg.EARTH, bg.GRID)

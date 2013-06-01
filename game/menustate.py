@@ -1,7 +1,7 @@
 from functools import partial
 import sys
 
-import pygame
+import pygame.display
 from pygame.constants import *
 
 from core           import config
@@ -11,21 +11,28 @@ from game.hudobject import make_text
 class MenuState(GameState):
     def __init__(self, *args, **kwargs):
         super().__init__()
+        ### Local Variables ####################################################
+        cursor_up   = partial(self._move_cursor, -1)
+        cursor_down = partial(self._move_cursor,  1)
+        ########################################################################
+        
+        ### Object Attributes ##################################################
         self.cursor_index = 0
         self.hud_cursor   = make_text("->", (0, 0))
         self.menu_actions = ()
         self.key_actions  = {
-                             K_RETURN : self._enter_selection         ,
-                             K_SPACE  : self._enter_selection         ,
-                             K_UP     : partial(self._move_cursor, -1),
-                             K_w      : partial(self._move_cursor, -1),
-                             K_DOWN   : partial(self._move_cursor,  1),
-                             K_s      : partial(self._move_cursor,  1),
-                             K_ESCAPE : sys.exit                      ,
-                             K_PRINT  : config.take_screenshot        ,
-                             K_F12    : config.take_screenshot        ,
-                             K_SYSREQ : config.take_screenshot        ,
+                             K_RETURN : self._enter_selection ,
+                             K_SPACE  : self._enter_selection ,
+                             K_UP     : cursor_up             ,
+                             K_w      : cursor_up             ,
+                             K_DOWN   : cursor_down           ,
+                             K_s      : cursor_down           ,
+                             K_ESCAPE : sys.exit              ,
+                             K_PRINT  : config.take_screenshot,
+                             K_F12    : config.take_screenshot,
+                             K_SYSREQ : config.take_screenshot,
                             }
+        ########################################################################
         
     def render(self):
         super().render()

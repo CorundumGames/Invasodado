@@ -2,17 +2,18 @@
 ComboCounter is a number that briefly floats up whenever the player makes a
 combo in clearing blocks.  This is a user feedback thing.
 '''
-import pygame
+from pygame import Rect
+
 from core            import config
 from game.gameobject import GameObject
 from game            import hudobject
 from game.hudobject  import HudObject
 
 ### Constants ##################################################################
-TIME_MOVING = 30
+TIME_MOVING   = 30
 TIME_STANDING = 30
-SPEED = 2
-STATE_NAMES = ('IDLE', 'APPEARING', 'MOVING', 'STANDING', 'LEAVING')
+SPEED         = 2
+STATE_NAMES   = ('IDLE', 'APPEARING', 'MOVING', 'STANDING', 'LEAVING')
 ################################################################################
 
 ### Globals ####################################################################
@@ -38,7 +39,7 @@ def get_combo_counter(num, pos):
     counter.position  = list(pos)
     counter.time_left = 0
     counter.image     = hudobject.make_text(str(num), pos=pos, surfaces=True)
-    counter.rect      = pygame.Rect(pos, counter.image.get_size())
+    counter.rect      = Rect(pos, counter.image.get_size())
     return counter
 ################################################################################
 
@@ -49,7 +50,7 @@ class ComboCounter(HudObject):
         super().__init__(hudobject.make_text(str(num), pos=pos, surfaces=True), pos)
         self.next_state = None
         self.position   = list(pos)
-        self.rect       = pygame.Rect(pos[0], pos[1], self.image.get_width(), self.image.get_height())
+        self.rect       = Rect(pos, self.image.get_size())
         self.time_left  = 0
         self.change_state(ComboCounter.STATES.IDLE)
         

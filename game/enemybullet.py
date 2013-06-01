@@ -6,7 +6,7 @@ much time creating and destroying bullets).
 
 from math import sin
 
-import pygame.rect
+from pygame import Rect
 
 from core        import config
 from core        import color
@@ -50,9 +50,9 @@ def get_enemy_bullet():
 
 class EnemyBullet(Bullet):
     SPEED     = 2
-    START_POS = pygame.Rect(30, config.screen.get_height() * 2, 5, 5)
+    START_POS = Rect(30, config.screen.get_height() * 2, 5, 5)
     STATES    = config.Enum(*BULLET_STATES)
-    FRAME     = pygame.Rect(262, 6, 20, 19)
+    FRAME     = Rect(262, 6, 20, 19)
     GROUP     = None
     halt      = False
 

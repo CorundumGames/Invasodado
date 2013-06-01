@@ -5,10 +5,10 @@ possible.
 '''
 from itertools import chain, combinations, filterfalse
 
-from pygame import Rect
-from pygame import display
-from pygame import sprite
-from pygame import time
+import pygame.display
+import pygame.sprite as sprite
+import pygame.time   as time
+from pygame.rect import Rect
 
 ### Globals ####################################################################
 '''
@@ -63,7 +63,8 @@ class CollisionGrid:
         @ivar layer: Only objects of the same layer may collide
         @ivar spare_collisions: Spare Collisions, so we don't keep creating them
         '''
-        size      = display.get_surface().get_size()
+        ### Local Variables ####################################################
+        size      = pygame.display.get_surface().get_size()
         cell_size = (size[0] / width, size[1] / height)
 
         def get_rect(i, j):
@@ -71,15 +72,18 @@ class CollisionGrid:
             Small helper function for cleaner code.
             '''
             return Rect((i * cell_size[0], j * cell_size[1]), cell_size)
+        ########################################################################
         
+        ### Object Attributes ##################################################
         self.collisions = []
         self.grid       = tuple(
                             tuple(GridCell(get_rect(i, j), self) for i in range(width))
                             for j in range(height)
                           )
-        self.group_list = group_list
-        self.layer      = layer
+        self.group_list       = group_list
+        self.layer            = layer
         self.spare_collisions = []
+        ########################################################################
 
     def update(self):
         '''

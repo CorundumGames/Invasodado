@@ -2,8 +2,9 @@
 This module just provides some useful tools for the various color-reliant
 objects in Invasodado to use.  Nothing too special here.
 '''
-from random import uniform, choice
-from itertools import chain, product
+from random    import uniform, choice
+from itertools import chain
+
 from pygame.constants import *
 from pygame           import Color, Rect
 
@@ -36,7 +37,7 @@ COLOR_BLIND_SYMBOLS = {
                         id(GREEN)  : config.get_sprite(COLOR_BLIND_FRAMES[2]),
                         id(YELLOW) : config.get_sprite(COLOR_BLIND_FRAMES[3]),
                         id(PURPLE) : config.get_sprite(COLOR_BLIND_FRAMES[4]),
-                        id(WHITE)  : None,
+                        id(WHITE)  : None                                    ,
                        }
 COLOR_KEY           = config.SPRITES.get_at((0, config.SPRITES.get_height() - 1))
 LIST                = (RED, BLUE, GREEN, YELLOW, PURPLE)

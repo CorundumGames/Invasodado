@@ -1,8 +1,7 @@
 from math   import copysign, pi, sin
 from random import choice, uniform
 
-import pygame.mixer
-import pygame.rect
+from pygame import Rect
 
 from core            import color
 from core            import config
@@ -13,7 +12,7 @@ from game.gameobject import GameObject
 
 ### Constants ##################################################################
 ENEMY_STATES    = ('IDLE', 'APPEARING', 'LOWERING', 'ACTIVE', 'DYING', 'CHEERING')
-FRAMES          = tuple(pygame.Rect(32 * i, 32, 32, 32) for i in range(4))
+FRAMES          = tuple(Rect(32 * i, 32, 32, 32) for i in range(4))
 LOWER_INCREMENT = 16
 START_POS       = (32.0, 32.0)
 
@@ -38,18 +37,28 @@ class Enemy(GameObject):
 
     def __init__(self, form_position):
         super().__init__()
+        ### Local variables ####################################################
+        the_color = choice(color.LIST)
+        the_id    = id(the_color)
+        ########################################################################
+        
+        ### Object Attributes ##################################################
         self.amount_lowered     = 0
         self._anim              = 0.0
-        self.color              = choice(color.LIST)
+        self.color              = the_color
         self.column             = None
         self._form_position     = form_position
         self.current_frame_list = ENEMY_FRAMES_COLOR_BLIND if settings.SETTINGS['color_blind'] else ENEMY_FRAMES
-        self.image              = self.current_frame_list[id(self.color)][0]
+        self.image              = self.current_frame_list[the_id][0]
         self.position           = list(START_POS)
-        self.rect               = pygame.Rect(START_POS, self.image.get_size())
+        self.rect               = Rect(START_POS, self.image.get_size())
         self.state              = Enemy.STATES.IDLE
-        self.emitter            = ParticleEmitter(color.color_particles[id(self.color)], self.rect, 1)
+        self.emitter            = ParticleEmitter(color.color_particles[the_id], self.rect, 1)
+        ########################################################################
+        
+        ### Preparation ########################################################
         del self.acceleration, self.velocity
+        ########################################################################
 
     def appear(self):
         self.add(Enemy.GROUP)

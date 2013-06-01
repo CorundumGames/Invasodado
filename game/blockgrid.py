@@ -5,9 +5,9 @@ refitted for other match-3 games like Bejewelled or Puzzle League.
 '''
 
 from pygame.display import get_surface
-from pygame import Rect
-from pygame import Surface
-from pygame.sprite import GroupSingle, Sprite
+from pygame         import Rect
+from pygame         import Surface
+from pygame.sprite  import GroupSingle, Sprite
 
 from core import config
 from core import color
@@ -45,7 +45,7 @@ def any_active():
 def cache_block_image():
     global block_buffer
     block_buffer.sprite.image = Surface([640, 384], config.BLIT_FLAGS, config.DEPTH)
-    block_buffer.sprite.image.set_colorkey(color.BLACK)
+    block_buffer.sprite.image.set_colorkey(color.BLACK, config.BLIT_FLAGS)
     BLOCK_TYPE.GROUP.draw(block_buffer.sprite.image)
 
 def check_block(block, should_check=True):

@@ -1,10 +1,10 @@
 from math   import log1p
 from random import randint
 
-import pygame
+import pygame.time
 
 from game.enemy import Enemy
-from game import gamedata
+from game       import gamedata
 
 ### Constants ##################################################################
 ROW_SIZE = 8

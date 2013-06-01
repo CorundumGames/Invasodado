@@ -27,6 +27,7 @@ excludes     = [
                 '_lsprof',
                 '_multibytecodec',
                 '_ssl',
+                'BUILD_CONSTANTS',
                 'bz2',
                 'cProfile',
                 'codecs',
@@ -58,21 +59,30 @@ excludes     = [
                 'pkg_resources',
                 'platform',
                 'plistlib',
+                'pprint',
                 'pstats',
                 'pydoc',
                 'pydoc_data',
+                'pygame._freetype',
                 'pygame._numpysndarray',
                 'pygame._numpysurfarray',
-                'pygame.camera', 
+                'pygame.camera',
+                'pygame.cdrom',
+                'pygame.cursors',
                 'pygame.fastevent',
+                'pygame.ftfont',
+                'pygame.joystick',
                 'pygame.mac_scrap',
                 'pygame.macosx',
                 'pygame.mask',
+                'pygame.math',
                 'pygame.movie',
                 'pygame.overlay',
                 'pygame.pixelarray',
+                'pygame.pixelcopy',
                 'pygame.pkgdata',
                 'pygame.scrap',
+                'pygame.sndarray',
                 'pygame.surfarray',
                 'readline',
                 'scipy',
@@ -86,19 +96,19 @@ excludes     = [
                 'zipfile',
                 ]
 
-include_files = [join('sfx' , j) for j in listdir('sfx' ) if 'bfxr' not in j] + \
+include_files = [join('sfx' , j) for j in listdir('sfx' ) if 'src' not in j] + \
                 [join('gfx' , k) for k in listdir('gfx' )                   ] + \
                 [join('text', m) for m in listdir('text')]
 
 
 build_options = {
-                 'append_script_to_exe':True,
-                 'bin_excludes'        :excludes,
-                 'compressed'          :True,
+                 'append_script_to_exe': True,
+                 'bin_excludes'        : excludes,
+                 'compressed'          : True,
                  'excludes'            : excludes,
                  'include_files'       : include_files,
                  'includes'            : includes,
-                 'optimize'            :2,
+                 'optimize'            : 2,
                  'packages'            : ['core', 'game'],
                  }
 

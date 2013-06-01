@@ -1,7 +1,7 @@
 import os.path
-from random import choice
 from functools import lru_cache
 from itertools import chain
+from random    import choice
 
 import pygame.mixer
 

@@ -56,10 +56,15 @@ APPEAR      = config.load_sound('appear.wav')
 APPEAR_POOL = ParticlePool(config.get_sprite(PART_IMAGE), _radius_move, _radius_appear)
 DEATH       = config.load_sound('death.wav')
 DEATH_POOL  = ParticlePool(config.get_sprite(PART_IMAGE), appear_func=_burst_appear)
+FRAMES      = tuple(config.get_sprite(Rect(32 * i, 128, 32, 32)) for i in range(5))
 GRAVITY     = 0.5
 SHIP_STATES = ('IDLE', 'SPAWNING', 'ACTIVE', 'DYING', 'DEAD', 'RESPAWN')
 SPEED       = 4
 START_POS   = Rect(config.SCREEN_WIDTH / 2, config.SCREEN_HEIGHT * .8, 32, 32)
+################################################################################
+
+### Preparation ################################################################
+for i in FRAMES: i.set_colorkey(color.COLOR_KEY, config.BLIT_FLAGS)
 ################################################################################
 
 class FlameTrail(GameObject):
@@ -115,7 +120,7 @@ class Ship(GameObject):
     it, but it has to inherit from pygame.sprite.Sprite, so we can't make it a
     true Python singleton (i.e. a module).
     '''
-    FRAMES = tuple(config.get_sprite(Rect(32 * i, 128, 32, 32)) for i in range(5))
+    
     STATES = config.Enum(*SHIP_STATES)
     GROUP  = None
 
@@ -132,7 +137,7 @@ class Ship(GameObject):
         self.appear_emitter = ParticleEmitter(APPEAR_POOL, START_POS.copy(), 2)
         self.emitter        = ParticleEmitter(DEATH_POOL, START_POS.copy(), 2)
         self.flames         = FlameTrail()
-        self.image          = self.__class__.FRAMES[0]
+        self.image          = FRAMES[0]
         self.invincible     = 0
         self.light_column   = LightColumn()
         self.my_bullet      = ShipBullet()
@@ -141,15 +146,13 @@ class Ship(GameObject):
         self.respawn_time   = 3 * 60  # In frames
         self.change_state(Ship.STATES.RESPAWN)
 
-        for i in Ship.FRAMES: i.set_colorkey(color.COLOR_KEY, config.BLIT_FLAGS)
-
     def on_fire_bullet(self):
         bul = self.my_bullet
         if bul.state == ShipBullet.STATES.IDLE and self.state == Ship.STATES.ACTIVE:
         #If our bullet is not already on-screen...
             bul.add(Ship.GROUP)
             self.anim       = 1
-            self.image      = Ship.FRAMES[self.anim]
+            self.image      = FRAMES[self.anim]
             bul.rect.center = self.rect.center
             bul.position    = list(self.rect.topleft)
             bul.change_state(ShipBullet.STATES.FIRED)
@@ -158,7 +161,7 @@ class Ship(GameObject):
         self.appear_emitter.burst(200)
         APPEAR.stop()
         APPEAR.play()
-        for i in chain(Ship.FRAMES, FlameTrail.FRAMES, {self.light_column.image}): i.set_alpha(128)
+        for i in chain(FRAMES, FlameTrail.FRAMES, {self.light_column.image}): i.set_alpha(128)
         self.invincible   = 250
         self.light_column.rect.midbottom = self.rect.midtop
         self.position     = list(START_POS.topleft)
@@ -190,10 +193,10 @@ class Ship(GameObject):
         #If we're invincible...
             self.invincible -= 1
         elif self.image.get_alpha() == 128:
-            for i in chain(Ship.FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
+            for i in chain(FRAMES, FlameTrail.FRAMES): i.set_alpha(255)
             
-        self.anim = self.anim + (0 < self.anim < len(Ship.FRAMES) - 1) / 3 if self.anim != 4 else 0.0
-        self.image = Ship.FRAMES[int(self.anim)]
+        self.anim = self.anim + (0 < self.anim < len(FRAMES) - 1) / 3 if self.anim != 4 else 0.0
+        self.image = FRAMES[int(self.anim)]
         
         if gamedata.combo_time == gamedata.MAX_COMBO_TIME and gamedata.combo > 1:
             counter                = get_combo_counter(gamedata.combo, self.rect.topleft)
@@ -205,7 +208,7 @@ class Ship(GameObject):
 
     def die(self):
         DEATH.play()
-        for i in chain(Ship.FRAMES, FlameTrail.FRAMES, (self.light_column.image,)): i.set_alpha(0)
+        for i in chain(FRAMES, FlameTrail.FRAMES, (self.light_column.image,)): i.set_alpha(0)
         self.emitter.rect = self.rect
         self.emitter.burst(100)
         self.change_state(Ship.STATES.DEAD)

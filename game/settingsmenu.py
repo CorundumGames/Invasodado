@@ -6,9 +6,9 @@ from collections import namedtuple
 from functools import partial
 from os.path import join
 
-import pygame
+import pygame.mixer
 from pygame.constants import *
-from pygame.sprite import Group, OrderedUpdates
+from pygame.sprite    import Group, OrderedUpdates
 
 from core           import config
 from core           import settings
@@ -46,6 +46,13 @@ class SettingsMenu(MenuState):
     def __init__(self):
         from game.mainmenu import MainMenu
         super().__init__()
+        ### Local Variables ####################################################
+        cursor_up   = partial(self._move_cursor, -1)
+        cursor_down = partial(self._move_cursor,  1)
+        null_func   = lambda x: None
+        ########################################################################
+        
+        ### Object Attributes ##################################################
         self.cursor_index = 0
         self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
         self.hud_title    = None
@@ -53,13 +60,13 @@ class SettingsMenu(MenuState):
         self.__make_text()
 
         self.menu_actions = (
-                             self.__toggle_fullscreen            ,
-                             self.__toggle_color_blind_mode      ,
-                             self.__change_language,
-                             self.__toggle_music_volume          ,
-                             self.__toggle_sound_volume          ,
-                             lambda x: None,
-                             lambda x: None,
+                             self.__toggle_fullscreen             ,
+                             self.__toggle_color_blind_mode       ,
+                             self.__change_language               ,
+                             self.__toggle_music_volume           ,
+                             self.__toggle_sound_volume           ,
+                             null_func                            ,
+                             null_func                            ,
                              lambda x: self.change_state(MainMenu),
                             ) #The lambda is so we can throw away the toggle parameter
 
@@ -67,16 +74,18 @@ class SettingsMenu(MenuState):
                              K_RETURN: partial(self._enter_selection,   1),
                              K_LEFT  : partial(self._enter_selection, -.1),
                              K_RIGHT : partial(self._enter_selection,  .1),
-                             K_UP    : partial(self._move_cursor    ,  -1),
-                             K_w     : partial(self._move_cursor    ,  -1),
-                             K_DOWN  : partial(self._move_cursor    ,   1),
-                             K_s     : partial(self._move_cursor    ,   1),
+                             K_UP    : cursor_up                          ,
+                             K_w     : cursor_up                          ,
+                             K_DOWN  : cursor_down                        ,
+                             K_s     : cursor_down                        ,
                              K_ESCAPE: partial(self.change_state    , MainMenu),
                             }
+        ########################################################################
 
+        ### Preparation ########################################################
         HUD.add(self.hud_cursor)
-
         GRID_BG.add(bg.EARTH, bg.GRID)
+        ########################################################################
         
     def __del__(self):
         super().__del__()

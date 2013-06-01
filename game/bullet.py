@@ -3,7 +3,7 @@ Bullet is an abstract class which ShipBullet and EnemyBullet will inherit from.
 Bullet should NOT be created in and of itself.
 '''
 
-import pygame
+from pygame import Rect
 
 from core            import config
 from core            import color
@@ -14,7 +14,7 @@ BULLET_STATES = ('IDLE', 'FIRED', 'MOVING', 'COLLIDE', 'RESET')
 ################################################################################
 
 class Bullet(GameObject):
-    FRAME  = pygame.Rect(227, 6, 26, 19)
+    FRAME  = Rect(227, 6, 26, 19)
     STATES = config.Enum(*BULLET_STATES)
     SPRITE = config.get_sprite(FRAME)
 

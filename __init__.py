@@ -5,9 +5,10 @@ Invasodado is a mix between Space Invaders and Columns.
 
 Copyright 2012-2013 Corundum Games
 '''
+
 import atexit
 from os.path import join
-from sys import argv
+from sys     import argv
 
 import pygame.display
 import pygame.event
@@ -58,7 +59,7 @@ def profile():
     data.print_stats()
 
 if __name__ == '__main__':
-    #If this script is being executed directly...
+#If this script is being executed directly...
     if 'profile' in argv:
     #If we're profiling the game...
         profile()

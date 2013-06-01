@@ -1,6 +1,5 @@
 from random import choice
 
-import pygame
 from pygame import Rect
 
 from core            import color

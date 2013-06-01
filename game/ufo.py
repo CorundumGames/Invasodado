@@ -3,7 +3,7 @@ import os.path
 from random import choice, uniform, expovariate
 from functools import lru_cache
 
-import pygame
+from pygame import Rect
 
 from core            import color
 from core            import config
@@ -15,7 +15,7 @@ from game.gameobject import GameObject
 AVG_WAIT   = 9000 #Expected time in frames between UFO appearance
 DEATH      = config.load_sound('ufo_explosion.wav')
 FRAMES     = tuple(
-              pygame.Rect(64 * (i % 4), 192 + 32 * (i // 4), 64, 32)
+              Rect(64 * (i % 4), 192 + 32 * (i // 4), 64, 32)
               for i in range(10, -1, -1)
              )
 INVADE     = config.load_sound('ufo.wav')
@@ -37,7 +37,7 @@ class UFO(GameObject):
         self.image    = config.get_sprite(FRAMES[0])
         self.odds     = expovariate(AVG_WAIT)
         self.position = list(START_POS)
-        self.rect     = pygame.Rect(START_POS, self.image.get_size())
+        self.rect     = Rect(START_POS, self.image.get_size())
         self.state    = UFO.STATES.IDLE
         self.emitter  = ParticleEmitter(color.random_color_particles, self.rect)
 
@@ -78,7 +78,7 @@ class UFO(GameObject):
         self.emitter.rect = self.rect
         self.emitter.burst(30)
         DEATH.play()
-        UFO.BLOCK_GROUP.add(get_block([self.rect.centerx, 0], special=True))
+        UFO.BLOCK_GROUP.add(get_block((self.rect.centerx, 0), special=True))
         self.change_state(UFO.STATES.LEAVING)
 
     def leave(self):

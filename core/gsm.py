@@ -4,7 +4,7 @@ game screen) to the next.
 
 @var _current_state: The screen we're currently at.
 '''
-import pygame
+import pygame.event
 
 from game.splash import SplashScreen
 

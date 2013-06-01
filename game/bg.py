@@ -5,7 +5,8 @@ screen in the game has the same background.
 
 from random import randint
 
-import pygame
+import pygame.sprite
+from pygame import Rect
 
 from core           import config
 from core.particles import ParticleEmitter, ParticlePool
@@ -29,13 +30,13 @@ def _star_move(self):
 ################################################################################
 
 STARS_GROUP = pygame.sprite.RenderUpdates()
-_STAR_IMAGE = config.get_sprite(pygame.Rect(4, 170, 2, 2))
+_STAR_IMAGE = config.get_sprite(Rect(4, 170, 2, 2))
 
 EARTH = HudObject(config.EARTH, [0, 0])
 GRID  = HudObject(config.GRID_BG   , [0, 0])
 STARS = ParticleEmitter(
                         ParticlePool(_STAR_IMAGE, _star_move, _star_appear),
-                        pygame.Rect(0, 0, 0, config.SCREEN_HEIGHT),
+                        Rect(0, 0, 0, config.SCREEN_HEIGHT),
                         8,
                         STARS_GROUP
                         )
