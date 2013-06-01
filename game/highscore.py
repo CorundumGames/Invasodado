@@ -1,8 +1,12 @@
-from functools import partial
-from random    import choice
-from string    import digits
+from ast          import literal_eval
+from collections  import namedtuple
+from functools    import partial
+from random       import choice
+from string       import digits
+from urllib.error import HTTPError, URLError
+import urllib.request, urllib.parse
+import json
 
-import pygame
 from pygame.constants import *
 from pygame.sprite    import Group, OrderedUpdates
 
@@ -30,7 +34,10 @@ DONE_CHAR           = '\u0180' #Normally a special b, but I modified it to say '
 CHAR_LIMIT          = 20
 DEFAULTS            = DEFAULT_HIGH_SCORES
 ENTRY_NAME_POS      = (32, config.SCREEN_HEIGHT - 32)
+ERROR               = config.load_sound('error.wav')
+METHOD              = 'POST'
 OK_CHARS            = ''.join((ALPHABET, digits, BLANK_CHAR, '-\'', DONE_CHAR, BACK_CHAR))
+ONLINE_TEXT         = namedtuple('ONLINE', 'prompt send get cancel ok fail')
 ROW_WIDTH           = 32
 SCORE_FORMAT        = "{:.<24}.{:.>7}"
 SCORE_TABLE_X       = (config.SCREEN_RECT.midtop[0] - 64, 16)
@@ -38,15 +45,19 @@ INSTRUCTIONS_X      = (32 , 10 * 32)
 INSTRUCT_DIST_APART = 40
 TABLE_CORNER        = (16, 64)
 V_SPACE             = 24
+URL                 = 'http://www.corundumgames.com/cgi-bin/game/invasodado/hs.py'
 ################################################################################
 
 ### Globals ####################################################################
 score_tables  = (
-                 HighScoreTable('0.wtf',  -1, 10, DEFAULTS[0]),
-                 HighScoreTable('2.wtf', 120, 10, DEFAULTS[1]),
-                 HighScoreTable('5.wtf', 300, 10, DEFAULTS[2]),
+                 HighScoreTable('0.wtf' ,   -1, 10, DEFAULTS[0]),
+                 HighScoreTable('2.wtf' ,  120, 10, DEFAULTS[1]),
+                 HighScoreTable('5.wtf' ,  300, 10, DEFAULTS[2]),
+                 HighScoreTable('0o.wtf',  -10, 10, DEFAULTS[0]),
+                 HighScoreTable('2o.wtf', 1200, 10, DEFAULTS[1]),
+                 HighScoreTable('5o.wtf', 3000, 10, DEFAULTS[2]),
                 )
-score_table_dict = {-1:0, 120:1, 300:2}
+score_table_dict = {-1:0, 120:1, 300:2, -10:3, 1200:4, 3000:5}
 del DEFAULTS
 ################################################################################
 
@@ -66,38 +77,55 @@ def make_score_table(table, pos, vspace, width, surfaces=False):
     return tuple(j.center() for j in make_text(scores, TABLE_CORNER, font=config.FONT, vspace=V_SPACE, surfaces=surfaces))
 
 def _make_tables():
-    return tuple(make_score_table(score_tables[i], (0, 0), 8, ROW_WIDTH) for i in range(3))
+    return tuple(make_score_table(i, (0, 0), 8, ROW_WIDTH) for i in score_tables)
 ################################################################################
 
 class HighScoreState(MenuState):
     def __init__(self, *args, **kwargs):
         super().__init__()
-        titles = config.load_text('menu', settings.get_language_code())[2:5]
+        ### Local Variables ####################################################
+        char_up   = partial(self.__char_move,  1)
+        char_down = partial(self.__char_move, -1)
+        langcode  = settings.get_language_code()
+        text      = config.load_text('highscore', langcode)
+        titles    = config.load_text('menu', langcode)[2:5]
+        titles   += tuple(map(lambda x: x + " (Online)", titles))
+        ########################################################################
         
+        ### Object Attributes ##################################################
         self._mode         = kwargs['mode'] if 'mode' in kwargs else -1
         self.current_table = score_table_dict[self._mode]
         self.entering_name = False
         self.key_actions = {
                             K_LEFT  : partial(self.__switch_table, -1),
                             K_RIGHT : partial(self.__switch_table,  1),
-                            K_UP    : partial(self.__char_move   ,  1),
-                            K_w     : partial(self.__char_move   ,  1),
-                            K_DOWN  : partial(self.__char_move   , -1),
-                            K_s     : partial(self.__char_move   , -1),
+                            K_UP    : char_up                         ,
+                            K_w     : char_up                         ,
+                            K_DOWN  : char_down                       ,
+                            K_s     : char_down                       ,
                             K_RETURN: self.__enter_char               ,
-                            K_SPACE : self.__enter_char               ,
+                            K_SPACE : self.__sync_scores              ,
                             K_ESCAPE: partial(self.change_state, kwargs['next']),
                            }
         self.group_list    = (bg.STARS_GROUP, GRID_BG, MENU)
         self.hud_titles    = tuple(make_text(i, SCORE_TABLE_X).center() for i in titles)
         self.hud_scores    = _make_tables()
+        self.online        = ONLINE_TEXT(*make_text(text[4:], INSTRUCTIONS_X, vspace=0))
+        ########################################################################
 
+        ### Preparation ########################################################
+        for i in self.online: i.center()
+             
         if 'score' in kwargs:
         #If we just finished a game...
+            config.play_music('score.ogg')
+            #Whether or not we got a high score, play the special music.
+            self.key_actions[K_SPACE] = self.__enter_char
+            
             if kwargs['score'] > score_tables[score_table_dict[self._mode]].lowest_score():
             #If we just got a high score...
                 self.instructions = make_text(
-                                              config.load_text('highscore', settings.get_language_code()),
+                                              text[:3],
                                               pos=INSTRUCTIONS_X,
                                               vspace=INSTRUCT_DIST_APART
                                              )
@@ -106,17 +134,14 @@ class HighScoreState(MenuState):
                 self.entering_name   = True
                 self.entry_name      = ['A']
                 self.hud_name        = make_text(''.join(self.entry_name), ENTRY_NAME_POS)
-                self.hud_name.image  = make_text(''.join(self.entry_name), surfaces=True)
                 self.last_entry_name = self.entry_name
                 self.name_index      = 0
                 MENU.add(self.instructions, self.hud_name)
-            
-            config.play_music('score.ogg')
-            #Whether or not we got a high score, play the special music.
-        
+
         m = score_table_dict[self._mode]
         MENU.add(self.hud_scores[m], self.hud_titles[m])
         GRID_BG.add(bg.EARTH, bg.GRID)
+        ########################################################################
 
     def render(self):  
         if self.entering_name and (self.entry_name != self.last_entry_name):
@@ -145,6 +170,9 @@ class HighScoreState(MenuState):
             self.current_table += index
             self.current_table %= len(score_tables)
             MENU.add(scores[self.current_table], titles[self.current_table])
+            MENU.remove(self.online)
+            if self.current_table >= len(score_tables) / 2:
+                MENU.add(self.online.prompt)
 
     def __enter_char(self):
         if self.entering_name and self.name_index < CHAR_LIMIT:
@@ -185,9 +213,68 @@ class HighScoreState(MenuState):
         config.CURSOR_SELECT.play()
         score = [HighScoreEntry(''.join(self.entry_name), self._score, self._mode)]
         self.entering_name = False
-        self.key_actions[K_SPACE] = self.key_actions[K_ESCAPE]
+        self.key_actions[K_SPACE] = self.__sync_scores
         self.hud_name.kill()  #Get rid of the name entry characters
         score_tables[self.current_table].add_scores(score)#add the entry to the leaderboard
         MENU.remove(self.hud_scores, self.instructions)
         self.hud_scores = _make_tables()
         MENU.add(self.hud_scores[self.current_table])#add the menu back to the screen with the updated entry
+        
+    def __sync_scores(self):
+        '''
+        Synchronizes the leaderboard.
+        '''
+        if self.current_table >= len(score_tables) / 2:
+            MENU.remove(self.online)
+            error = None
+            try:
+                self.__get_online()
+                self.__submit_online()
+            except (URLError, HTTPError, SyntaxError) as e:
+                ERROR.play()
+                error = e.args
+            
+            MENU.remove(self.online)
+            if error is not None:
+                self.online.fail.image = make_text(config.load_text('highscore', settings.get_language_code())[9], surfaces=True)
+                MENU.add(self.online.fail.center())
+            else:
+                MENU.remove(self.hud_scores[self.current_table])
+                self.hud_scores = _make_tables()
+                MENU.add(self.online.prompt, self.hud_scores[self.current_table])
+
+    def __submit_online(self):
+        '''
+        Submits the highest score to the server.
+        '''
+        MENU.remove(self.online.prompt)
+        MENU.add(self.online.send)
+        self.render()  #Quick hack; make this asyncronous later
+        entry = score_tables[self.current_table - len(score_tables) // 2].scores[0]
+        post_params = urllib.parse.urlencode({
+            b'name'  : entry.name.encode()      ,
+            b'score' : str(entry.score).encode(),
+            b'mode'  : str(entry.mode * 10).encode() ,
+        }).encode()
+        
+        urllib.request.urlopen(URL, post_params)
+        MENU.remove(self.online.send)
+    
+    def __get_online(self):
+        '''
+        Retrieves all scores from the server and places them in the online
+        score tables.  Alerts the user if it fails.
+        '''
+        MENU.remove(self.online.prompt)
+        MENU.add(self.online.get)
+        self.render()
+        
+        a = urllib.request.urlopen(urllib.request.Request(URL, method=METHOD))
+        
+        c = literal_eval(a.read().decode())
+        table = score_tables[self.current_table]
+        scores = [HighScoreEntry(i['name'], i['score'], i['mode']) for i in filter(lambda x: x['mode'] == table.mode, c)]
+        table.set_scores(scores)
+        MENU.remove(self.online.get)
+        
+

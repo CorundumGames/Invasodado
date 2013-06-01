@@ -4,13 +4,13 @@ from functools  import lru_cache
 from json       import dumps, load, loads
 from sys        import platform
 from os         import mkdir
-from os.path    import isdir  , join
+from os.path    import isdir, join
 import shelve
 
 from core import config
 
 ### Constants ##################################################################
-PATTERN      = '%Y-%m-%d %H:%M:%S.%f'
+PATTERN      = '%Y-%m-%d %H:%M:%S'
 SCORE_FORMAT = '{0.name}|{0.score}|{0.mode}|{0.platform}|{0.time}'
 ################################################################################
 
@@ -132,12 +132,12 @@ class HighScoreTable:
 
     def add_scores(self, iterable):
         '''
+        Adds all scores in iterable to self.scorefile, or at least tries
+        
         @param iterable: An iterable holding a bunch of HighScoreEntrys
         
         @raise TypeError: If any element in iterable is not a HighScoreEntry
         @raise ValueError: If any element in iterable has a different mode than self
-
-        Adds all scores in iterable to self.scorefile, or at least tries
         '''
 
         for i in iterable:
@@ -157,6 +157,15 @@ class HighScoreTable:
             self.scores.pop()
             
         self.write_scores()
+        
+    def set_scores(self, iterable):
+        '''
+        Similar to add_scores, but replaces the scores.  Must be at least as
+        big as self.size.
+        '''
+        
+        self.scores = []
+        self.add_scores(iterable)
                     
     def write_scores(self):
         '''
