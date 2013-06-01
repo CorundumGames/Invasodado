@@ -7,10 +7,9 @@ from functools import lru_cache
 from os        import environ
 from os.path   import join
 import sys
-from sys       import argv, platform
 
 import pygame.image
-from pygame.display import set_caption
+from pygame.display   import set_caption
 from pygame.constants import *
 from pygame import Color
 from pygame import Rect
@@ -37,7 +36,7 @@ fps_timer = pygame.time.Clock()
 
 screen = pygame.display.set_mode(settings.SETTINGS['resolution'], DOUBLEBUF)
 
-tracking = __debug__ and 'track' in argv
+tracking = __debug__ and 'track' in sys.argv
 #True if we're outputting graphs of the player's statistics
 
 ################################################################################
@@ -61,7 +60,7 @@ def load_sound(name):
 @lru_cache(maxsize=None)
 def load_text(name, lang):
     with open(join('text', '%s-%s.wtf' % (name, lang)), encoding='utf-8') as text_file:
-            return tuple(line.strip("\n") for line in text_file)
+        return tuple(line.strip("\n") for line in text_file)
     
 def loop_sound(sound):
     global _sound_looping
@@ -142,7 +141,6 @@ def toggle_pause():
     _pause = not _pause
     pygame.mixer.pause()
     PAUSE.play()
-    #TODO: Make the pausing user-friendly.  No game these days just freezes.
     pygame.mixer.music.pause()
     
     while _pause:
@@ -156,6 +154,7 @@ def toggle_pause():
                 pygame.mixer.unpause()
                 pygame.mixer.music.unpause()
                 break
+        fps_timer.tick(20)
 
 ################################################################################
 
@@ -188,7 +187,7 @@ APP_DATA_LIN = 'HOME'
 BLIT_FLAGS    = HWSURFACE | HWACCEL | ASYNCBLIT | RLEACCEL
 CURSOR_BEEP   = load_sound('cursor.wav')
 CURSOR_SELECT = load_sound('select.wav')
-DATA_STORE    = join(environ[APP_DATA_WIN if 'win' in platform else APP_DATA_LIN], 'Invasodado')
+DATA_STORE    = join(environ[APP_DATA_WIN if 'win' in sys.platform else APP_DATA_LIN], 'Invasodado')
 DEBUG         =  __debug__ and not hasattr(sys, 'frozen') #cx_freeze adds 'frozen' to the sys module
 DEPTH         = 8
 EARTH         = load_image('earth.png')
@@ -211,7 +210,7 @@ SPRITES       = load_image('sprites.png')
 
 ### Preparation ################################################################
 for i in (EARTH, GRID_BG):
-    i.set_colorkey(Color('#000000'))
+    i.set_colorkey(Color('#000000'), BLIT_FLAGS)
 
 GRID_BG.set_alpha(128)
 EARTH = EARTH.subsurface(Rect(0, 0, EARTH.get_width(), EARTH.get_height() / 2))

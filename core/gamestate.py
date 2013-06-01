@@ -2,7 +2,6 @@
 An interface for representing game screens.
 '''
 
-import pygame
 from pygame.constants import *
 
 from core        import color
@@ -75,7 +74,7 @@ class GameState:
         assert not config.show_fps()
         #^ So this statement is stripped in Release mode.
 
-        config.fps_timer.tick_busy_loop(60 * config._limit_frame)
+        config.fps_timer.tick(60 * config._limit_frame)
 
     def change_state(self, state_type, *args, **kwargs):
         '''
