@@ -4,7 +4,6 @@ from itertools import chain
 from math        import log1p
 from random      import choice
 
-import pygame
 import pygame.mixer
 from pygame.constants import *
 from pygame.sprite import Group, OrderedUpdates
@@ -52,14 +51,15 @@ rect = config.SCREEN_RECT
 ALARM          = config.load_sound('alarm.wav')
 DEBUG_KEYS     = (K_u, K_c, K_f, K_F1, K_e, K_k, K_i)
 FADE_TIME      = 2500  #In milliseconds
-FIRE_LOCATION  = (rect.centerx - 192, rect.centery)
-GAME_OVER_LOC  = (rect.centerx - 64, rect.centery - 64)
-HUD_TEXT       = namedtuple('Hud', 'score lives time game_over press_fire wave')
+FIRE_LOCATION  = (rect.centerx - 192, rect.centery     )
+GAME_OVER_LOC  = (rect.centerx - 64 , rect.centery - 64)
+HUD_TEXT       = namedtuple('Hud', 'score lives time game_over press_fire wave pause')
 LIVES_LOCATION = (rect.width - 160, 16)
 MODULE_CLEANUP = (balloflight, blockgrid, block, enemybullet, enemysquadron, gamedata)
 MOUSE_ACTIONS  = {1:color.RED, 2:color.YELLOW, 3:color.BLUE}
 MUSIC_PATHS    = {-1:'music.ogg', 120:'2.ogg', 300:'5.ogg'}
-GAME_TEXT      = config.load_text('ingame', settings.get_language_code())
+NULL_FUNC      = lambda: None
+GAME_TEXT      = None
 GAME_OVER_PATH = 'gameover.ogg'
 SCORE_LOCATION = (16, 16)
 TIME_FORMAT    = "{}:{:0>2}"
@@ -87,7 +87,7 @@ def null_if_debug(function):
     Returns function if we're in debug mode, returns the empty function (which
     does nothing) if we're not.
     '''
-    return function if config.DEBUG else lambda: None
+    return function if config.DEBUG else NULL_FUNC
 ################################################################################
 
 ### Preparation ################################################################
@@ -126,10 +126,14 @@ class InGameState(GameState):
         @ivar _time: Time limit for the game in seconds (no limit if 0)
         @ivar _ufo: The UFO_GROUP object that, when shot, can destroy many blocks
         '''
+        from game.mainmenu import MainMenu
+        ### Local Variables ####################################################
         global GAME_TEXT
         GAME_TEXT = config.load_text('ingame', settings.get_language_code())
-        from game.mainmenu import MainMenu
-        rect = config.SCREEN_RECT
+        rect      = config.SCREEN_RECT
+        ########################################################################
+        
+        ### Object Attributes ##################################################
         self._game_running   = True
         self.group_list      = [bg.STARS_GROUP, BG, BLOCKS, UFO_GROUP, ENEMIES, ENEMY_BULLETS, PLAYER, PARTICLES, HUD]
         self._collision_grid = CollisionGrid(4, 4, 1, self.group_list)
@@ -140,6 +144,7 @@ class InGameState(GameState):
                                         make_text(GAME_TEXT[2], GAME_OVER_LOC ).center(),
                                         make_text(GAME_TEXT[3], FIRE_LOCATION ).center(),
                                         make_text(GAME_TEXT[4], WAVE_LOCATION ).center(),
+                                        make_text(GAME_TEXT[5], GAME_OVER_LOC ).center(),
                                        )
         self._ship          = Ship()
         self.key_actions    = {
@@ -160,7 +165,9 @@ class InGameState(GameState):
         self._mode          = kwargs['time'] if 'time' in kwargs else -1
         self._time          = self._mode * 60 + 60 #In frames
         self._ufo           = UFO()
+        ########################################################################
 
+        ### Preparation ########################################################
         PLAYER.add(self._ship, self._ship.flames, self._ship.my_bullet, self._ship.light_column)
         UFO_GROUP.add(self._ufo)
         HUD.add(self.hud_text.score, self.hud_text.wave)
@@ -183,6 +190,7 @@ class InGameState(GameState):
         enemysquadron.reset()
         enemysquadron.start()
         config.play_music(MUSIC_PATHS[self._mode])
+        ########################################################################
 
     def __del__(self):
         super().__del__()
@@ -199,20 +207,19 @@ class InGameState(GameState):
 
         for e in events:
         #For all events passed in...
-            if config.DEBUG and e.type == MOUSEBUTTONDOWN:
+            if e.type == KEYDOWN and e.key in key_actions:
+            #If a key is pressed...
+                if self._game_running or (not self._game_running and e.key == K_SPACE):
+                #If we haven't gotten a game over...
+                    key_actions[e.key]()
+            elif config.DEBUG and e.type == MOUSEBUTTONDOWN:
             #If a mouse button is clicked and we're in debug mode...
                 if e.button < 4:
                     self.__make_block(e.pos[0], MOUSE_ACTIONS[e.button])
                 else:
                     self.__make_block(e.pos[0], None, True)
-            elif e.type == KEYDOWN and e.key in key_actions:
-            #If a key is pressed...
-                if self._game_running or (not self._game_running and e.key == K_SPACE):
-                #If we haven't gotten a game over...
-                    key_actions[e.key]()
 
     def logic(self):
-        #if config.DEBUG and len(ENEMIES) == 0: vartracker.update()
         enemysquadron.update()
         blockgrid.update()
         self._collision_grid.update()
@@ -326,13 +333,14 @@ class InGameState(GameState):
         self.key_actions[K_SPACE] = partial(self.change_state, HighScoreState, **kwargs)
 
     def _pause_game(self):
-            
+        HUD.add(self.hud_text.pause)
         for i in chain(BLOCKS, ENEMIES):
             i.image = i.current_frame_list[id(color.WHITE)][i._anim]
 
         self.render()
         config.toggle_pause()
-            
+        
+        HUD.remove(self.hud_text.pause)
         for i in chain(BLOCKS, ENEMIES):
             i.image = i.current_frame_list[id(i.color)][i._anim]
 
