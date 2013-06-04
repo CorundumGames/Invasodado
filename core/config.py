@@ -18,7 +18,7 @@ from core import settings
 
 ### Globals ####################################################################
 
-#The window we blit graphics onto.
+
 
 _limit_frame = True
 #True if we're restricting framerate to 60FPS
@@ -34,11 +34,8 @@ _sound_looping = None
 
 fps_timer = pygame.time.Clock()
 
+#The window we blit graphics onto.
 screen = pygame.display.set_mode(settings.SETTINGS['resolution'], DOUBLEBUF)
-
-tracking = __debug__ and 'track' in sys.argv
-#True if we're outputting graphs of the player's statistics
-
 ################################################################################
 
 
@@ -129,8 +126,9 @@ def toggle_fullscreen():
     @postcondition: If the game wasn't in full-screen before, it is now, or vice versa.
     '''
     global screen
-    settings.SETTINGS['fullscreen'] = not settings.SETTINGS['fullscreen']
-    screen = pygame.display.set_mode(settings.SETTINGS['resolution'], FULL_FLAGS * settings.SETTINGS['fullscreen'])
+    sets = settings.SETTINGS
+    sets['fullscreen'] = not sets['fullscreen']
+    screen = pygame.display.set_mode(sets['resolution'], FULL_FLAGS * sets['fullscreen'])
 
 def toggle_pause():
     '''
@@ -217,7 +215,6 @@ EARTH = EARTH.subsurface(Rect(0, 0, EARTH.get_width(), EARTH.get_height() / 2))
 
 if not DEBUG:
     del show_fps
-    del tracking
 
 pygame.event.set_allowed(None)
 pygame.event.set_allowed(EVENTS_OK)

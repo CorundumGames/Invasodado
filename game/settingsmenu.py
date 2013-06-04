@@ -3,8 +3,8 @@ This is a menu that lets the user change settings within the game.
 '''
 
 from collections import namedtuple
-from functools import partial
-from os.path import join
+from functools   import partial
+from os.path     import join
 
 import pygame.mixer
 from pygame.constants import *
@@ -43,13 +43,15 @@ del SETTINGS_FIELDS
 ################################################################################
 
 class SettingsMenu(MenuState):
-    def __init__(self):
-        from game.mainmenu import MainMenu
+    def __init__(self, *args, **kwargs):
         super().__init__()
         ### Local Variables ####################################################
-        cursor_up   = partial(self._move_cursor, -1)
-        cursor_down = partial(self._move_cursor,  1)
-        null_func   = lambda x: None
+        cursor_up    = partial(self._move_cursor    ,  -1)
+        cursor_down  = partial(self._move_cursor    ,   1)
+        cursor_left  = partial(self._enter_selection, -.1)
+        cursor_right = partial(self._enter_selection,  .1)
+        cursor_ok    = partial(self._enter_selection,   1)
+        null_func    = lambda x: None
         ########################################################################
         
         ### Object Attributes ##################################################
@@ -67,18 +69,21 @@ class SettingsMenu(MenuState):
                              self.__toggle_sound_volume           ,
                              null_func                            ,
                              null_func                            ,
-                             lambda x: self.change_state(MainMenu),
+                             lambda x: self.change_state(kwargs['next']),
                             ) #The lambda is so we can throw away the toggle parameter
 
         self.key_actions  = {
-                             K_RETURN: partial(self._enter_selection,   1),
-                             K_LEFT  : partial(self._enter_selection, -.1),
-                             K_RIGHT : partial(self._enter_selection,  .1),
-                             K_UP    : cursor_up                          ,
-                             K_w     : cursor_up                          ,
-                             K_DOWN  : cursor_down                        ,
-                             K_s     : cursor_down                        ,
-                             K_ESCAPE: partial(self.change_state    , MainMenu),
+                             K_RETURN: cursor_ok   ,
+                             K_SPACE : cursor_ok   ,
+                             K_LEFT  : cursor_left ,
+                             K_a     : cursor_left ,
+                             K_RIGHT : cursor_right,
+                             K_d     : cursor_right,
+                             K_UP    : cursor_up   ,
+                             K_w     : cursor_up   ,
+                             K_DOWN  : cursor_down ,
+                             K_s     : cursor_down ,
+                             K_ESCAPE: partial(self.change_state, kwargs['next']),
                             }
         ########################################################################
 
@@ -93,6 +98,7 @@ class SettingsMenu(MenuState):
 
     def render(self):
         self.hud_cursor.rect.midright = self.menu[self.cursor_index][0].rect.midleft
+        self.hud_cursor.rect.right -= 8
         super().render()
         
     def __make_text(self):
@@ -118,8 +124,8 @@ class SettingsMenu(MenuState):
         a[-1].center()
 
         self.hud_title = make_text(text[0], TITLE_LOCATION).center()
+        self.menu      = SETTINGS_KEYS(*zip(a, b))
         MENU.add(self.hud_title, a, b)
-        self.menu = SETTINGS_KEYS(*zip(a, b))
         
         #first value is the menu entry, second value is its setting
 

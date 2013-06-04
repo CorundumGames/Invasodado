@@ -7,8 +7,8 @@ from game.enemy import Enemy
 from game       import gamedata
 
 ### Constants ##################################################################
-ROW_SIZE = 8
-COL_SIZE = 4
+ROW_SIZE       = 8
+COL_SIZE       = 4
 SPEED_INCREASE = .15 #In pixels per frame
 ################################################################################
 

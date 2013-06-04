@@ -6,8 +6,6 @@ from core            import config
 from core            import color
 from game.gameobject import GameObject
 
-
-
 class HudObject(GameObject):
     '''
     HudObject is meant for displays like lives, score, etc.

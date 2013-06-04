@@ -18,7 +18,7 @@ class MenuState(GameState):
         
         ### Object Attributes ##################################################
         self.cursor_index = 0
-        self.hud_cursor   = make_text("->", (0, 0))
+        self.hud_cursor   = make_text("\u2192", (0, 0))
         self.menu_actions = ()
         self.key_actions  = {
                              K_RETURN : self._enter_selection ,

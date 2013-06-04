@@ -25,8 +25,8 @@ UFO_BLOCK    = config.load_sound('ufo_block.wav')
 ### Globals ####################################################################
 _blocks_set = set()
 _bump       = config.load_sound('bump.wav')
-_block_frames          = color.get_colored_objects(FRAMES, True, False, True)
-_block_frames_color_blind = color.get_colored_objects(FRAMES, True, True, True)
+_block_frames             = color.get_colored_objects(FRAMES, True, False, True)
+_block_frames_color_blind = color.get_colored_objects(FRAMES, True, True , True)
 ################################################################################
 
 ### Functions ##################################################################
@@ -211,6 +211,7 @@ class Block(GameObject):
                 blockgrid.clear_color(self.color)
             else:
                 blockgrid.clear_row(self.gridcell[1])
+
         elif not self.gridcell[1]:
         #If we go past the the playing field...
             self._anim = len(FRAMES) - 2  #Bring us to the second-to-last frame

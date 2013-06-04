@@ -19,7 +19,7 @@ BLOCK_TYPE = None
 CELL_SIZE  = (32, 32)
 COMBOS     = tuple(config.load_sound('combo%d.wav' % i) for i in range(1, 6))
 SIZE       = (20, 12) #(width, height)
-RECT       = Rect((0, 0), (get_surface().get_width(), SIZE[1] * CELL_SIZE[1]))
+RECT       = Rect(0, 0, get_surface().get_width(), SIZE[1] * CELL_SIZE[1])
 ################################################################################
 
 ### Globals ####################################################################
@@ -44,7 +44,7 @@ def any_active():
 
 def cache_block_image():
     global block_buffer
-    block_buffer.sprite.image = Surface([640, 384], config.BLIT_FLAGS, config.DEPTH)
+    block_buffer.sprite.image = Surface((640, 384), config.BLIT_FLAGS, config.DEPTH)
     block_buffer.sprite.image.set_colorkey(color.BLACK, config.BLIT_FLAGS)
     BLOCK_TYPE.GROUP.draw(block_buffer.sprite.image)
 

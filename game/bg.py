@@ -32,8 +32,8 @@ def _star_move(self):
 STARS_GROUP = pygame.sprite.RenderUpdates()
 _STAR_IMAGE = config.get_sprite(Rect(4, 170, 2, 2))
 
-EARTH = HudObject(config.EARTH, [0, 0])
-GRID  = HudObject(config.GRID_BG   , [0, 0])
+EARTH = HudObject(config.EARTH  , (0, 0))
+GRID  = HudObject(config.GRID_BG, (0, 0))
 STARS = ParticleEmitter(
                         ParticlePool(_STAR_IMAGE, _star_move, _star_appear),
                         Rect(0, 0, 0, config.SCREEN_HEIGHT),

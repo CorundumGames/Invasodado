@@ -17,7 +17,7 @@ LOWER_INCREMENT = 16
 START_POS       = (32.0, 32.0)
 
 ENEMY_FRAMES             = color.get_colored_objects(FRAMES, True, False, True)
-ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES, True, True, True)
+ENEMY_FRAMES_COLOR_BLIND = color.get_colored_objects(FRAMES, True, True , True)
 del FRAMES
 ################################################################################
 
@@ -63,8 +63,8 @@ class Enemy(GameObject):
     def appear(self):
         self.add(Enemy.GROUP)
         self.position     = [
-                             START_POS[0] * (self._form_position[0]+1)* 1.5,
-                             START_POS[1] * (self._form_position[1]+1)* 1.5,
+                             START_POS[0] * (self._form_position[0] + 1) * 1.5,
+                             START_POS[1] * (self._form_position[1] + 1) * 1.5,
                             ]
         self.rect.topleft = (self.position[0] + .5, self.position[1] + .5)
         self.color        = choice(color.LIST)
@@ -114,7 +114,7 @@ class Enemy(GameObject):
 
     def cheer(self):
         self.__animate()
-        self.position[1] -= 2 * sin((Enemy.anim / 2) - (pi/4) * self._form_position[0])
+        self.position[1] -= 2 * sin((Enemy.anim/2) - (pi/4) * self._form_position[0])
         self.rect.top = self.position[1] + .5
     
     def __animate(self):

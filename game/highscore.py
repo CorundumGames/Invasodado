@@ -1,10 +1,12 @@
-from ast          import literal_eval
-from collections  import namedtuple
-from functools    import partial
-from random       import choice
-from string       import digits
-from urllib.error import HTTPError, URLError
-import urllib.request, urllib.parse
+from ast            import literal_eval
+from collections    import namedtuple
+from functools      import partial
+from random         import choice
+from socket         import timeout
+from string         import digits
+from urllib.error   import HTTPError, URLError
+from urllib.request import Request, urlopen
+import urllib.parse
 import json
 
 from pygame.constants import *
@@ -44,6 +46,7 @@ SCORE_TABLE_X       = (config.SCREEN_RECT.midtop[0] - 64, 16)
 INSTRUCTIONS_X      = (32 , 10 * 32)
 INSTRUCT_DIST_APART = 40
 TABLE_CORNER        = (16, 64)
+TIME_OUT            = 10
 V_SPACE             = 24
 URL                 = 'http://www.corundumgames.com/cgi-bin/game/invasodado/hs.py'
 ################################################################################
@@ -84,12 +87,14 @@ class HighScoreState(MenuState):
     def __init__(self, *args, **kwargs):
         super().__init__()
         ### Local Variables ####################################################
-        char_up   = partial(self.__char_move,  1)
-        char_down = partial(self.__char_move, -1)
+        char_up     = partial(self.__char_move   ,  1)
+        char_down   = partial(self.__char_move   , -1)
+        table_left  = partial(self.__switch_table, -1)
+        table_right = partial(self.__switch_table,  1)
         langcode  = settings.get_language_code()
         text      = config.load_text('highscore', langcode)
         titles    = config.load_text('menu', langcode)[2:5]
-        titles   += tuple(map(lambda x: x + " (Online)", titles))
+        titles   += tuple(map(lambda x: " ".join((x, text[3])), titles))
         ########################################################################
         
         ### Object Attributes ##################################################
@@ -97,20 +102,22 @@ class HighScoreState(MenuState):
         self.current_table = score_table_dict[self._mode]
         self.entering_name = False
         self.key_actions = {
-                            K_LEFT  : partial(self.__switch_table, -1),
-                            K_RIGHT : partial(self.__switch_table,  1),
-                            K_UP    : char_up                         ,
-                            K_w     : char_up                         ,
-                            K_DOWN  : char_down                       ,
-                            K_s     : char_down                       ,
-                            K_RETURN: self.__enter_char               ,
-                            K_SPACE : self.__sync_scores              ,
+                            K_LEFT  : table_left        ,
+                            K_a     : table_left        ,
+                            K_RIGHT : table_right       ,
+                            K_d     : table_right       ,
+                            K_UP    : char_up           ,
+                            K_w     : char_up           ,
+                            K_DOWN  : char_down         ,
+                            K_s     : char_down         ,
+                            K_RETURN: self.__enter_char ,
+                            K_SPACE : self.__sync_scores,
                             K_ESCAPE: partial(self.change_state, kwargs['next']),
                            }
         self.group_list    = (bg.STARS_GROUP, GRID_BG, MENU)
         self.hud_titles    = tuple(make_text(i, SCORE_TABLE_X).center() for i in titles)
         self.hud_scores    = _make_tables()
-        self.online        = ONLINE_TEXT(*make_text(text[4:], INSTRUCTIONS_X, vspace=0))
+        self.online        = ONLINE_TEXT(*make_text(text[4:10], INSTRUCTIONS_X, vspace=0))
         ########################################################################
 
         ### Preparation ########################################################
@@ -225,23 +232,33 @@ class HighScoreState(MenuState):
         Synchronizes the leaderboard.
         '''
         if self.current_table >= len(score_tables) / 2:
-            MENU.remove(self.online)
+        #If we're in the half of the table list that's online...
+            langcode = settings.get_language_code()
+            text     = config.load_text('highscore', langcode)
             error = None
             try:
+                MENU.remove(self.online)
                 self.__get_online()
                 self.__submit_online()
-            except (URLError, HTTPError, SyntaxError) as e:
-                ERROR.play()
-                error = e.args
+            except HTTPError as e:
+                error = "%s (%d)" % (e.reason, e.getcode())
+            except URLError as e:
+                error = text[10]
+            except (SyntaxError, timeout) as e:
+                error = text[11]
+            except (ConnectionError, ValueError) as e:
+                error = text[12]
             
             MENU.remove(self.online)
             if error is not None:
-                self.online.fail.image = make_text(config.load_text('highscore', settings.get_language_code())[9], surfaces=True)
+                ERROR.play()
+                self.online.fail.image = make_text(' '.join([text[9], error]), surfaces=True)
+                self.online.fail.rect.size  = self.online.fail.image.get_size()
                 MENU.add(self.online.fail.center())
             else:
                 MENU.remove(self.hud_scores[self.current_table])
                 self.hud_scores = _make_tables()
-                MENU.add(self.online.prompt, self.hud_scores[self.current_table])
+                MENU.add(self.online.ok, self.hud_scores[self.current_table])
 
     def __submit_online(self):
         '''
@@ -249,16 +266,19 @@ class HighScoreState(MenuState):
         '''
         MENU.remove(self.online.prompt)
         MENU.add(self.online.send)
-        self.render()  #Quick hack; make this asyncronous later
+        self.render()  #Quick hack; make this asynchronous later
         entry = score_tables[self.current_table - len(score_tables) // 2].scores[0]
         post_params = urllib.parse.urlencode({
-            b'name'  : entry.name.encode()      ,
-            b'score' : str(entry.score).encode(),
-            b'mode'  : str(entry.mode * 10).encode() ,
+            b'name'  : entry.name.encode()          ,
+            b'score' : str(entry.score).encode()    ,
+            b'mode'  : str(entry.mode * 10).encode(),
         }).encode()
         
-        urllib.request.urlopen(URL, post_params)
+        a = urlopen(URL, post_params, timeout=TIME_OUT).read().decode()
+        response = json.loads(a)
         MENU.remove(self.online.send)
+        if 'success' not in response:
+            raise ConnectionError()
     
     def __get_online(self):
         '''
@@ -269,7 +289,7 @@ class HighScoreState(MenuState):
         MENU.add(self.online.get)
         self.render()
         
-        a = urllib.request.urlopen(urllib.request.Request(URL, method=METHOD))
+        a = urlopen(Request(URL, method=METHOD), timeout=TIME_OUT)
         
         c = literal_eval(a.read().decode())
         table = score_tables[self.current_table]

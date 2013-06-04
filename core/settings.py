@@ -33,7 +33,7 @@ SETTINGS_FILE_NAME = 'settings.wtf'
 @var color_blind: True if we're playing the game in colorblind mode
 @var fullscreen: True if we're playing the game in fullscreen mode
 @var language_id: Ordinal ID for the languages
-@var music_volume: Volume, from 0-1, of the music (0 is silent, 1 is max)
+@var music_volume: Volume, from 0-1, of the music (0 is silent, 1.0 is max)
 @var resolution: x and y resolution of the screen, in pixels
 @var sound_volume: Volume, from 0-1, of the sound effects (0 is silent, 1 is max)
 '''
@@ -41,9 +41,9 @@ SETTINGS = {
             'color_blind'  : False     ,
             'fullscreen'   : False     ,
             'language_id'  : 0         ,
-            'music_volume' : 0.5       ,
+            'music_volume' : 1.0       ,
             'resolution'   : (640, 480),
-            'sound_volume' : 0.5       ,
+            'sound_volume' : 1.0       ,
             }
 ################################################################################
 

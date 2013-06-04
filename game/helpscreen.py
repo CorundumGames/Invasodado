@@ -7,7 +7,7 @@ from pygame.sprite    import Group, OrderedUpdates
 
 from core           import config
 from core           import settings
-from core import color
+from core           import color
 from game           import bg
 from game.menustate import MenuState
 from game.hudobject import make_text, HudObject
@@ -41,17 +41,17 @@ will have text of varying verbosity.
 '''
 ALIEN_BLOCK_POS = {
     'en' : lambda i: 176 + ALIEN_DIST * i,
-    'es' : lambda i: 180 + ALIEN_DIST * i,
+    'es' : lambda i: 182 + ALIEN_DIST * i,
 }
 
 SHIP_POS = {
     'en' : (176, 120),
-    'es' : (100, 120),
+    'es' : (200, 116),
 }
 
 UFO_POS = {
     'en' : (400, 384),
-    'es' : (100, 384),
+    'es' : (512, 384),
 }
 ################################################################################
 
@@ -74,7 +74,7 @@ class HelpScreen(MenuState):
                            }
         
         self.aliens = (HudObject(ALIEN_FRAMES[id(color.LIST[i])][ 0], (AB(i), ALIEN_Y)) for i in range(len(color.LIST)))
-        self.blocks = (HudObject(BLOCK_FRAMES[id(color.LIST[i])][-1], (AB(i), BLOCK_Y)) for i in range(len(color.LIST)))
+        self.blocks = (HudObject(BLOCK_FRAMES[id(color.LIST[j])][-1], (AB(j), BLOCK_Y)) for j in range(len(color.LIST)))
         self.ship   = HudObject(player.FRAMES[0], SHIP_POS[langcode])
         self.ufo    = HudObject(ufo.UFO_FRAMES[id(choice(color.LIST))][0], UFO_POS[langcode])
         

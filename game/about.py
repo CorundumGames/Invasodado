@@ -36,9 +36,10 @@ class AboutScreen(MenuState):
                            }
 
         self.hud_text = make_text(config.load_text('about', settings.get_language_code()), pos=TOP_LEFT, vspace=DIST_APART)
-            
+
         TEXT.add(self.hud_text)
         GRID_BG.add(bg.EARTH, bg.GRID)
+        for i in (0, 1, -2, -1): self.hud_text[i].center()
         
     def render(self):
         super().render()

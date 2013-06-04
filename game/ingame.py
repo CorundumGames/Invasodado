@@ -66,17 +66,17 @@ TIME_FORMAT    = "{}:{:0>2}"
 TIME_LOCATION  = (rect.centerx, 32)
 TYPES_IGNORED  = (Block, BallOfLight, ComboCounter, FlameTrail, LightColumn, HudObject, Particle, ParticleEmitter)
 TYPE_PAIRS_IGNORED = (
-                      (Enemy, EnemyBullet),
-                      (EnemyBullet, Enemy),
-                      (Ship, ShipBullet),
-                      (ShipBullet, Ship),
-                      (Ship, UFO),
-                      (UFO, Ship),
+                      (Enemy      , EnemyBullet),
+                      (EnemyBullet,       Enemy),
+                      (Ship       ,  ShipBullet),
+                      (ShipBullet ,        Ship),
+                      (Ship       ,         UFO),
+                      (UFO        ,        Ship),
                       (EnemyBullet, EnemyBullet),
-                      (Enemy, Enemy),
-                      (ShipBullet, EnemyBullet),
-                      (EnemyBullet, ShipBullet),
-                      )
+                      (Enemy      ,       Enemy),
+                      (ShipBullet , EnemyBullet),
+                      (EnemyBullet,  ShipBullet),
+                     )
 WAVE_LOCATION = (rect.centerx - 48, rect.height - 32)
 del rect
 ################################################################################
@@ -198,9 +198,6 @@ class InGameState(GameState):
         pygame.mixer.stop()
         for i in MODULE_CLEANUP:
             i.clean_up()
-
-        #vartracker.output()
-        #vartracker.clear()
 
     def events(self, events):
         key_actions = self.key_actions
@@ -343,6 +340,3 @@ class InGameState(GameState):
         HUD.remove(self.hud_text.pause)
         for i in chain(BLOCKS, ENEMIES):
             i.image = i.current_frame_list[id(i.color)][i._anim]
-
-    def __begin_tracking(self):
-        pass

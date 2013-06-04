@@ -1,7 +1,5 @@
-from math import sin
-import os.path
+from math   import sin
 from random import choice, uniform, expovariate
-from functools import lru_cache
 
 from pygame import Rect
 
@@ -10,6 +8,7 @@ from core            import config
 from core.particles  import ParticleEmitter
 from game.block      import get_block
 from game.gameobject import GameObject
+from game import gamedata
 
 ### Constants ##################################################################
 AVG_WAIT   = 9000 #Expected time in frames between UFO appearance
@@ -79,6 +78,7 @@ class UFO(GameObject):
         self.emitter.burst(30)
         DEATH.play()
         UFO.BLOCK_GROUP.add(get_block((self.rect.centerx, 0), special=True))
+        gamedata.score += 90
         self.change_state(UFO.STATES.LEAVING)
 
     def leave(self):

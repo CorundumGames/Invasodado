@@ -66,12 +66,7 @@ class CollisionGrid:
         ### Local Variables ####################################################
         size      = pygame.display.get_surface().get_size()
         cell_size = (size[0] / width, size[1] / height)
-
-        def get_rect(i, j):
-            '''
-            Small helper function for cleaner code.
-            '''
-            return Rect((i * cell_size[0], j * cell_size[1]), cell_size)
+        get_rect  = lambda i, j: Rect((i * cell_size[0], j * cell_size[1]), cell_size)
         ########################################################################
         
         ### Object Attributes ##################################################

@@ -83,7 +83,7 @@ class EnemyBullet(Bullet):
     def blink(self):
         self.blink_timer -= 1
         
-        self.image.set_alpha(256 * (sin(self.blink_timer / 4) > 0))
+        self.image.set_alpha(256 * (sin(self.blink_timer // 4) > 0))
             
         if not self.blink_timer:
         #If we're done animating...

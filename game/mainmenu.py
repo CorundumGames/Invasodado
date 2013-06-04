@@ -41,6 +41,7 @@ GRID_BG = OrderedUpdates()
 Since we're centering everything, we really don't need to store the corner
 '''
 DIST_APART = 36
+INSTRUCTION_DIST = 24
 MENU_TOP   = config.SCREEN_RECT.top + 144
 TITLE_TOP  = 32
 TITLE      = HudObject(config.load_image('gamelogo.png'), (0, 0))
@@ -55,31 +56,40 @@ TITLE.center().image.set_colorkey(color.BLACK, config.BLIT_FLAGS)
 class MainMenu(MenuState):
     def __init__(self, *args, **kwargs):
         super().__init__()
-        text = config.load_text('menu', settings.get_language_code())
+        ### Local Variables ####################################################
+        text      = config.load_text('menu', settings.get_language_code())
+        to_game   = lambda a=-1: partial(self.change_state, InGameState, time=a)
+        to_screen = lambda x   : partial(self.change_state, x, next=MainMenu)
+        ########################################################################
+        
+        ### Object Attributes ##################################################
         self.group_list   = (bg.STARS_GROUP, GRID_BG, HUD, MENU)
 
-        self.instructions = make_text(text[:2], pos=(0, config.SCREEN_HEIGHT - 48), vspace=24)
+        self.instructions = make_text(text[:2], pos=(0, config.SCREEN_HEIGHT - 48), vspace=INSTRUCTION_DIST)
         self.menu = make_text(text[2:], pos=(0, MENU_TOP), vspace=DIST_APART)
 
         self.menu_actions = (
-                            partial(self.change_state, InGameState          ),
-                            partial(self.change_state, InGameState, time=120),
-                            partial(self.change_state, InGameState, time=300),
-                            partial(self.change_state, HighScoreState, next=MainMenu),
-                            partial(self.change_state, HelpScreen, next=MainMenu),
-                            partial(self.change_state, SettingsMenu         ),
-                            partial(self.change_state, AboutScreen, next=MainMenu),
-                            exit                                             ,
+                            to_game()                ,
+                            to_game(120)             ,
+                            to_game(300)             ,
+                            to_screen(HighScoreState),
+                            to_screen(HelpScreen    ),
+                            to_screen(SettingsMenu  ),
+                            to_screen(AboutScreen   ),
+                            exit                     ,
                             )
+        ########################################################################
         
+        ### Preparation ########################################################
         TITLE.rect.top = TITLE_TOP
         HUD.add(TITLE, self.hud_cursor, (i.center() for i in self.instructions))
-        MENU.add(i.center() for i in self.menu)
+        MENU.add(j.center() for j in self.menu)
         GRID_BG.add(bg.EARTH, bg.GRID)
-        
         config.play_music('title.ogg')
+        ########################################################################
 
     def render(self):
-        TITLE.rect.top += sin(10*time()) + .5
+        TITLE.rect.top += sin(10 * time()) + .5
         self.hud_cursor.rect.midright = self.menu[self.cursor_index].rect.midleft
+        self.hud_cursor.rect.right -= 8
         super().render()
