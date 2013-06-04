@@ -48,10 +48,12 @@ def make_text(text, pos=(0, 0), col=color.WHITE, font=HudObject.fonts[0], vspace
         if isinstance(text, str):
         #If we were given a single string...
             hud = font.render(text, False, col).convert(config.DEPTH, config.BLIT_FLAGS)
+            hud.set_colorkey(color.BLACK)
             return hud if surfaces else HudObject(hud, pos)
         else:
             def d(t):
                 hud = font.render(text[t], False, col).convert(config.DEPTH, config.BLIT_FLAGS)
+                hud.set_colorkey(color.BLACK)
                 return hud if surfaces else HudObject(hud, (pos[0], pos[1] + vspace * t))
 
             return [d(i) for i in range(len(text))]

@@ -8,7 +8,10 @@ Copyright 2012-2013 Corundum Games
 
 import atexit
 from os.path import join
-from sys     import argv
+import sys
+import warnings
+
+warnings.simplefilter('ignore')
 
 import pygame.display
 import pygame.event
@@ -20,7 +23,7 @@ pygame.display.init()
 
 from core import config
 from core import settings
-from core import gsm
+import core.gsm as gsm
 
 @atexit.register
 def close():
@@ -38,6 +41,15 @@ def main():
     #Set the sounds now that we loaded the correct volumes
     config.set_volume()
     config.init_music_volume()
+    if not sys.stdout:
+        class Dummy:
+            def write(self, *args, **kwargs):
+                pass
+                
+        sys.stdout = Dummy()
+        sys.stdin = sys.stdout
+        sys.stderr = sys.stdout
+    
     while True:
     #Until the game is closed...
         gsm.update()
@@ -60,7 +72,7 @@ def profile():
 
 if __name__ == '__main__':
 #If this script is being executed directly...
-    if 'profile' in argv:
+    if 'profile' in sys.argv:
     #If we're profiling the game...
         profile()
     else:
