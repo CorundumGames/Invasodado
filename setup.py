@@ -1,6 +1,6 @@
 from os import listdir
 from os.path import join
-
+from sys import platform
 from cx_Freeze import setup, Executable
 
 includes     = [
@@ -114,6 +114,7 @@ build_options = {
 common_exe_options = {
                       'appendScriptToExe'  : True,
                       'appendScriptToLibrary':True,
+                      'base': 'Win32GUI' if 'win' in platform else None,
                       'compress'           : True,
                       'copyDependentFiles' : True,
                       'excludes'           : excludes,
