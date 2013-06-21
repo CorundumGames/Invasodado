@@ -89,7 +89,6 @@ excludes     = [
                 'shutil',
                 'ssl',
                 'tarfile',
-                'tempfile',
                 'termios',
                 'tkinter',
                 'unittest',
